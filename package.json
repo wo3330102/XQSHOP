@@ -13,6 +13,7 @@
     "compression-webpack-plugin": "^6.0.1",
     "core-js": "^3.6.5",
     "echarts": "^4.9.0",
+    "el-table-infinite-scroll": "^1.0.10",
     "element-ui": "^2.13.2",
     "jsencrypt": "^3.0.0-rc.1",
     "tinymce": "^5.0.3",
