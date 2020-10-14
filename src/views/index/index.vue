@@ -1,0 +1,115 @@
+<template>
+  <div class="container">
+    <h1>欢迎来到XShoppy,{{userName}}</h1>
+    <em>请按照以下开店引导进行开店。</em>
+    <div class="stepList">
+      <div v-for="item in stepList" :key="item.id">
+        <div class="text">
+          <img :src="item.icon" />
+          {{item.title}}
+        </div>
+        <div class="des">{{item.tip}}</div>
+        <div class="option">
+          <el-button>{{item.btn}}</el-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+export default {
+  data() {
+    return {
+      userName: "admin",
+      stepList: [
+        {
+          icon:
+            "data:image/png;base64,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",
+          title: "添加商品",
+          tip:
+            "您可以手动添加一个商品，或者进入到商品管理页面批量导入shopify的商品。",
+          btn: "添加",
+          url: "",
+        },
+        {
+          icon:
+            "data:image/png;base64,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",
+          title: "装修店铺",
+          tip: "选择适合您的模板，打造个性店铺。",
+          btn: "装修",
+          url: "",
+        },
+        {
+          icon:
+            "data:image/png;base64,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",
+          title: "设置物流方式",
+          tip:"设置店铺可支持的物流配送地区，以及在订单结账页中，提供可供客户选择的物流配送方案。",
+          btn: "设置",
+          url: "",
+        },
+        {
+          icon:
+            "data:image/png;base64,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",
+          title: "绑定域名",
+          tip: "绑定合适的域名可以让您的店铺更具品牌效应。",
+          btn: "设置",
+          url: "",
+        },
+        {
+          icon:
+            "data:image/png;base64,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",
+          title: "收款方式",
+          tip:
+            "设置店铺用于收款的账户，可以同时支持PayPal和信用卡收款方式供顾客选择。",
+          btn: "设置",
+          url: "",
+        },
+      ],
+    };
+  },
+};
+</script>
+<style lang="scss" scoped>
+h1 {
+  font-size: 24px;
+  margin-bottom:12px;
+  font-weight: 400;
+  line-height: 40px;
+  justify-items: center;
+  display: flex;
+}
+em {
+  font-size: 12px;
+  color: rgb(94, 113, 133);
+}
+.stepList {
+  display: flex;
+  flex-wrap: wrap;
+  & > div {
+    width: 100%;
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 1px 3px 0 rgba(35, 35, 112, 0.2);
+    border-radius: 4px;
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .text {
+      width: 300px;
+      img {
+        vertical-align: middle;
+        margin-right: 8px;
+      }
+    }
+    .des {
+      flex: 1;
+      color: #5e7185;
+    }
+    .option {
+      width: 80px;
+      text-align: center;
+    }
+  }
+}
+</style>
