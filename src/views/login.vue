@@ -8,7 +8,7 @@
         <p class="desc">{{findPassword?'修改密码':'登录你的店铺'}}</p>
         <div
           class="data"
-          style="margin-top: 58px; text-align: center;"
+          style="margin-top: 18px; text-align: center;"
           v-if="findPassword == false"
         >
           <!--{ type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' } -->
@@ -27,12 +27,9 @@
             >
               <el-input type="password" v-model="loginData.password" placeholder="请输入密码" style="width: 366px;"></el-input>
             </el-form-item>
-            <el-form-item prop="code">
-				<div class="code">
-					<img :src="codeImg"/>
-					  <el-input v-model="loginData.code" placeholder="请输入验证码" style="width: 100px;"></el-input>
-				</div>
-			
+            <el-form-item prop="code" style="margin: 0px;padding: 0px;">
+					  <el-image :src="codeImg" style="padding: 0 20px; width: 30%;" > </el-image>
+					  <el-input v-model="loginData.code" placeholder="请输入验证码" style="width: 40%;"></el-input>
             </el-form-item>
             <p class="item" style="margin-top: 30px;">
               <el-button
@@ -135,12 +132,7 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.code{
-	float: left;
-	}
-	.code img{
-		height: 30px;
-	}
+
 .login {
   width: 100%;
   height: 100%;

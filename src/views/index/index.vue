@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <h1>欢迎来到XShoppy,{{userName}}</h1>
+    <h1>欢迎来到XQShopy,{{userName}}</h1>
     <em>请按照以下开店引导进行开店。</em>
     <div class="stepList">
       <div v-for="item in stepList" :key="item.id">
