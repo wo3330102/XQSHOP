@@ -3,7 +3,7 @@
     <div class="login-box">
       <div class="form">
         <p class="logo">
-          <img :src="codeImg" style="width:140px;height:63px;" />
+         <span style="font-size: 30px;">XQSHOP</span>
         </p>
         <p class="desc">{{findPassword?'修改密码':'登录你的店铺'}}</p>
         <div
@@ -28,7 +28,11 @@
               <el-input type="password" v-model="loginData.password" placeholder="请输入密码" style="width: 366px;"></el-input>
             </el-form-item>
             <el-form-item prop="code">
-              <el-input v-model="loginData.code" placeholder="请输入验证码" style="width: 366px;"></el-input>
+				<div class="code">
+					<img :src="codeImg"/>
+					  <el-input v-model="loginData.code" placeholder="请输入验证码" style="width: 100px;"></el-input>
+				</div>
+			
             </el-form-item>
             <p class="item" style="margin-top: 30px;">
               <el-button
@@ -131,6 +135,12 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.code{
+	float: left;
+	}
+	.code img{
+		height: 30px;
+	}
 .login {
   width: 100%;
   height: 100%;

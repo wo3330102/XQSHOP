@@ -7,7 +7,7 @@
     <div id="main">
       <div class="warp-left">
         <div class="logo-wrap">
-          <img style="height:48px;margin:10px;margin-left:-10px;display:block;" src="../assets/logo.png" />
+          <!-- <img style="height:48px;margin:10px;margin-left:-10px;display:block;" src="../assets/logo.png" /> -->
           <span>XQSHOP</span>
         </div>
         <el-menu
@@ -233,7 +233,10 @@ export default {
   display: flex;
   align-content: center;
   justify-content: center;
+  font-size: 20px;
+  font-weight: bold;
   span{
+	  
     display: inline-block;
     color: #ffffff;
     line-height: 68px;
