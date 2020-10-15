@@ -28,8 +28,11 @@
               <el-input type="password" v-model="loginData.password" placeholder="请输入密码" style="width: 366px;"></el-input>
             </el-form-item>
             <el-form-item prop="code" style="margin: 0px;padding: 0px;">
-					  <el-image :src="codeImg" style="padding: 0 20px; width: 30%;" > </el-image>
-					  <el-input v-model="loginData.code" placeholder="请输入验证码" style="width: 40%;"></el-input>
+				<div class="code">
+					<el-image :src="codeImg" > </el-image>
+					<el-input v-model="loginData.code" placeholder="请输入验证码" ></el-input>
+				</div>
+					  
             </el-form-item>
             <p class="item" style="margin-top: 30px;">
               <el-button
@@ -177,5 +180,17 @@ export default {
     color: #1a1d2c;
     box-sizing: border-box;
   }
+}
+.code{
+	display: flex!important;
+	justify-content: start!important;
+}
+.code .el-image{
+	padding: 0px 20px 0 0;
+	width: 40%;
+	height: 36px;
+}
+.code .el-input .el-input--medium{
+	width: 100%;
 }
 </style>
