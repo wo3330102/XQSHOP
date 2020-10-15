@@ -513,17 +513,7 @@ export default {
   created() {
     let form = JSON.parse(localStorage.getItem('categoryDetail'))
     let that = this; 
-    this.token = localStorage.getItem("token");
-    let par = {
-      page: 0,
-      size: 10,
-      sort: "sort,desc",
-    }; 
-    // getCates(par).then(res=>{ 
-    //   let par = { id: 0, label: '顶级类目', children: [] }
-    //   res.content.unshift(par)
-    //   this.categotyList = res.content
-    // }) 
+    this.token = localStorage.getItem("token"); 
     if(form.pic){
       this.imageUrl = [{url:form.pic}]; 
       this.showUpload = true;
@@ -549,13 +539,9 @@ export default {
       console.log(object);
     },
     ChangeShopAttributeValue: function () {
-      this.resetForm();
-    },
-    resetForm: function () {
       this.$refs["form"].resetFields();
-    },
-    addFormData: function () {
-      console.log(this.formData.domains.length);
+    }, 
+    addFormData: function () { 
       this.formData.domains.push({
         value: "",
         shopAttributeValue: 1,
@@ -574,19 +560,23 @@ export default {
     // 新增
     Save: function () { 
       let imageUrl = '';
+      let that = this;
       if(this.imageUrl.length>0){
         imageUrl = this.imageUrl[0].url
+        console.log(imageUrl)
       } else {
         imageUrl = ''
       } 
-      let par = {
-        content:this.form.desc, 
-        title: this.form.title,
-        pic: this.imageUrl,
+      console.log('测试')
+      let par = {  
+        ...this.form,
+        pic: imageUrl,
       }; 
       edit(par).then((res) => { 
         this.$message.success('修改成功');
-        this.$router.push('/commodityType')
+        setTimeout(function(){
+          that.$router.push('/commodityType')
+        },200)
       });
     },
   },

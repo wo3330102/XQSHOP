@@ -12,7 +12,7 @@
             </h3>
             <div>
               <el-input
-                v-model="facebook"
+                v-model="detail.facebookPixel"
                 size="medium"
                 maxlength="100"
                 placeholder="请将您的Facebook Pixel ID粘贴至此处"
@@ -26,7 +26,7 @@
               <span class="subTitle">可通过追踪您的店铺数据，为您找到最精准的客户进行营销</span>
             </h3>
             <div>
-              <el-input v-model="snap" size="medium" maxlength="100" placeholder="请将您的插件代码粘贴至此处"></el-input>
+              <el-input v-model="detail.snapPixel" size="medium" maxlength="100" placeholder="请将您的插件代码粘贴至此处"></el-input>
             </div>
           </div>
           <!-- Pinterest Pixel -->
@@ -37,7 +37,7 @@
             </h3>
             <div>
               <el-input
-                v-model="pinterest"
+                v-model="detail.pinterestPixel"
                 size="medium"
                 maxlength="100"
                 placeholder="请将您的插件代码粘贴至此处"
@@ -51,7 +51,7 @@
               <span class="subTitle">可通过追踪您的店铺数据，为您找到最精准的客户进行营销</span>
             </h3>
             <div>
-              <el-input v-model="label" size="medium" maxlength="100" placeholder="请将您的插件代码粘贴至此处"></el-input>
+              <el-input v-model="detail.bingAdsUet" size="medium" maxlength="100" placeholder="请将您的插件代码粘贴至此处"></el-input>
             </div>
           </div>
           <!-- Google Analytics -->
@@ -62,7 +62,7 @@
             </h3>
             <div>
               <el-input
-                v-model="googleAnalytics"
+                v-model="detail.googleAnalytics"
                 size="medium"
                 maxlength="100"
                 placeholder="请将您的谷歌跟踪ID粘贴至此处"
@@ -77,7 +77,7 @@
             </h3>
             <div>
               <el-input
-                v-model="googleAnalytics"
+                v-model="detail.googleAds"
                 type="textarea"
                 size="medium"
                 maxlength="100"
@@ -94,7 +94,7 @@
             </h3>
             <div>
               <el-input
-                v-model="googleAnalytics"
+                v-model="detail.tiktokAds"
                 type="textarea"
                 size="medium"
                 maxlength="100"
@@ -111,7 +111,7 @@
             </h3>
             <div>
               <el-input
-                v-model="googleAnalytics"
+                v-model="detail.wac"
                 type="textarea"
                 size="medium"
                 maxlength="100"
@@ -130,27 +130,48 @@
           </div>
         </el-col>
       </el-row>
-      <div class="pageSaveBtn">
-        <el-button>取消</el-button>
-        <el-button type="primary" :disabled="save">保存</el-button>
+      <div class="pageSaveBtn"> 
+        <el-button type="primary" @click="Save">保存</el-button>
       </div>
     </div>
   </div>
 </template> 
 <script>
+import {get,edit,add} from '@/api/yxSystemStoreTrack'
 export default {
   data() {
-    return {
-      facebook: "", // Facebook Pixel
-      snap: "", // snap Pixel
-      pinterest: "",
-      label: "",
-      googleAnalytics: "",
-      save: true,
+    return { 
+      isAdd:true,
+      detail:{},
     };
   },
-
-  methods: {},
+  created(){
+    let par = {
+      page:0,
+      size:10,
+    }
+    get(par).then(res=>{ 
+      if(res.content.length>0){
+        this.isAdd = false;
+        this.detail = res.content[0];
+      } else {
+        this.detail = {}; 
+      }
+    })
+  },
+  methods: {
+    Save:function(){
+      if(this.isAdd){
+        add(this.detail).then(res=>{ 
+          this.$message.success('新增成功')
+        })
+      } else {
+        edit(this.detail).then(res=>{
+          this.$message.success('修改成功')
+        })
+      }
+    },
+  },
   updated() {
     console.log("更新");
     this.save = false;

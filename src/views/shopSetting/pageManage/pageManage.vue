@@ -2,13 +2,15 @@
   <div class="container">
     <h1 class="title">
       <span>页面管理</span>
-      <span style="font-size:0">
-        <el-button type="primary" @click="$NavgitorTo('/addPage')">添加页面</el-button>
+      <span style="font-size: 0">
+        <el-button type="primary" @click="$NavgitorTo('/addPage')"
+          >添加页面</el-button
+        >
       </span>
     </h1>
     <div class="content">
       <div class="conditions">
-        <el-select v-model="selectPage" placeholder>
+        <el-select v-model="requestParams.status" placeholder>
           <el-option
             v-for="item in pageList"
             :key="item.value"
@@ -16,60 +18,68 @@
             :value="item.value"
           ></el-option>
         </el-select>
-        <div class="search-box" style="flex: 1 1 0%; margin-left: 12px;">
+        <div class="search-box" style="flex: 1 1 0%; margin-left: 12px">
           <el-input v-model="searchVal" placeholder="请输入商品名称或SKU ">
-            <el-button slot="append">搜索</el-button>
+            <el-button slot="append" @click="requestParams.title=searchVal">搜索</el-button>
           </el-input>
         </div>
       </div>
-      <table-tem :selectOption="false" :tableData="tableData" :tableHeader="tableHeader"></table-tem>
-      <export-function :show="showExport" @close="showExport=false" ></export-function>
+      <table-tem
+        :selection="false" 
+        :requestUrl="'api/yxStorePageBoard'"
+        :requestParams="requestParams"
+        :tableHeader="tableHeader"
+        @rowClick="RowClick"
+      ></table-tem>
     </div>
   </div>
 </template>
 <script>
-import exportFunction from "@/components/exportFunction";
 import tableTem from "@/components/tableTem";
 export default {
   components: {
-    exportFunction,
     tableTem,
   },
   data() {
     return {
-        selectPage:1,
+      selectPage: 1,
       pageList: [
         {
-          value: 1,
+          value: 0,
           label: "全部状态",
         },
         {
-          value: 2,
+          value: 1,
           label: "可见",
         },
         {
-          value: 3,
+          value: 2,
           label: "隐藏",
         },
       ],
-      searchVal: "",
-      tableData: [],
-      tableHeader: [ 
+      searchVal: "", 
+      requestParams:{
+        page:0,
+        size:10,
+        status:0,
+        title:'',
+      },
+      tableHeader: [
         {
-          prop: "categoryName",
+          prop: "title",
           label: "标题",
-          width: 786,
+          width: 766,
         },
         {
-          prop: "categoryType",
+          prop: "status",
           label: "状态",
           width: 180,
         },
         {
-          prop: "number",
+          prop: "createTime",
           label: "修改时间",
-          width: 160,
-        }, 
+          width: 180,
+        },
       ],
       currentPage: 1,
       showExport: false,
@@ -97,6 +107,15 @@ export default {
     handleCurrentChange: function (e) {
       console.log(e);
     },
+    RowClick:function(e){
+      this.$router.push({
+        name: 'AddPage', 
+        query: {
+          id:e.id
+        }
+      })
+      localStorage.setItem('pageDetail',JSON.stringify(e))
+    }
   },
 };
 </script>

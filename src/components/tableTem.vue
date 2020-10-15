@@ -46,7 +46,8 @@
           :sortable="item.sortable" 
         >
           <template slot-scope="scope">
-            <span v-if="item.prop == 'image'" class="small-img" :style="{backgroundImage: 'url('+scope.row.image+')'}"></span> 
+            <span v-if="item.prop == 'image' " class="small-img" :style="{backgroundImage: 'url('+scope.row.image+')'}"></span> 
+            <span v-else-if="item.prop == 'pic' " class="small-img" :style="{backgroundImage: 'url('+scope.row.pic+')'}"></span> 
             <span v-else-if="item.prop == 'uploadImage'" class="small-img" ></span> 
             <span v-else-if="item.prop == 'createTime'">{{
               new Date(Number(scope.row.createTime)).toLocaleString()
@@ -54,9 +55,15 @@
             <span v-else-if="item.label.indexOf('金额')>-1">
               {{ scope.row[item.prop]?'$'+scope.row[item.prop] : '' }}
             </span>
+            <span v-else-if="item.prop == 'categoryType'">
+              手动分类
+            </span>
             <span v-else-if="item.prop.indexOf('storeCategory')>-1">
               {{ scope.row.storeCategory.cateName}}
             </span>
+            <span v-else-if="requestUrl == 'api/yxStorePageBoard' && item.prop == 'status'">
+              {{ scope.row[item.prop] == 1?'可见':'隐藏'}}
+            </span> 
             <span v-else>{{ scope.row[item.prop] }}</span>
           </template>
         </el-table-column>
@@ -85,6 +92,7 @@
           align="center"
           label="操作"
           v-if="option == '操作（预览）'"
+          @click.prevent="Jump"
         >
           <template slot-scope="scope">
             <span class="textBtn" style="text-decoration: underline">预览</span>
@@ -96,6 +104,7 @@
           align="center"
           label="操作"
           v-if="option == '操作（结果页）'"
+          @click.prevent="Jump"
         >
           <template slot-scope="scope">
             <span class="textBtn" style="text-decoration: underline"
@@ -207,7 +216,7 @@ export default {
       },
       deep: true,
       immediate:true,
-    },
+    }, 
     selectItemArr:function(val){
       console.log(val)
       this.selectItem = val;
@@ -222,6 +231,13 @@ export default {
       let that = this;
       that.loading = true;
       console.log(that.params)
+      if(that.requestUrl == 'api/yxStorePageBoard'){
+        if(that.params.status === 0){
+          delete that.params.status
+        }
+      }
+
+
       request({
         url: that.requestUrl + '?' + qs.stringify(that.params, { indices: false }),
         method: "get", 
@@ -272,6 +288,9 @@ export default {
     rowClick: function (row) {
       this.$emit("rowClick", row);
     },
+    Jump:function(e){
+      console.log(e);
+    }
   },
 };
 </script>

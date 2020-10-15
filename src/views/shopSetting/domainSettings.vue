@@ -17,8 +17,8 @@
           <el-table :data="mainDomainForm">
             <el-table-column prop="domain" label="域名">
               <template slot-scope="scope">
-                <a :href="scope.href"></a>
-                <el-button size="mini" type="danger" @click="handleDelete(scope, scope.row)">Delete</el-button>
+                <a :href="scope.row.domain">{{scope.row.domain}}</a>
+                <!-- <el-button size="mini" type="danger" @click="handleDelete(scope, scope.row)">Delete</el-button> -->
               </template>
             </el-table-column>
             <el-table-column prop="status" label="状态"></el-table-column>
@@ -61,6 +61,7 @@
   </div>
 </template> 
 <script>
+import {getShopById} from '@/api/yxSystemStore'
 export default {
   data() {
     return {
@@ -70,7 +71,18 @@ export default {
       domain: "",
     };
   },
-
+  created(){
+    let id = localStorage.getItem('storeId')
+    getShopById(id).then(res=>{
+      console.log(res);
+      if(res.linkUrl){
+        this.mainDomainForm = [{
+          domain:res.linkUrl,
+          status:'已连接'
+        }]
+      }; 
+    })
+  },
   methods: {
     handleClick: function (el) {
       console.log(el);

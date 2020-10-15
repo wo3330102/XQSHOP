@@ -99,14 +99,14 @@
               class="box-item-entry"
               size="medium" 
               v-model="detail.classIds"
+              multiple
               placeholder="请选择商品分类"
             >
-              <el-option
-                :disabled="!item.disabled"
+              <el-option 
                 v-for="item in categoryList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
+                :key="item.id"
+                :label="item.title"
+                :value="item.id"
               ></el-option>
             </el-select>
           </div>
@@ -142,10 +142,25 @@
               </el-select> -->
             </el-input>
           </div>
-          <!-- <div class="item-margin">
+          <div class="item-margin">
             <span class="text-span">标签</span>
-            <el-input v-model="shopLabel" size="medium" placeholder="请选择商品标签"></el-input>
-          </div> -->
+            <el-input
+                  class="input-new-tag"
+                  v-model="tags"
+                  ref="saveTagInput"
+                  size="medium"
+                  placeholder="请在此输入内容并按回车键"
+                  @keyup.enter.native="AddTag"
+                ></el-input>
+            <el-tag
+              :key="index"
+              v-for="(item,index) in tagList"
+              closable
+              :disable-transitions="false"
+              @close="tagList.splice(index,1)">
+              {{item}}
+            </el-tag>
+          </div>
         </div>
       </div>
       <div class="box">
@@ -386,6 +401,7 @@ let storeId = localStorage.getItem("storeId"); // 初始化请求参数
 import tinymceEditor from "@/components/tinymce-editor";
 import tableTem from "@/components/tableTem";
 import { add, edit, getInfo, isFormatAttr } from "@/api/yxStoreProduct";
+import {getCates} from "@/api/yxStoreCategory"
 export default {
   components: {
     tinymceEditor,
@@ -494,6 +510,8 @@ export default {
       batchValue: "",
       temp_id: "", // 运费模板id（兼容另外一个系统）
       oldTableHeader: [], // 请求头（用于新增）
+      tagList:[],
+      tags:'',
     };
   },
   created() {
@@ -507,11 +525,17 @@ export default {
         id: 0,
         storeId,
       };
-      getInfo(par).then((res) => {
-        this.categoryList = res.cateList;
+      getInfo(par).then((res) => { 
         this.detail = { ...res.productInfo };
-        this.temp_id = res.tempList[0].id || "";
+        this.temp_id = res.tempList[0].id || ""; 
       });
+      let params = {
+        page: 0,
+        size: 20,
+      }
+      getCates(params).then(res=>{ 
+        this.categoryList = res.content
+      })
     },
     PictureCardPreview(file) {
       this.imageUrl = file.url;
@@ -531,6 +555,12 @@ export default {
       });
       console.log(this.fileList);
       this.showUpload = false;
+    },
+    // 添加商品标签
+    AddTag(){
+      this.tagList.push(this.tags);
+      console.log(this.tagList);
+      this.tags = '';
     },
     // 添加规格
     AddOption: function () {
@@ -761,7 +791,9 @@ export default {
         arr.map((i) => {
           data.slider_image.push(i.response.link);
         });
-      }
+      } 
+      data.tagIds = data.classIds.toString();
+      data.classIds = this.tagList.toString(); 
       add(data).then((res) => {
         that.$message({
           message: "修改成功",

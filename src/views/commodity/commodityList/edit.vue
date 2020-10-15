@@ -38,7 +38,7 @@
           >
         </h3>
         <div class="product-left">
-          <div class="item-margin">
+          <div class="item-margin" v-if="show">
             <span class="text-span">售价</span>
             <el-input
               class="box-item-entry"
@@ -49,7 +49,7 @@
               <span slot="append">USD</span>
             </el-input>
           </div>
-          <div class="item-margin">
+          <div class="item-margin" v-if="show">
             <span class="text-span">库存数量</span>
             <el-input
               v-model.number="attr.stock"
@@ -98,21 +98,21 @@
             <el-select
               class="box-item-entry"
               size="medium"
-              v-model="detail.cate_id"
+              v-model="detail.tagIds"
+              multiple
               placeholder="请选择商品分类"
             >
               <el-option
-                v-for="item in categoryList"
-                :disabled="!item.disabled"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
+                v-for="item in categoryList" 
+                :key="item.id"
+                :label="item.title"
+                :value="item.id"
               ></el-option>
-            </el-select>
+            </el-select> 
           </div>
         </div>
         <div class="product-right">
-          <div class="item-margin">
+          <div class="item-margin" v-if="show">
             <span class="text-span">原价</span>
             <el-input
               class="box-item-entry"
@@ -123,8 +123,8 @@
               <span slot="append">USD</span>
             </el-input>
           </div>
-          <div class="item-margin">
-            <span class="text-span">商品重量</span>
+          <div class="item-margin" v-if="show">
+            <span class="text-span" >商品重量</span>
             <el-input
               class="box-item-entry"
               v-model.number="attr.weight"
@@ -142,10 +142,25 @@
               </el-select> -->
             </el-input>
           </div>
-          <!-- <div class="item-margin">
+          <div class="item-margin">
             <span class="text-span">标签</span>
-            <el-input v-model="shopLabel" size="medium" placeholder="请选择商品标签"></el-input>
-          </div> -->
+            <el-input
+                  class="input-new-tag"
+                  v-model="tags"
+                  ref="saveTagInput"
+                  size="medium"
+                  placeholder="请在此输入内容并按回车键"
+                  @keyup.enter.native="AddTag"
+                ></el-input>
+            <el-tag
+              :key="index"
+              v-for="(item,index) in tagList"
+              closable
+              :disable-transitions="false"
+              @close="tagList.splice(index,1)">
+              {{item}}
+            </el-tag>
+          </div>
         </div>
       </div>
       <div class="box">
@@ -453,6 +468,7 @@ let storeId = localStorage.getItem("storeId"); // 初始化请求参数
 import tinymceEditor from "@/components/tinymce-editor";
 import tableTem from "@/components/tableTem";
 import { add, edit, getInfo, isFormatAttr } from "@/api/yxStoreProduct";
+import {getCates} from "@/api/yxStoreCategory"
 export default {
   components: {
     tinymceEditor,
@@ -488,7 +504,8 @@ export default {
       ],
       categoryValue: "", // 分类值
       categoryList: [], // 分类列表
-      shopLabel: "", // 商品标签
+      tags: "", // 商品标签
+      tagList:[],// 商品标签列表
       msg: "", // 富文本内容
       upLoadHeaders: {}, // 上传头部字段
       dialogVisible: false, // 上传图片是否显示
@@ -565,6 +582,7 @@ export default {
       seoTitle: "",
       seoLink: "",
       seoDesc: "",
+      show:true,// 是否显示其他项
     };
   },
   created() {
@@ -581,9 +599,7 @@ export default {
         storeId,
       };
       let that = this;
-      getInfo(par).then((res) => {
-        that.categoryList = res.cateList;
-        
+      getInfo(par).then((res) => { 
         that.detail = { ...res.productInfo };
         that.attr = res.productInfo.attr;
         that.detail.cate_id = Number(that.detail.cate_id);
@@ -595,6 +611,7 @@ export default {
           // 多规格
           that.shopAttributeList = res.productInfo.items;
           that.InitFormatAttr();
+          this.show = false;
         } 
         // 初始化图片列表
         let arr = [];
@@ -605,7 +622,20 @@ export default {
           arr.push(obj);
         });
         that.fileList = arr;
+
+        // 分类和标签
+        this.detail.tagIds = res.tagList
+        this.tagList = res.productInfo.classIds.split(',')
+
       });
+      let params = {
+        page: 0,
+        size: 20,
+      }
+      getCates(params).then(res=>{
+        console.log(res);
+        this.categoryList = res.content
+      })
     },
     PictureCardPreview(file) {
       this.imageUrl = file.url;
@@ -627,7 +657,7 @@ export default {
       this.showUpload = false;
     },
     // 添加规格
-    AddOption: function () {
+    AddOption: function () { 
       this.shopAttributeList.push({
         value: "",
         inputValue: "",
@@ -767,6 +797,20 @@ export default {
       this.table[this.tableIndex].pic = "";
       this.showDialog = false;
     },
+    // 添加商品标签
+    AddTag(){
+      if(this.tags){
+          
+      }
+      this.tagList.map(i=>{
+        if(i == this.tags){
+          this.$message.error('')
+        }
+      })
+      this.tagList.push(this.tags);
+      console.log(this.tagList);
+      this.tags = '';
+    },
     // 保存修改
     Save: function () {
       let that = this;
@@ -829,6 +873,10 @@ export default {
         // this.detail.attrs = this.table || [];
         this.detail.attr = this.attr; 
       }
+      this.detail.tagIds = this.tagList; 
+
+      this.detail.classIds = this.detail.classIds.toString();
+      this.detail.tagIds = this.tagList.toString();
 
       add(this.detail).then((res) => {
         that.$message({

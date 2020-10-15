@@ -7,12 +7,12 @@
       @close="CloseDialog"
     >
       <p class="title">已选取菜单类别</p>
-      <el-input :readonly="true"></el-input>
+      <el-input :readonly="true" v-model="inputValue"></el-input>
       <div class="content">
         <ul class="left">
           <li
             v-for="(item, index) in nav"
-            :key="item.url"
+            :key="item.label"
             :class="active === index ? 'active' : ''"
             @click="getData(index)"
           >
@@ -21,65 +21,51 @@
         </ul>
         <div class="el-table">
           <el-table
-            border
             height="400px"
             v-el-table-infinite-scroll="load"
-            :data="tableData1"
+            :data="tableData"
             :show-header="false"
-            v-show="active === 0"
+            v-loading="loading"
+            @selection-change="SelectionChange"  
           >
-            <el-table-column type="selection" width="40"> </el-table-column>
-            <el-table-column prop="image" width="80"> </el-table-column>
-            <el-table-column prop="title" width="351" > </el-table-column>
-          </el-table>
-          <el-table
-            border
-            height="400px"
-            v-el-table-infinite-scroll="load"
-            :data="tableData2"
-            :show-header="false"
-            v-show="active === 1"
-          >
-            <el-table-column prop="date" label="日期" width="180"> </el-table-column>
-            <el-table-column prop="name" label="姓名" width="180"> </el-table-column>
-            <el-table-column prop="address" label="地址"> </el-table-column>
-          </el-table>
-          <el-table
-            border
-            height="400px" 
-            :data="tableData3"
-            v-el-table-infinite-scroll="load"
-            :show-header="false"
-            v-show="active === 2"
-          >
-            <el-table-column prop="date" label="日期" width="180"> </el-table-column>
-            <el-table-column prop="name" label="姓名" width="180"> </el-table-column>
-            <el-table-column prop="address" label="地址"> </el-table-column>
-          </el-table>
-          <el-table
-            border
-            height="400px" 
-            :data="tableData4"
-            v-show="active === 3"
-            :show-header="false"
-          >
-            <el-table-column prop="date" label="日期" width="180"> </el-table-column>
-            <el-table-column prop="name" label="姓名" width="180"> </el-table-column>
-            <el-table-column prop="address" label="地址"> </el-table-column>
-          </el-table>
-          <el-table
-            border
-            height="400px" 
-            :data="tableData5"
-            v-show="active === 4"
-            :show-header="false"
-          >
-            <el-table-column prop="date" label="日期" width="180"> </el-table-column>
-            <el-table-column prop="name" label="姓名" width="180"> </el-table-column>
-            <el-table-column prop="address" label="地址"> </el-table-column>
+            <!-- v-infinite-scroll="load"  -->
+            <!-- <el-table-column prop="image" width="80">
+              <template slot-scope="scope">
+                <span
+                  class="small-img"
+                  :style="{ backgroundImage: 'url(' + scope.row.image + ')' }"
+                ></span>
+              </template>
+            </el-table-column>
+            <el-table-column prop="title" width="351"></el-table-column> -->
+            <el-table-column
+              v-if="tableData.length > 0"
+              type="selection"
+              width="40"
+            ></el-table-column>
+            <el-table-column
+              v-for="item in tableHeader"
+              :key="item.id"
+              :prop="item.prop"
+              :width="item.width"
+            >
+              <template slot-scope="scope">
+                <span
+                  v-if="item.prop == 'image'"
+                  class="small-img"
+                  :style="{ backgroundImage: 'url(' + scope.row.image + ')' }"
+                ></span>
+                <span
+                  v-else-if="item.prop == 'pic'"
+                  class="small-img"
+                  :style="{ backgroundImage: 'url(' + scope.row.pic + ')' }"
+                ></span>
+                <span v-else>{{ scope.row[item.prop] }}</span>
+              </template>
+            </el-table-column>
           </el-table>
         </div>
-      </div> 
+      </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="CloseDialog">取 消</el-button>
         <el-button type="submit" @click="submitForm">确 定</el-button>
@@ -88,25 +74,29 @@
   </div>
 </template>
 <script>
-import elTableInfiniteScroll from 'el-table-infinite-scroll';
+import elTableInfiniteScroll from "el-table-infinite-scroll";
 import request from "@/utils/request";
-import qs from 'qs'
+import qs from "qs";
 export default {
   props: {
     show: {
       type: Boolean,
       default: false,
     },
+    index: {
+      default: "", 
+    },
   },
   directives: {
-    'el-table-infinite-scroll': elTableInfiniteScroll
-  },
-  watch: {
-    show: function (newVal, oldVal) {
-      console.log("newVal", newVal);
-      console.log("oldVal", oldVal);
-      // this.showAddMenuCom = newVal
-    },
+    "el-table-infinite-scroll": elTableInfiniteScroll,
+  }, 
+  created() {
+    if (this.index) {
+      this.active = Number(this.index);
+      this.getData(this.active);
+    } else {
+      this.getData(0);
+    }
   },
   data() {
     return {
@@ -123,61 +113,139 @@ export default {
         },
         {
           label: "自定义页面",
-          url: "3",
+          url: "api/yxStorePageBoard",
         },
         {
           label: "自定义链接",
-          url: "4",
         },
         {
           label: "政策条款",
-          url: "5",
         },
       ],
       active: 0,
-      tableData1:[],
-      tableData2:[],
-      tableData3:[],
-      tableData4:[],
-      tableData5:[],
-      params:{}
+      tableData: [],
+      tableHeader: [],
+      params: {
+        page: 0,
+        size: 20,
+      },
+      subData: [], 
+      inputValue:'',
+      loading:true,
     };
   },
   methods: {
     CloseDialog: function () {
       this.$emit("Close", false);
     },
-    ChangeActive: function (index) {
-      this.active = index;
+    SelectionChange: function (e) {
+      let that = this;
+      let arr = []; 
+      let input = '';
+      e.map(j => {
+        let object = {};
+        object.name = j.storeName || j.title;
+        object.id = j.id;
+        object.label = that.active;
+        arr.push(object); 
+      });
+      // 至此  arr 为需要数据 
+      let onOff = false;
+      this.subData.map((i) => {
+        // 如果当前对象在提交数据变量中，则开关打开
+        if (i && i.label == that.active) {
+          onOff = true
+          i.data = arr; 
+        } 
+      });
+      if(!onOff){
+        //提交数据变量中含有不含有该分类数据，新增
+        let obj = {
+          label:that.active,
+          data:arr
+        }  
+        that.subData.push(obj);
+      }    
+      that.subData.map(i=>{
+        if(i.data){
+          input += this.nav[i.label].label + '('+i.data.length+')'
+          console.log(input) 
+        }
+      })
+      that.inputValue = input
     },
-    SelectChange: function (e) {
-      console.log(e);
-    },
-    submitForm: function (res) {
-      console.log(res);
-      console.log(this.selectMenu);
-      this.$emit("selectData", this.selectMenu);
+    submitForm: function (res) { 
+      this.$emit("selectData", this.subData);
       this.$emit("Close", false);
     },
     load() {
-      this.$message.success('加载下一页');
-      let page = this.page +1; 
+      let that = this; 
+      this.params += 1; 
+      request({
+          url:
+            that.nav[that.active].url +
+            "?" +
+            qs.stringify(that.params, { indices: false }),
+          method: "get",
+        }).then((res) => {
+          this.tableData.concat(res.content);
+        });
       // this.tableData = this.tableData.concat();
-      
     },
-    getData(e){ 
+    getData(e) {
+      this.loading = false;
       this.active = e;
       let that = this;
-      if(that.nav[e].url){
-        request({
-          url: that.nav[e].url + '?' + qs.stringify(that.params, { indices: false }),
-          method: "get", 
-        }).then((res) => {
-          console.log(res);
-          this['tableData'+e] = res.content
-        })
+      this.tableData = [];
+      this.tableHeader = []; 
+      switch (e) {
+        case 0:
+          that.tableHeader = [
+            {
+              prop: "pic",
+              width: 80,
+            },
+            {
+              prop: "title",
+              label: "标题",
+              width: 351,
+            },
+          ]; 
+          break;
+        case 1:
+          that.tableHeader = [
+            {
+              prop: "image",
+              width: 80,
+            },
+            {
+              prop: "storeName",
+              label: "标题",
+              width: 351,
+            },
+          ];
+          break;
+        case 2:
+          that.tableHeader = [ 
+            {
+              prop: "title", 
+            },
+          ];
+          break;
       }
-    }
+      if (that.nav[e].url) {
+        request({
+          url:
+            that.nav[e].url +
+            "?" +
+            qs.stringify(that.params, { indices: false }),
+          method: "get",
+        }).then((res) => {
+          this.tableData = res.content;
+          this.loading = false;
+        });
+      }
+    },
   },
   destroyed() {
     console.log("销毁");
@@ -212,6 +280,46 @@ export default {
       box-sizing: border-box;
       cursor: pointer;
     }
+  } 
+}
+.el-table {
+  border-left: 1px solid #ddd;
+  /deep/.cell { 
+    vertical-align: center;
+    text-overflow: initial;
   }
+  /deep/ .el-table--enable-row-transition .el-table__body td{
+    height:70px
+  }
+  /*滚动条样式*/
+  ::-webkit-scrollbar {
+    /*滚动条整体样式*/
+    width: 6px;
+    margin-right: 2px;
+  }
+  ::-webkit-scrollbar-thumb {
+    /*滚动条里面小方块*/
+    border-radius: 5px;
+    background: #d5d5e6;
+  }
+  ::-webkit-scrollbar-track {
+    /*滚动条里面轨道*/
+    border-radius: 6px;
+    background: #f5f5f9;
+  }
+}
+.small-img {
+  display: inline-block;
+  vertical-align: middle;
+  width: 50px;
+  height: 50px;
+  border-radius: 4px;
+  border: 1px solid #dadde4;
+  background-color: #f7f8fd;
+  background-origin: content-box;
+  background-position: 50% 50%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  overflow: hidden;
 }
 </style>

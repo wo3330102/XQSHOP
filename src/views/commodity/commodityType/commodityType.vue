@@ -12,7 +12,7 @@
       <div class="conditions">
         <div class="search-box">
           <el-input v-model="searchVal" placeholder="搜索分类名称 ">
-            <el-button slot="append">搜索</el-button>
+            <el-button slot="append" @click="requestParams.title = searchVal">搜索</el-button>
           </el-input>
         </div>
       </div>
@@ -23,9 +23,12 @@
         :requestUrl="'api/yxStoreTag'"
         :requestParams="requestParams"
         :tableHeader="tableHeader" 
+        @rowClick="RowClick"
+        @BatchOption="Del"
+        @SelectionChange="SelectItem"
       ></table-tem>
       <!-- 隐藏 -->
-      <div class="table" v-if="false">
+      <!-- <div class="table" v-if="false">
         <div
           class="checkOption"
           :class="isActive ? 'show' : ''"
@@ -58,8 +61,7 @@
           :row-style="{ cursor: 'pointer' }"
           :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
           row-key="id"  
-        >
-          <!-- 是否需要选框 -->
+        > 
           <el-table-column
             type="selection" 
             width="70"
@@ -92,7 +94,7 @@
           </template>
         </el-table-column>
         </el-table>
-      </div> 
+      </div>  -->
     </div>
   </div>
 </template>
@@ -110,22 +112,21 @@ export default {
       searchVal: "",
       tableHeader: [
         {
-          prop: "cateName",
-          label: "分类名称", 
-          width: 455,
+          prop: "pic",
         },
         {
-          prop:'pic',
-          width:80,
+          prop: "title",
+          label: "分类名称", 
+          width: 303,
         }, 
         {
           prop: "categoryType",
           label: "分类类型",
           align:'center',
-          width: 200,
+          width: 240,
         },
         {
-          prop: "number",
+          prop: "count",
           label: "商品数量",
           sortable: true,
           width: 120,
@@ -135,6 +136,8 @@ export default {
         page: 0,
         size: 10,
         sort: "sort,desc",
+        isRefresh:0,
+        title:'',
       },
       data:[],
       currentPage: 1,
@@ -165,14 +168,16 @@ export default {
       this.$router.push("/editCategory");
       localStorage.setItem('categoryDetail',JSON.stringify(e))
     }, 
-    Del:function(){ 
+    Del:function(){  
       let par = [];
       this.selectItem.map(i=>{
+        console.log(i);
         par.push(i.id)
       })
+      console.log(par);
       del(par).then(res=>{ 
-        this.$message.success('删除成功')
-        this.getData();
+        this.$message.success('删除成功'); 
+        this.requestParams.isRefresh += 1; 
       })
     }
   },

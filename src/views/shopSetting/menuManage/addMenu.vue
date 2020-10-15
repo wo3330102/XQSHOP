@@ -22,6 +22,7 @@
                   placeholder="最多250个字符"
                   maxlength="250"
                   class="el-input__inner"
+                  v-model="detail.title"
                 />
               </div>
             </div>
@@ -30,12 +31,14 @@
           <div class="box" style="padding:0">
             <h3 class="title" style="padding: 12px;">编辑菜单项</h3>
             <div class="group" v-if="selectData.length>0">
-              <div class="item-group" v-for="(item,index) in selectData" :key="item">
-                <span class="ellipsis">{{item}}</span>
+              <template v-for="(item,index) in selectData">
+                <div class="item-group" v-for="(v,i) in item.data" :key="i">
+                <span class="ellipsis">{{v.name}}</span>
                 <span class="options">
-                  <i class="el-icon-delete" @click="DelMenu(index)"></i>
+                  <i class="el-icon-delete" @click="DelMenu(index,i)"></i>
                 </span>
               </div>
+              </template>
             </div>
             <div class="addPage" @click="showAddMenu = true">
               <i class="el-icon-circle-plus-outline"></i>
@@ -45,26 +48,35 @@
         </el-col>
         <el-col :span="8">
           <div class="box">
-            <p class="infoTip">页面类型</p>
+            <h3 class="infoTip">菜单栏</h3>
             <p style class="infoContent">1.菜单栏可以在店铺的页头和页脚显示，方便用户在网站中进行页面跳转。</p>
             <p class="infoContent">2.通过点击添加页面来为菜单栏增加页面，按住页面前方按钮可以进行拖拽，为其他页面添加二级菜单。</p>
-          </div>
+          </div> 
+          <div class="box">
+            <h3 class="infoTip">菜单栏位置<span class="infoContent"> (页头页尾只能有一个)</span></h3> 
+            <el-select v-model="detail.status" placeholder="">
+              <el-option v-for="item in optionList" :key="item.value" :label="item.label" :value="item.value"></el-option>
+            </el-select>
+          </div> 
+          
         </el-col>
       </el-row>
       <div class="pageSaveBtn">
         <el-button @click="$NavgitorTo('/pageManage')">取消</el-button>
-        <el-button type="primary" :disabled="save">保存</el-button>
+        <el-button type="primary" @click="Save">保存</el-button>
       </div>
     </div>
     <add-menu-com
       v-if="showAddMenu"
+      :index="index"
       @Close="(e)=>{showAddMenu = false}"
-      @selectData="(e)=>{selectData = e}"
+      @selectData="GetData"
     ></add-menu-com>
   </div>
 </template> 
 <script>
 import addMenuCom from "@/components/addMenuCom";
+import {add,edit} from '@/api/yxStoreMenubar'
 export default {
   components: {
     addMenuCom,
@@ -76,12 +88,72 @@ export default {
       save: true,
       showAddMenu: false,
       selectData: [],
+      index:'',
+      id:'',
+      detail:{
+        status:0,
+      },
+      optionList:[{
+        label:'默认',
+        value:0,
+      },{
+        label:'页头',
+        value:1,
+      },{
+        label:'页尾',
+        value:2,
+      }]
     };
   },
-  methods: {
-    DelMenu:function(index){
-      console.log(index);
-      this.selectData.splice(index,1)
+  created(){
+    if(this.$route.query.hasOwnProperty('id')){
+      this.detail = JSON.parse(localStorage.getItem('menuDetail'))
+      this.selectData = this.detail.menuItems
+    } else {
+      
+    }
+  },
+  methods: { 
+    DelMenu:function(index,i){ 
+      this.selectData[index].data.splice(i,1)  
+    },
+    GetData:function(e){ 
+      this.selectData = e;
+      // let arr = this.selectData; 
+      // if(arr.length>0){
+      //   arr.map(i=>{
+      //     console.log(i.label)
+      //     e.map(j=>{
+      //       console.log(j.label)
+      //       if(i.label === j.label){
+      //         i.data.concat(j.data) 
+      //       }
+      //     })
+      //   });
+      // } else { 
+      // }
+      // console.log(arr)
+    },
+    Save:function(){
+      if(!this.detail.title){
+        this.$message.error('请填写菜单栏标题')
+        return false
+      }
+      if(this.selectData.length == 0){
+        this.$message.error('请选择菜单项')
+        return false
+      }
+      this.detail.menuItems = this.selectData
+      if(this.id){
+        edit(this.detail).then(res=>{
+          this.$message.success('修改成功')
+        })
+      } else {
+        add(this.detail).then(res=>{
+          this.$message.success('新增成功'),
+          this.$router.push('/menuManage')
+        })
+      }
     }
   },
 };

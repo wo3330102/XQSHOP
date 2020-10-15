@@ -2,29 +2,77 @@
   <div class="container">
     <h1 class="title">
       <span>菜单栏</span>
-      <span style="font-size:0">
-        <el-button type="primary" @click="$NavgitorTo('/addMenu')">添加菜单栏</el-button>
+      <span style="font-size: 0">
+        <el-button type="primary" @click="$NavgitorTo('/addMenu')"
+          >添加菜单栏</el-button
+        >
       </span>
     </h1>
     <div class="content">
-      <el-table :data="tableData" style="width: 100%">
-        <el-table-column prop="title" label="标题" width="260"></el-table-column>
-        <el-table-column prop="menu" label="菜单项" width="866"></el-table-column>
+      <el-table :data="tableData" style="width: 100%" @row-click="ToDetail">
+        <el-table-column
+          prop="title"
+          label="标题"
+          width="260"
+        ></el-table-column>
+        <el-table-column prop="menuItems" label="菜单项" width="716">
+          <template slot-scope="scope">
+            {{
+              (function () {
+                let str = [];
+                scope.row.menuItems.map((i) => { 
+                  i.data.map(j=>{
+                    str.push(j.name);
+                  })
+                });
+                return str.toString()
+              }())
+            }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="150">
+          <template slot-scope="scope">
+            {{
+              scope.row.status == 0
+                ? ""
+                : scope.row.status == 1
+                ? "页头"
+                : "页尾"
+            }}
+          </template>
+        </el-table-column>
       </el-table>
     </div>
   </div>
 </template>
 <script>
+import { get } from "@/api/yxStoreMenubar";
 export default {
   data() {
-    return { 
-      tableData:[
-        
-      ]
+    return {
+      tableData: [],
     };
   },
+  created() {
+    let par = {
+      page: 0,
+      size: 20,
+    };
+    get(par).then((res) => {
+      this.tableData = res.content;
+    });
+  },
   methods: {
-     
+    ToDetail: function (row) {
+      console.log(row);
+      localStorage.setItem('menuDetail',JSON.stringify(row))
+      this.$router.push({
+        path:'/addMenu',
+        query:{
+          id:row.id
+        }
+      })
+    },
   },
 };
 </script>
@@ -69,7 +117,7 @@ export default {
         background: #fff;
         color: #000000;
       }
-    }  
+    }
     /deep/ .el-input__inner {
       padding: 0 8px;
     }
@@ -78,7 +126,7 @@ export default {
     padding: 14px 0;
     text-align: center;
   }
-} 
+}
 /deep/.el-input__icon {
   line-height: 36px !important;
 }

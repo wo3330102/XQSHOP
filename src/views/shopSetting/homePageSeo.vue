@@ -10,14 +10,19 @@
             <div>
               <p style="margin :12px 0">
                 SEO标题
-                <span class="subTitle" style="float:right">{{seoTitle.length}}/70 字符</span>
+                <span class="subTitle" style="float:right">{{detail.seoTitle?detail.seoTitle.length : 0}}/70 字符</span>
               </p>
-              <el-input v-model="seoTitle" maxlength="70"></el-input>
+              <el-input v-model="detail.seoTitle" maxlength="70"></el-input>
               <p style="margin :12px 0">
-                SEO标题
-                <span class="subTitle" style="float:right">{{seoTitle.length}}/320 字符</span>
+                SEO关键字
+                <span class="subTitle" style="float:right">{{detail.seoKeys?detail.seoKeys:0}}/70 字符</span>
               </p>
-              <el-input type="textarea" v-model="seoTitle" maxlength="320"></el-input>
+              <el-input v-model="detail.seoKeys" maxlength="70"></el-input>
+              <p style="margin :12px 0">
+                SEO详情
+                <span class="subTitle" style="float:right">{{detail.seoContent?detail.seoContent.length : 0}}/320 字符</span>
+              </p>
+              <el-input type="textarea" v-model="detail.seoContent" maxlength="320"></el-input>
             </div>
           </div>
         </el-col>
@@ -29,21 +34,51 @@
         </el-col>
       </el-row>
       <div class="pageSaveBtn"> 
-        <el-button type="primary" :disabled="save">保存</el-button>
+        <el-button type="primary" @click="Save">保存</el-button>
       </div>
     </div>
   </div>
 </template> 
 <script>
+import {get,edit,add} from '@/api/yxSystemStoreTrack'
 export default {
   data() {
     return {
-      seoTitle: "", // Facebook Pixel
-      save: true,
+      detail:{
+        seoTitle:'',
+        seoKeys:'',
+        seoContent:'', 
+      },
+      isAdd:true
     };
+  }, 
+  created(){
+    let par = {
+      page:0,
+      size:10,
+    }
+    get(par).then(res=>{ 
+      if(res.content.length>0){
+        this.isAdd = false;
+        this.detail = res.content[0];
+      } else {
+        this.detail = {};
+      }
+    })
   },
-
-  methods: {},
+  methods: {
+    Save:function(){
+      if(this.isAdd){
+        add(this.detail).then(res=>{ 
+          this.$message.success('新增成功')
+        })
+      } else {
+        edit(this.detail).then(res=>{
+          this.$message.success('修改成功')
+        })
+      }
+    },
+  },
   updated() {
     console.log("更新");
     this.save = false;

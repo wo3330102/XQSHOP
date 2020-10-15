@@ -46,10 +46,11 @@ export function add(data) {
     data
   })
 }
-export function del(id) {
+export function del(data) {
   return request({
-    url: 'api/yxStoreTag/' + id,
+    url: 'api/yxStoreTag',
     method: 'delete', 
+    data
   })
 }
 export function edit(data) {

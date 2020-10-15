@@ -176,7 +176,7 @@ export default {
           sortable: true,
         },
         {
-          prop: "storeCategory.cateName",
+          prop: "tagName",
           label: "分类",
           width: "443",
         },

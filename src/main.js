@@ -92,6 +92,10 @@ Vue.prototype.$confirm = MessageBox.confirm;
 Vue.prototype.$message = Message;
 Vue.prototype.$loading = Loading.service;
 
+// 无限滚动（下拉加载）
+import infiniteScroll from "vue-infinite-scroll";
+ Vue.use(infiniteScroll);
+
 // 强制保留两位小数
 Vue.prototype.$toDecimal2 = function (x) {
   var f = parseFloat(x);
