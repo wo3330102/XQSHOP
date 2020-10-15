@@ -48,16 +48,16 @@
             </el-menu-item-group>
           </el-submenu>
           <el-menu-item index="/customer">
-            <i class="el-icon-setting"></i>
+            <i class="el-icon-s-custom"></i>
             <span slot="title">顾客</span>
           </el-menu-item>
           <el-menu-item index="/dataCenter">
-            <i class="el-icon-setting"></i>
+            <i class="el-icon-s-data"></i>
             <span slot="title">数据中心</span>
           </el-menu-item>
           <el-submenu index="4">
             <template slot="title">
-              <i class="el-icon-location"></i>
+              <i class="el-icon-s-marketing"></i>
               <span>营销</span>
             </template>
             <el-menu-item-group>
@@ -68,7 +68,7 @@
           </el-submenu>
           <el-submenu index="5">
             <template slot="title">
-              <i class="el-icon-location"></i>
+              <i class="el-icon-s-shop"></i>
               <span>店铺管理</span>
             </template>
             <el-menu-item-group>

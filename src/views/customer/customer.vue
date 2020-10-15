@@ -175,7 +175,7 @@ export default {
         {
           width: 263,
           label: "姓名",
-          prop:'realName',
+          prop:'username',
         },
         {
           width: 261,

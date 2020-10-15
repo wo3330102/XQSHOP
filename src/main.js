@@ -9,6 +9,8 @@ import './element-variables.scss';
 // 提示
 import 'echarts/lib/component/tooltip'
 
+// import './assets/img/settings' // icon
+
 import {
   Container,
   Header,
