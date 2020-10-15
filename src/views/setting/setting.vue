@@ -15,14 +15,18 @@
   </div>
 </template>
 <script>
+import pic1 from '@/assets/img/settings/accout.png'
 export default {
+	
   data() {
-    let url = "https://ddd.xshoppy.shop";
+    let url = "http://ddd.xshoppy.shop";
+    // let url = "@/assets/img/settings";
+	
     return {
       settingList: [
         {
           id: 1,
-          icon: url + "/static/img/settings/base-message.png",
+          icon: pic1,
           title: "基础信息",
           tip: "设置店铺的基础信息",
           url: "/userInfo",
