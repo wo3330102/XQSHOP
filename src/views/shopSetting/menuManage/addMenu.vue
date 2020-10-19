@@ -31,14 +31,15 @@
           <div class="box" style="padding:0">
             <h3 class="title" style="padding: 12px;">编辑菜单项</h3>
             <div class="group" v-if="selectData.length>0">
-              <template v-for="(item,index) in selectData">
-                <div class="item-group" v-for="(v,i) in item.data" :key="i">
+              <!-- <template v-for="(item,index) in selectData">
+                
+              </template> -->
+              <div class="item-group" v-for="(v,i) in selectData" :key="i">
                 <span class="ellipsis">{{v.name}}</span>
                 <span class="options">
-                  <i class="el-icon-delete" @click="DelMenu(index,i)"></i>
+                  <i class="el-icon-delete" @click="DelMenu(i)"></i>
                 </span>
               </div>
-              </template>
             </div>
             <div class="addPage" @click="showAddMenu = true">
               <i class="el-icon-circle-plus-outline"></i>
@@ -53,16 +54,16 @@
             <p class="infoContent">2.通过点击添加页面来为菜单栏增加页面，按住页面前方按钮可以进行拖拽，为其他页面添加二级菜单。</p>
           </div> 
           <div class="box">
-            <h3 class="infoTip">菜单栏位置<span class="infoContent"> (页头页尾只能有一个)</span></h3> 
-            <el-select v-model="detail.status" placeholder="">
+            <h3 class="infoTip">菜单栏位置</h3> 
+            <el-select v-model="detail.type" placeholder="">
               <el-option v-for="item in optionList" :key="item.value" :label="item.label" :value="item.value"></el-option>
             </el-select>
-          </div> 
-          
+          </div>  
         </el-col>
       </el-row>
       <div class="pageSaveBtn">
-        <el-button @click="$NavgitorTo('/pageManage')">取消</el-button>
+        <el-button type="danger" style="float:left" v-if="id" @click="Del">删除</el-button>
+        <el-button @click="$NavgitorTo('/menuManage')">取消</el-button>
         <el-button type="primary" @click="Save">保存</el-button>
       </div>
     </div>
@@ -76,7 +77,7 @@
 </template> 
 <script>
 import addMenuCom from "@/components/addMenuCom";
-import {add,edit} from '@/api/yxStoreMenubar'
+import {add,edit,del} from '@/api/yxStoreMenubar'
 export default {
   components: {
     addMenuCom,
@@ -92,21 +93,20 @@ export default {
       id:'',
       detail:{
         status:0,
+        type:0,
       },
       optionList:[{
-        label:'默认',
+        label:'页头',
         value:0,
       },{
-        label:'页头',
-        value:1,
-      },{
         label:'页尾',
-        value:2,
+        value:1,
       }]
     };
   },
   created(){
     if(this.$route.query.hasOwnProperty('id')){
+      this.id = this.$route.query.id
       this.detail = JSON.parse(localStorage.getItem('menuDetail'))
       this.selectData = this.detail.menuItems
     } else {
@@ -114,25 +114,23 @@ export default {
     }
   },
   methods: { 
-    DelMenu:function(index,i){ 
-      this.selectData[index].data.splice(i,1)  
+    DelMenu:function(index,i){  
+      this.selectData.splice(i,1);
     },
-    GetData:function(e){ 
-      this.selectData = e;
-      // let arr = this.selectData; 
-      // if(arr.length>0){
-      //   arr.map(i=>{
-      //     console.log(i.label)
-      //     e.map(j=>{
-      //       console.log(j.label)
-      //       if(i.label === j.label){
-      //         i.data.concat(j.data) 
-      //       }
-      //     })
-      //   });
-      // } else { 
-      // }
-      // console.log(arr)
+    GetData:function(e){  
+      if(this.selectData.length>0){ 
+        this.selectData = this.selectData.concat(e);
+      } else {
+        this.selectData = e;
+      } 
+    },
+    Del:function(){
+      let arr = [this.detail.id]
+      del(arr).then(res=>{
+        console.log(res);
+        this.$message.success('删除菜单栏成功')
+        this.$router.push('/menuManage')
+      })
     },
     Save:function(){
       if(!this.detail.title){
@@ -147,8 +145,10 @@ export default {
       if(this.id){
         edit(this.detail).then(res=>{
           this.$message.success('修改成功')
+          this.$router.push('/menuManage')
         })
       } else {
+        console.log('新增')
         add(this.detail).then(res=>{
           this.$message.success('新增成功'),
           this.$router.push('/menuManage')

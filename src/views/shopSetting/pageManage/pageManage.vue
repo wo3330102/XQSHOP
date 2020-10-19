@@ -19,7 +19,7 @@
           ></el-option>
         </el-select>
         <div class="search-box" style="flex: 1 1 0%; margin-left: 12px">
-          <el-input v-model="searchVal" placeholder="请输入商品名称或SKU ">
+          <el-input v-model="searchVal" placeholder="请输入标题名称">
             <el-button slot="append" @click="requestParams.title=searchVal">搜索</el-button>
           </el-input>
         </div>

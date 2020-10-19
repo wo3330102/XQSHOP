@@ -60,6 +60,10 @@
                   class="small-img"
                   :style="{ backgroundImage: 'url(' + scope.row.pic + ')' }"
                 ></span>
+                <el-input
+                  v-else-if="item.prop == 'input'"  
+                  v-model="scope.row.value"
+                ></el-input>
                 <span v-else>{{ scope.row[item.prop] }}</span>
               </template>
             </el-table-column>
@@ -156,7 +160,7 @@ export default {
         if (i && i.label == that.active) {
           onOff = true
           i.data = arr; 
-        } 
+        }
       });
       if(!onOff){
         //提交数据变量中含有不含有该分类数据，新增
@@ -167,15 +171,20 @@ export default {
         that.subData.push(obj);
       }    
       that.subData.map(i=>{
-        if(i.data){
-          input += this.nav[i.label].label + '('+i.data.length+')'
-          console.log(input) 
+        if(i.data.length>0){
+          input += this.nav[i.label].label + '('+i.data.length+')，' 
         }
       })
       that.inputValue = input
     },
     submitForm: function (res) { 
-      this.$emit("selectData", this.subData);
+      let arr = [];
+      this.subData.map(i=>{
+        console.log(i.data)
+        arr = arr.concat(i.data);
+      })
+      console.log(arr);
+      this.$emit("selectData", arr);
       this.$emit("Close", false);
     },
     load() {
@@ -193,7 +202,7 @@ export default {
       // this.tableData = this.tableData.concat();
     },
     getData(e) {
-      this.loading = false;
+      this.loading = true;
       this.active = e;
       let that = this;
       this.tableData = [];
@@ -229,6 +238,13 @@ export default {
           that.tableHeader = [ 
             {
               prop: "title", 
+            },
+          ];
+          break;
+        case 3:
+          that.tableHeader = [ 
+            {
+              prop: "input", 
             },
           ];
           break;

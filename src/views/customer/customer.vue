@@ -192,7 +192,7 @@ export default {
           width: 261,
           label: "总金额",
           sortable: true,
-          prop:'addres',
+          prop:'sumMoney',
         },
       ],
       currentPage: 1,

@@ -556,9 +556,13 @@ export default {
     ChangeRelationShopForm: function () {},
     // 新增
     Save: function () { 
+      if(!this.form.title){
+        this.$message.error('请输入分类名称')
+        return false;
+      }
       let par = {
         content:this.form.desc, 
-        title: this.form.title,
+        title: this.form.title, 
         pic: this.imageUrl,
       };    
       add(par).then((res) => {

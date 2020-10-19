@@ -31,3 +31,11 @@ export function del(data) {
         data
     })
 } 
+
+export function changeMenuBarStatus(params) { 
+    return request({
+        url: 'api/yxStoreMenubar/mod',
+        method: 'post',
+        params
+    })
+}  

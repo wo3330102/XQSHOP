@@ -182,8 +182,8 @@ export default {
   }
 }
 .code{
-	display: flex!important;
-	justify-content: start!important;
+	display: flex !important;
+	justify-content: flex-start!important;
 }
 .code .el-image{
 	padding: 0px 20px 0 0;

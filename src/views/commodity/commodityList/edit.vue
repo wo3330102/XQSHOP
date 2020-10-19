@@ -623,10 +623,9 @@ export default {
         });
         that.fileList = arr;
 
-        // 分类和标签
-        this.detail.tagIds = res.tagList
-        this.tagList = res.productInfo.classIds.split(',')
+        // 分类和标签 
 
+        this.detail.tagIds = res.tagList 
       });
       let params = {
         page: 0,
@@ -824,6 +823,13 @@ export default {
           i.url = i.response.link;
         }
       }); 
+      // 判断是否选择分类
+      if(this.detail.tagIds){
+        this.detail.tagIds = this.detail.tagIds.toString();
+      } else {
+        this.$message.error('请选择商品分类')
+        return false;
+      }
       // 判断是否为多规格数据控制库存
       if (this.table.length === 0) { 
         if(this.attr.price == '' ||this.attr.price == 0){
@@ -872,12 +878,11 @@ export default {
         
         // this.detail.attrs = this.table || [];
         this.detail.attr = this.attr; 
-      }
-      this.detail.tagIds = this.tagList; 
-
-      this.detail.classIds = this.detail.classIds.toString();
-      this.detail.tagIds = this.tagList.toString();
-
+      }   
+      // if(this.detail.classIds){
+      //   this.detail.classIds = this.detail.classIds.toString();
+      // } 
+      
       add(this.detail).then((res) => {
         that.$message({
           message: "修改成功",

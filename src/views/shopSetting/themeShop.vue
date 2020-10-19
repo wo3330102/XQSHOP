@@ -3,20 +3,20 @@
     <h1 class="title">
       <span>设置</span>
     </h1>
-    <div class="themeList">
+    <div class="themeList" v-if="show">
       <dl
         v-for="(item, index) in themeList"
         :key="item.id"
         @click="ShowDetail(index)"
         class="theme"
       >
-        <dt class="img">
-          <img :src="item.pcImage" class="web" />
+        <dt class="img"> 
+          <img :src="item.pcImage || ''" class="web" />
         </dt>
         <dd class="desc">
           <h3>{{ item.name }}</h3>
           <p>
-            {{ item.price }}
+            {{ '免费' }}
             <span>包含 1 种风格</span>
           </p>
         </dd>
@@ -69,57 +69,15 @@
 </template>
 <script>
 import { getStoreTemplate } from "@/api/home.js";
+import {getShopById,changeTem} from '@/api/yxSystemStore';
+
 export default {
   data() {
     return {
-      themeList: [
-        {
-          id: 1,
-          status: 1,
-          img:
-            "https://static.xshoppy.shop/theme/1-1.png?x-oss-process=image/resize,m_lfit,w_325",
-          name: "多品综合站-默认",
-          price: "免费",
-          style: 1,
-          check: true,
-        },
-        {
-          id: 2,
-          status: 1,
-          img:
-            "https://static.xshoppy.shop/theme/1-1.png?x-oss-process=image/resize,m_lfit,w_325",
-          name: "多品综合站-默认",
-          price: "免费",
-          style: 1,
-        },
-        {
-          id: 3,
-          status: 1,
-          img:
-            "https://static.xshoppy.shop/theme/1-1.png?x-oss-process=image/resize,m_lfit,w_325",
-          name: "多品综合站-默认",
-          price: "免费",
-          style: 1,
-        },
-        {
-          id: 4,
-          status: 2,
-          img:
-            "https://static.xshoppy.shop/theme/1-1.png?x-oss-process=image/resize,m_lfit,w_325",
-          name: "多品综合站-默认",
-          price: "免费",
-          style: 1,
-        },
-        {
-          id: 5,
-          status: 1,
-          img:
-            "https://static.xshoppy.shop/theme/1-1.png?x-oss-process=image/resize,m_lfit,w_325",
-          name: "多品综合站-默认",
-          price: "免费",
-          style: 1,
-        },
-      ],
+      themeList: [{
+        pcImage:'',
+
+      }],
       showDetail: false,
       radio: 0,
       radioList: [{
@@ -128,12 +86,25 @@ export default {
       }],
       title: "",
       index: 0,
+      detail:{},
+      show:false
     };
   },
   created() {
     getStoreTemplate().then((res) => {
       this.themeList = res.content;
+      this.show = true;
     });
+    let id = localStorage.getItem('storeId');
+    getShopById(id).then(res=>{ 
+      if(res.tempLink){
+        this.themeList.map(i=>{
+          if(i.tempLink == res.tempLink){
+            i.check = true;
+          } 
+        })
+      }
+    })
   },
   methods: {
     ShowDetail: function (index) {
@@ -143,13 +114,20 @@ export default {
       this.index = index;
     },
     CheckThemeShop: function () {
-      let that = this;
-      let arr = that.themeList;
+      let that = this; 
       for (var i in that.themeList) {
         that.themeList[i].check = false;
       }
       that.themeList[that.index].check = true;
-      that.showDetail = false;
+      that.showDetail = false; 
+      let id = that.themeList[that.index].id; 
+      let par = {
+        tempId:id,
+      }
+      changeTem(par).then(res=>{
+        console.log(res);
+        this.$message.success('模板选择成功');
+      })
     },
   },
 };

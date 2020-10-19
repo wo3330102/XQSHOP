@@ -53,4 +53,12 @@ export function edit(data) {
   })
 }
 
+export function changeTem(data){
+  return request({
+    url: 'api/yxSystemStore/updateTempLink',
+    method: 'put',
+    data
+  })
+}
+
 export default { getL, add, edit, del, getShop, getAll }

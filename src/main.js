@@ -49,6 +49,7 @@ import {
   Loading,
   Image,
   Cascader,
+  Switch
 } from 'element-ui';
  
 Vue.use(Container);
@@ -86,6 +87,7 @@ Vue.use(Tag)
 Vue.use(Image)
 Vue.use(Cascader)
 Vue.use(Loading.directive);
+Vue.use(Switch)
  
 Vue.prototype.$ELEMENT = { size: 'medium'}; 
 Vue.prototype.$msgbox = MessageBox;

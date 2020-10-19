@@ -53,7 +53,7 @@
               new Date(Number(scope.row.createTime)).toLocaleString()
             }}</span>
             <span v-else-if="item.label.indexOf('金额')>-1">
-              {{ scope.row[item.prop]?'$'+scope.row[item.prop] : '' }}
+              {{ scope.row[item.prop]?'$'+scope.row[item.prop] : '$0.00' }}
             </span>
             <span v-else-if="item.prop == 'categoryType'">
               手动分类

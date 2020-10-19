@@ -15,30 +15,36 @@
           label="标题"
           width="260"
         ></el-table-column>
-        <el-table-column prop="menuItems" label="菜单项" width="716">
+        <el-table-column prop="menuItems" label="菜单项" width="616">
           <template slot-scope="scope">
             {{
               (function () {
                 let str = [];
-                scope.row.menuItems.map((i) => { 
-                  i.data.map(j=>{
-                    str.push(j.name);
-                  })
+                scope.row.menuItems.map((i) => {
+                  str.push(i.name);
                 });
-                return str.toString()
-              }())
+                return str.toString();
+              })()
             }}
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" width="150">
+        <el-table-column prop="type" label="类型" width="150">
           <template slot-scope="scope">
-            {{
-              scope.row.status == 0
-                ? ""
-                : scope.row.status == 1
-                ? "页头"
-                : "页尾"
-            }}
+            {{ scope.row.type === 0 ? "页头" : "页尾" }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态" width="100">
+          <template slot-scope="scope">
+            <!-- <el-button v-if="scope.row.status === 0" type="text" size="small" @click.stop.prevent="ChangeStatus(scope.$index)">未启用</el-button> 
+            <el-button v-else type="text" @click.stop.prevent="ChangeStatus(scope.$index)">已启用</el-button>  -->
+            <el-switch  @click.native.stop
+              v-model="scope.row.status"
+              @change="ChangeStatus(scope.$index)"
+              :active-value="1"
+              :inactive-value="0"
+              active-color="#34395d" 
+            >
+            </el-switch>
           </template>
         </el-table-column>
       </el-table>
@@ -46,7 +52,7 @@
   </div>
 </template>
 <script>
-import { get } from "@/api/yxStoreMenubar";
+import { get, changeMenuBarStatus } from "@/api/yxStoreMenubar";
 export default {
   data() {
     return {
@@ -54,25 +60,42 @@ export default {
     };
   },
   created() {
-    let par = {
-      page: 0,
-      size: 20,
-    };
-    get(par).then((res) => {
-      this.tableData = res.content;
-    });
+    this.init();
   },
   methods: {
+    init: function () {
+      let par = {
+        page: 0,
+        size: 20,
+      };
+      get(par).then((res) => {
+        this.tableData = res.content;
+      });
+    },
     ToDetail: function (row) {
       console.log(row);
-      localStorage.setItem('menuDetail',JSON.stringify(row))
+      localStorage.setItem("menuDetail", JSON.stringify(row));
       this.$router.push({
-        path:'/addMenu',
-        query:{
-          id:row.id
-        }
-      })
+        path: "/addMenu",
+        query: {
+          id: row.id,
+        },
+      });
     },
+    ChangeStatus: function (index) {
+      let obj = this.tableData;
+      let storeId = localStorage.getItem("storeId");
+      console.log(index)
+      console.log(this.tableData[index].status)
+      let par = {
+        status: obj[index].status === 1?1:0,
+        id: obj[index].id,
+        storeId: storeId,
+      };
+      changeMenuBarStatus(par).then((res) => {
+        this.init();
+      });
+    }, 
   },
 };
 </script>
