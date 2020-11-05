@@ -35,7 +35,7 @@
           ></el-option>
         </el-select> -->
         <!-- 发货状态 -->
-        <el-select
+        <!-- <el-select
           v-model="getListParams.orderType"
           clearable
           placeholder="全部发货状态"
@@ -47,7 +47,7 @@
             :label="item.label"
             :value="item.id"
           ></el-option>
-        </el-select>
+        </el-select> -->
         <!-- 时间选择 -->
         <!-- <el-date-picker
           v-model="getListParams.createTime"
@@ -60,9 +60,9 @@
         ></el-date-picker> -->
         <el-date-picker
           v-model="getListParams.createTime"
-          :default-time="['00:00:00','23:59:59']"
+          :default-time="['00:00:00', '23:59:59']"
           type="daterange"
-          range-separator="至"  
+          range-separator="至"
           value-format="yyyy-MM-dd HH:mm:ss"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
@@ -85,21 +85,22 @@
         <div class="search-box">
           <el-input
             v-model="searchVal"
+            clearable
             placeholder="选择搜索类型后输入搜索类容"
           >
             <el-button slot="append" @click="Search">搜索</el-button>
           </el-input>
         </div>
       </div>
-      <!-- :optionList="['发货','标记已完成','标记进行中']" -->
-      <table-tem
-        :option="'操作（结果页）'"
+      <table-tem 
         :requestUrl="'api/yxStoreOrder'"
         :requestParams="getListParams"
-        :tableHeader="tableHeader" 
+        :tableHeader="tableHeader"
         @SelectionChange="SelectionChange"
-        @rowClick="ToDetail" 
-      ></table-tem>
+        @rowClick="ToDetail"
+      >
+        <span slot="option" class="textBtn"> 结果页 </span>
+      </table-tem>
     </div>
     <!-- 导出 -->
     <export-function
@@ -160,7 +161,6 @@
 <script>
 import exportFunction from "@/components/exportFunction";
 import tableTem from "@/components/tableTem";
-import { getList } from "@/api/order";
 export default {
   components: {
     exportFunction,
@@ -171,15 +171,15 @@ export default {
       getListParams: {
         // 初始化表格参数
         page: 0,
-        size: 10,
+        size: 30,
         sort: "id,desc",
         orderStatus: -99,
         orderType: 0,
-        createTime: "", 
-      }, 
-      exportParams:{
-
-      },  // 初始化导出参数
+        createTime: "",
+        value: "",
+        type: "",
+      },
+      exportParams: {}, // 初始化导出参数
       nav: [
         //头部导航栏
         {
@@ -214,9 +214,9 @@ export default {
           id: -2,
           label: "已退款",
         },
-      ], 
+      ],
       selectItem: [], // 选中的表单数据
-      acitve: 0, // 当前选中  
+      acitve: 0, // 当前选中
       deliveryTypeList: [
         // 发货状态   || 订单类型
         {
@@ -257,10 +257,10 @@ export default {
           label: "用户电话",
         },
       ],
-      searchVal: "",  // 搜索内容
+      searchVal: "", // 搜索内容
       tableHeader: [
         {
-          width: "200",
+          width: "238",
           prop: "orderId",
           label: "订单编号",
         },
@@ -271,23 +271,32 @@ export default {
           sortable: true,
         },
         {
-          width: "160",
+          width: "120",
           prop: "payTypeName",
           label: "付款状态",
+          align:'center'
         },
         {
-          width: "160",
+          width: "120",
           prop: "statusName",
           label: "物流状态",
+          align:'center'
         },
         {
-          width: "196",
+          width: "238",
           prop: "payPrice",
           label: "总金额",
+          align:'right'
+        },
+        {
+          width: "150",  
+          prop:'option',
+          label: "操作",
+          align:'right'
         },
       ],
       showExport: false, // 控制导出对话框显示
-      showEdit: false, // 控制修改数据对话框显示 
+      showEdit: false, // 控制修改数据对话框显示
       // ************  以下为导入模块  *****************
       // editList: [
       //   // 导入选框
@@ -309,7 +318,7 @@ export default {
       //     downloadText: "下载已付款订单导入模板",
       //     url: "",
       //   },
-      // ], 
+      // ],
       // checkOrder: 1, // 选中的导入项
       // showExportSelect: 99, // 控制导出邮箱选择
       // emailSuccess: false, // 邮箱是否验证成功
@@ -318,42 +327,67 @@ export default {
       // isDisabledSendEmailToCustomer: false, // 是否禁用发送发货通知邮件给顾客,默认为false
     };
   },
-  methods: { 
+  watch: {
+    searchVal: function (val) {
+      if (val == "") {
+        let par = { ...this.getListParams };
+        delete par["orderId"];
+        delete par["realName"];
+        delete par["userPhone"];
+        par.value = "";
+        par.type = "";
+        this.getListParams = par;
+      }
+    },
+    searchType: function (val) {
+      if (val == "") {
+        let par = { ...this.getListParams };
+        delete par["orderId"];
+        delete par["realName"];
+        delete par["userPhone"];
+        par.value = "";
+        par.type = "";
+        this.getListParams = par;
+      }
+    },
+  },
+  methods: {
     // 搜索对应数据
-    Search: function () { 
-      let obj = { ...this.getListParams };  
-      if (this.searchType == '') {
-        // delete 为删除对应key
-        delete obj['orderId']
-        delete obj['realName']
-        delete obj['userPhone']
+    Search: function () {
+      let obj = { ...this.getListParams };
+      // delete 为删除对应key
+      delete obj["orderId"];
+      delete obj["realName"];
+      delete obj["userPhone"];
+      if (this.searchType == "") {
         this.getListParams = {
           value: this.searchVal,
           type: this.searchType,
           ...obj,
         };
-        console.log('没有搜索条件',this.getListParams)
+        console.log("没有搜索条件", this.getListParams);
       } else {
+        let searchType = this.searchType;
         this.getListParams = {
-          type: this.searchType,
+          type: searchType,
           value: this.searchVal,
-          [this.searchType]: this.searchVal,
+          [searchType]: this.searchVal,
           ...obj,
         };
-        console.log('有搜索条件',this.getListParams)
+        console.log("有搜索条件", this.getListParams);
       }
     },
     // 选中的数据
-    SelectionChange: function (e) { 
+    SelectionChange: function (e) {
       this.exportParams.listContent = [];
-      e.map(i=>{
+      e.map((i) => {
         this.exportParams.listContent.push(i.orderId);
-      }) 
+      });
     },
     // 改变头部索引
     ChangeActive: function (index) {
       this.acitve = index;
-      this.getListParams.orderStatus = this.nav[index].id; 
+      this.getListParams.orderStatus = this.nav[index].id;
     },
     // 改变表单的筛选条件
     ChangeSelect: function (e) {
@@ -365,29 +399,29 @@ export default {
       localStorage.setItem("shopItem", JSON.stringify(e));
       this.$router.push("/order/edit");
     },
-    // 初始化导出参数 
-    RestExportParmas:function(){ 
-      let obj = {};  
+    // 初始化导出参数
+    RestExportParmas: function () {
+      let obj = {};
       obj = {
         page: 0,
         size: 10000,
-        sort: 'id,desc',
+        sort: "id,desc",
         orderStatus: this.getListParams.orderStatus,
         orderType: this.getListParams.orderType,
-        createTime: this.getListParams.createTime,  
-      }
-      if(this.searchType !== ''){
+        createTime: this.getListParams.createTime,
+      };
+      if (this.searchType !== "") {
         obj = {
           [this.searchType]: this.searchVal,
-          ...obj
-        }
+          ...obj,
+        };
       }
       this.exportParams = {
         ...obj,
-        ...this.exportParams
+        ...this.exportParams,
       };
       this.showExport = true;
-    }, 
+    },
     // ChangeEditOrderSelect: function (e) {
     //   console.log(e);
     //   if (e !== 1) {
@@ -448,10 +482,7 @@ export default {
     display: flex;
     justify-content: space-around;
     border-bottom: 1px solid #f1f1f6;
-    flex-wrap: wrap;
-    /deep/ .el-input__inner {
-      padding: 0 8px;
-    }
+    flex-wrap: wrap; 
     .search-box {
       display: flex;
       flex: 1;
@@ -469,16 +500,7 @@ export default {
     padding: 14px 0;
     text-align: center;
   }
-}
-/deep/.el-input__inner {
-  height: 36px !important;
-}
-/deep/.el-input__icon {
-  line-height: 36px !important;
-}
-/deep/ .el-range-separator {
-  line-height: 35px;
-}
+}  
 /deep/ .el-dialog__footer {
   border-top: 1px solid #f0f0f0;
   padding: 20px;

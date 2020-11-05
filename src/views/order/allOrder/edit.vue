@@ -72,7 +72,7 @@
                       {{ item.cartInfoMap.productInfo.storeName }}
                     </p>
                     <p class="sku">
-                      SKU：{{ item.cartInfoMap.productInfo.attrInfo.sku }}
+                      SKU：{{ item.cartInfoMap.productInfo.attrInfo?item.cartInfoMap.productInfo.attrInfo.sku:'' }}
                     </p>
                   </td>
                   <td class="spec">1</td>
@@ -247,7 +247,7 @@ export default {
   created() {
     let detail = JSON.parse(localStorage.getItem("shopItem"));
     this.detail = detail;
-    if (this.detail.status === 0 ) {
+    if (this.detail.statusName === '未发货' ) {
         this.btnText = "发货";
         this.showBtn = true;
     } else {
@@ -259,6 +259,7 @@ export default {
       this.showDialog = true;
       if (this.deliveryId) {
         this.detail.deliveryId = this.deliveryId;
+        this.detail.deliveryName = '427'; 
         edit(this.detail).then(() => {
           this.$router.push("/order");
         });

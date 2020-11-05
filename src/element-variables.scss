@@ -1,71 +1,64 @@
-.el-button--primary {
-    color: #fff;
-    background-color: #34395d;
-    border-color: #34395d;
-}
+$--color-primary: #34395d;
+$--font-path: '~element-ui/lib/theme-chalk/fonts';
+@import "~element-ui/packages/theme-chalk/src/index";
 
-.el-button:focus,
-.el-button:hover {
-    color: #34395d;
-    border-color: #c2c4ce;
-    background-color: #ebebef;
-}
+// .el-button--primary {
+//     color: #fff;
+//     background-color: #34395d;
+//     border-color: #34395d;
+// }
 
-.el-button--primary:hover {
-    color: #f2f3fa;
-    background-color: #2d3259;
-    border-color: #2d3259;
-}
+// .el-button:focus,
+// .el-button:hover {
+//     color: #34395d;
+//     border-color: #c2c4ce;
+//     background-color: #ebebef;
+// }
 
-.el-radio__input.is-checked+.el-radio__label {
-    color: #34395d;
-}
+// .el-button--primary:hover {
+//     color: #f2f3fa;
+//     background-color: #2d3259;
+//     border-color: #2d3259;
+// }
 
-.el-button--primary.is-disabled,
-.el-button--primary.is-disabled:active,
-.el-button--primary.is-disabled:focus,
-.el-button--primary.is-disabled:hover {
-    color: hsla(0, 0%, 100%, .7);
-    background-color: #b0b7e6;
-    border-color: #b0b7e6;
-}
+// .el-radio__input.is-checked+.el-radio__label {
+//     color: #34395d;
+// }
 
-.el-dialog__header,
-.el-message-box__header {
-    padding: 20px 20px 17px;
-    background-color: #f9f9f9;
-    border-bottom: 1px solid #f0f0f0;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-}
+// .el-button--primary.is-disabled,
+// .el-button--primary.is-disabled:active,
+// .el-button--primary.is-disabled:focus,
+// .el-button--primary.is-disabled:hover {
+//     color: hsla(0, 0%, 100%, .7);
+//     background-color: #b0b7e6;
+//     border-color: #b0b7e6;
+// }  
 
-.el-dialog__footer {
-    border-top: 1px solid #f0f0f0;
-    padding: 20px;
-}
+// .el-dialog,
+// .el-message-box {
+//     width: 640px !important;
+// }
 
-.el-dialog,.el-message-box {
-    width: 640px !important;
-}
+
+
+// .el-input-group__append,
+// .el-input-group__prepend {
+//     padding: 0 14px;
+// }
+
+// .el-input-group__append button.el-button {
+//     color: #000;
+// }
+
+// .el-input--prefix .el-input__inner {
+//     padding-left: 20px;
+// }
 
 .el-input__inner {
     padding: 0 8px;
 }
 
-.el-input-group__append,
-.el-input-group__prepend {
-    padding: 0 14px;
-}
-
-.el-input-group__append button.el-button {
-    color: #000;
-}
-
-.el-input--prefix .el-input__inner {
-    padding-left: 20px;
-}
-
-.el-tooltip{
+.el-tooltip {
     position: relative;
 }
 
@@ -89,4 +82,104 @@
     text-align: right;
     font-size: 0;
     margin-bottom: 40px;
+}
+
+.el-table th {
+    font-weight: 400;
+    height: 59px;
+}
+.el-table--enable-row-transition .el-table__body td{
+    height: 70px;
+    box-sizing: border-box;
+}
+
+.el-dialog__body,
+.el-dialog__body .el-message-box__content {
+    padding: 20px;
+}
+
+.el-dialog__header,
+.el-message-box__header {
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #f0f0f0;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+.el-dialog__footer {
+    border-top: 1px solid #f0f0f0;
+    padding: 20px;
+}
+
+.el-pagination.is-background .el-pager li:not(.disabled).active {
+    color: #f2f3fa;
+    background-color: #2d3259;
+    border-color: #2d3259;
+}
+
+.el-checkbox__input.is-checked .el-checkbox__inner {
+    background-color: #ffffff;
+}
+
+.el-input-group__append {
+    background: #fff;
+    color: #000000;
+}
+
+.el-checkbox__inner::after {
+    box-sizing: content-box;
+    content: "";
+    border: 1px solid #34395d;
+    border-left: 0;
+    border-top: 0;
+    height: 7px;
+    left: 4px;
+    position: absolute;
+    top: 1px;
+    transform: rotate(45deg) scaleY(0);
+    width: 3px;
+    transition: transform .15s ease-in .05s;
+    transform-origin: center;
+}
+
+.el-tag {
+    background-color: #ffffff;
+    border-color: #34395d;
+}
+
+.el-loading-mask {
+    background-color: #ffffff;
+}
+
+.el-table .cell,
+.el-table th div {
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.el-rate__icon{
+    margin-right: 0px !important;
   }
+
+.small-img {
+    display: inline-block;
+    vertical-align: middle;
+    width: 50px;
+    height: 50px;
+    border-radius: 4px;
+    border: 1px solid #dadde4;
+    background-color: #f7f8fd;
+    background-origin: content-box;
+    background-position: 50% 50%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    overflow: hidden;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}

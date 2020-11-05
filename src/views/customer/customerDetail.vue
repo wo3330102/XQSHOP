@@ -22,17 +22,17 @@
           <div class="box customer-info">
             <h3 class="title">
               顾客信息
-              <span class="option" @click="showDialog =true">编辑</span>
+              <span class="option" @click="showDialog = true">编辑</span>
             </h3>
             <div class="item">
               <div class="left">姓名</div>
               <div class="right">
-                <span>{{ detail.realName || detail.nickname}}</span>
+                <span>{{ detail.realName || detail.nickname }}</span>
                 <i v-if="detail.isSubscribe" class="subscribe">已订阅</i>
               </div>
             </div>
             <div class="item">
-              <div class="left">电话</div>
+              <div class="left">电话</div>  
               <div class="right">
                 <span>{{ detail.phone }}</span>
               </div>
@@ -40,13 +40,13 @@
             <div class="item">
               <div class="left">城市</div>
               <div class="right">
-                <span>{{ detail.addres }}</span>
+                <span>{{ shippingAddress.city || '--'}}</span>
               </div>
             </div>
             <div class="item">
               <div class="left">邮箱</div>
               <div class="right">
-                <span>{{ "" }}</span>
+                <span>{{ detail.email }}</span>
               </div>
             </div>
             <div class="item">
@@ -64,14 +64,14 @@
             <div class="item">
               <div class="left">总花费</div>
               <div class="right">
-                <span>{{ totalPrice ? '$' + totalPrice : "$0.00" }}</span>
+                <span>{{ detail.sumMoney ? "$" + detail.sumMoney : "$0.00" }}</span>
               </div>
             </div>
           </div>
           <!-- 历史订单 -->
-          <div class="box historyOrder" >
+          <div class="box historyOrder">
             <h3 class="title">历史订单</h3>
-            <template v-if="historyOrderList.length>0">
+            <template v-if="historyOrderList.length > 0">
               <div
                 class="order-list"
                 v-for="item in historyOrderList"
@@ -91,7 +91,10 @@
                         <div
                           class="small-img"
                           :style="{
-                            backgroundImage: 'url(' + item.cartInfo[0].productInfo.image_base + ')',
+                            backgroundImage:
+                              'url(' +
+                              item.cartInfo[0].productInfo.image_base +
+                              ')',
                           }"
                         ></div>
                       </td>
@@ -111,10 +114,11 @@
                       </td>
                       <td width="110">{{ item.cartInfo[0].cartNum }}</td>
                       <td width="100" align="right">
-                        {{ '$'+item.cartInfo[0].truePrice }} * {{ item.cartInfo[0].cartNum }}
+                        {{ "$" + item.cartInfo[0].truePrice }} *
+                        {{ item.cartInfo[0].cartNum }}
                       </td>
                       <td width="80" align="right" style="padding-right: 0px">
-                        {{ '$'+item.payPrice }}
+                        {{ "$" + item.payPrice }}
                       </td>
                     </tr>
                   </tbody>
@@ -128,8 +132,11 @@
             <h3 class="title">收货地址</h3>
             <div class="address-item" style="align-items: center">
               <span class="label">姓名:</span>
-              <span class="info">{{ shippingAddress.realName?shippingAddress.realName:'--'}}</span>
+              <span class="info">{{
+                shippingAddress.realName ? shippingAddress.realName : "--"
+              }}</span>
               <span
+                v-if="shippingAddress.realName"
                 style="
                   padding: 3px 8px;
                   margin-left: 22px;
@@ -145,34 +152,51 @@
             </div>
             <div class="address-item" style="align-items: center">
               <span class="label">电话:</span>
-              <span class="info">{{ shippingAddress.phone? shippingAddress.phone: '--'}}</span>
+              <span class="info">{{
+                shippingAddress.phone ? shippingAddress.phone : "--"
+              }}</span>
             </div>
             <div class="address-item" style="align-items: center">
               <span class="label">地址:</span>
-              <span class="info">{{ shippingAddress.province + shippingAddress.city + shippingAddress.district + shippingAddress.detail}}</span>
+              <span class="info">{{ 
+                (function(){
+                  if(shippingAddress.province || shippingAddress.city || shippingAddress.district || shippingAddress.detail){
+                    return shippingAddress.province +
+                shippingAddress.city +
+                shippingAddress.district +
+                shippingAddress.detail
+                  } else {
+                    return '--'
+                  }
+                }()) 
+              }}</span>
             </div>
             <div class="address-item" style="align-items: center">
               <span class="label">邮编:</span>
-              <span class="info">{{ shippingAddress.postCode?shippingAddress.postCode:'--' }}</span>
+              <span class="info">{{
+                shippingAddress.postCode ? shippingAddress.postCode : "--"
+              }}</span>
             </div>
-            <div class="" v-if="shippingAddress.length>1">
-
-            </div>
+            <div class="" v-if="shippingAddress.length > 1"></div>
           </div>
         </el-col>
-      </el-row> 
+      </el-row>
     </div>
     <!-- 编辑顾客信息 -->
     <el-dialog title="编辑顾客信息" :visible.sync="showDialog">
-      <el-form :model="detail" >
+      <el-form :model="detail">
         <el-form-item label="姓名">
           <el-input v-model="detail.realName" placeholder=""></el-input>
-        </el-form-item> 
+        </el-form-item>
         <el-form-item label="电话">
           <el-input v-model="detail.phone" placeholder=""></el-input>
         </el-form-item>
         <el-form-item label="邮箱">
-          <el-input v-model="detail.email" placeholder="" :disabled="Boolean(detail.email)"></el-input>
+          <el-input
+            v-model="detail.email"
+            placeholder=""
+            :disabled="Boolean(detail.email)"
+          ></el-input>
         </el-form-item>
         <el-form-item>
           <el-checkbox v-model="isSubscribe" label="顾客接受订阅"></el-checkbox>
@@ -180,17 +204,13 @@
       </el-form>
       <div slot="footer">
         <el-button @click="showDialog = false">取 消</el-button>
-        <el-button
-          type="primary" 
-          @click="Save"
-          >确 定</el-button
-        >
+        <el-button type="primary" @click="Save">确 定</el-button>
       </div>
-    </el-dialog> 
+    </el-dialog>
   </div>
 </template> 
 <script>
-import { edit, del, getUserAddress,historyOrder } from "@/api/yxUser";  
+import { edit, del, getUserAddress, historyOrder } from "@/api/yxUser";
 export default {
   data() {
     return {
@@ -199,50 +219,47 @@ export default {
       deliveryId: "",
       showBtn: false,
       btnText: "发货",
-      showDialog: false, 
-      isSubscribe:false, 
-      historyOrderList:[],
-      totalPrice:'',
-      shippingAddressList:[],
-      shippingAddress:{},
+      showDialog: false,
+      isSubscribe: false,
+      historyOrderList: [], 
+      shippingAddressList: [],
+      shippingAddress: {},
     };
   },
   created() {
     this.detail = JSON.parse(localStorage.getItem("customerDetail"));
     console.log(this.detail);
-    this.detail.isSubscribe = 1; 
-    historyOrder(this.detail.uid).then(res=>{
-      console.log(res);
+    this.detail.isSubscribe = 1;
+    historyOrder(this.detail.uid).then((res) => {
       this.historyOrderList = res.data.content;
-      res.data.content.map(i=>{
-        i.image = i.p
-      })
-      this.totalPrice = res.data.sumPrice
-    }) 
-    getUserAddress(this.detail.uid).then(res=>{
-      console.log(res);
+      res.data.content.map((i) => {
+        i.image = i.p;
+      }); 
+    });
+    getUserAddress(this.detail.uid).then((res) => {
       let that = this;
       this.shippingAddressList = res.data.content;
-      this.shippingAddress = res.data.content.length>0?res.data.content[0] : {}
-      res.data.content.map(i=>{
-        if(i.isDefault == 1){
+      this.shippingAddress =
+        res.data.content.length > 0 ? res.data.content[0] : {};
+      res.data.content.map((i) => {
+        if (i.isDefault == 1) {
           that.shippingAddress = i;
         }
-      })
-    })
+      });
+    });
   },
-  methods: { 
+  methods: {
     Del: function () {
       del(this.detail.id).then(() => {
         this.$router.push("/order");
       });
     },
-    Save:function(){
-      edit(this.detail).then(res=>{  
-        this.$message.success('编辑成功')
-        this.$router.push('/customer')
-      })
-    }
+    Save: function () {
+      edit(this.detail).then((res) => {
+        this.$message.success("编辑成功");
+        this.$router.push("/customer");
+      });
+    },
   },
   updated() {},
 };
@@ -337,51 +354,56 @@ h1 {
 }
 
 .historyOrder {
-  .order-info {
-    padding: 20px 0 14px;
-    display: flex;
-    align-items: center;
-    color: #909399;
-    span {
-      .handleText {
-        margin-left: 10px;
-        color: #273a8a;
-        line-height: 20px;
-        cursor: pointer;
-        text-decoration: none;
-      }
-      &:first-child {
-        flex: 1;
+  padding: 12px 0;
+  .title {
+    padding-left: 12px;
+  }
+  .order-list {
+    &:last-child>.product-list{
+      border-bottom: none;
+    }
+    .order-info {
+      padding: 20px 12px 14px;
+      display: flex;
+      align-items: center;
+      color: #909399;
+      span {
+        .handleText {
+          margin-left: 10px;
+          color: #273a8a;
+          line-height: 20px;
+          cursor: pointer;
+          text-decoration: none;
+        }
+        &:first-child {
+          flex: 1;
+        }
       }
     }
-  }
-  .product-list {
-    padding: 0 12px;
-    border-bottom: 1px solid #dcddeb;
-    border-top: 1px solid #dcddeb;
-    width: 100%;
-    border-collapse: collapse;
-    &:last-child {
-      border-bottom: none;
-    } 
-    td {
-      padding: 20px 6px;
-      vertical-align: top;
-      color: #1c1f32;
-      border-collapse: collapse;
-      .small-img {
-        display: inline-block;
-        vertical-align: middle;
-        width: 50px;
-        height: 50px;
-        border-radius: 4px;
-        border: 1px solid #dadde4;
-        background-color: #f7f8fd;
-        background-origin: content-box;
-        background-position: 50% 50%;
-        background-size: contain;
-        background-repeat: no-repeat;
-        overflow: hidden;
+    .product-list {
+      padding: 0 12px;
+      border-bottom: 1px solid #dcddeb;
+      border-top: 1px solid #dcddeb;
+      width: 100%; 
+      td {
+        padding: 20px 6px;
+        vertical-align: top;
+        color: #1c1f32;
+        border-collapse: collapse;
+        .small-img {
+          display: inline-block;
+          vertical-align: middle;
+          width: 50px;
+          height: 50px;
+          border-radius: 4px;
+          border: 1px solid #dadde4;
+          background-color: #f7f8fd;
+          background-origin: content-box;
+          background-position: 50% 50%;
+          background-size: contain;
+          background-repeat: no-repeat;
+          overflow: hidden;
+        }
       }
     }
   }
@@ -411,6 +433,6 @@ h1 {
   margin-bottom: 40px;
 }
 /deep/.editFormData .el-form-item__label {
-    line-height: 1;
+  line-height: 1;
 }
 </style>  

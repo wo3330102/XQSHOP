@@ -17,84 +17,22 @@
         </div>
       </div>
       <table-tem
-        :show-img="true"
-        :option="'操作（预览）'" 
+        :show-img="true" 
         :optionList="['删除']" 
         :requestUrl="'api/yxStoreTag'"
         :requestParams="requestParams"
         :tableHeader="tableHeader" 
+        :isRefresh="isRefresh"
         @rowClick="RowClick"
-        @BatchOption="Del"
-        @SelectionChange="SelectItem"
-      ></table-tem>
-      <!-- 隐藏 -->
-      <!-- <div class="table" v-if="false">
-        <div
-          class="checkOption"
-          :class="isActive ? 'show' : ''"
-          v-if="optionList.length > 0"
-        >
-          <div class="checkContent">
-            <i
-              :class="isActive ? 'el-icon-caret-left' : 'el-icon-caret-right'"
-              @click.stop="isActive = !isActive"
-            ></i>
-            <span
-              v-for="item in optionList"
-              :key="item"
-              @click="Del"
-              class="item"
-              :class="selectItem.length == 0 ? 'disable' : ''"
-              >{{ item }}</span
-            >
-          </div>
-        </div>
-        <el-table
-          ref="multipleTable"
-          :data="data"
-          tooltip-effect="dark"
-          style="width: 100%;padding-left:10px"
-          empty-text="暂无数据"
-          v-loading="loading"
-          @select="SelectItem"
-          @select-all="SelectItem" 
-          :row-style="{ cursor: 'pointer' }"
-          :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
-          row-key="id"  
-        > 
-          <el-table-column
-            type="selection" 
-            width="70"
-            align="center"
-          ></el-table-column>
-          <el-table-column
-          v-for="(item, index) in tableHeader"
-          :key="index"
-          :width="item.width ? item.width : ''"
-          :prop="item.prop ? item.prop : ''"
-          :label="item.label ? item.label : ''"
-          :align="item.align ? item.align : ''"
-          :sortable="item.sortable"  
-          
-          >
-            <template slot-scope="scope">
-              <span v-if="item.prop == 'pic'" class="small-img" :style="{backgroundImage: 'url('+scope.row.pic+')'}"></span> 
-            <span v-else >{{ scope.row[item.prop] }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column
-          header-align="center"
-          align="center"
-          width="200"
-          label="操作"
-        >
-          <template slot-scope="scope">
-            <span class="textBtn" @click="RowClick(scope.row)" style="text-decoration: underline">编辑</span>
-            <span class="textBtn" style="text-decoration: underline">预览</span>
-          </template>
-        </el-table-column>
-        </el-table>
-      </div>  -->
+        @BatchOption="Del" 
+      >
+        <template slot="image" slot-scope="params" >  
+          <span class="small-img" :style="{ backgroundImage: 'url(' + params.params.pic + ')' }"></span>
+        </template>
+        <template slot="option" slot-scope="params">
+          <span @click.stop="(e)=>{params}" class="textBtn">预览</span>
+        </template>
+      </table-tem> 
     </div>
   </div>
 </template>
@@ -113,6 +51,7 @@ export default {
       tableHeader: [
         {
           prop: "pic",
+          label:'',
         },
         {
           prop: "title",
@@ -130,54 +69,41 @@ export default {
           label: "商品数量",
           sortable: true,
           width: 120,
+          align:'center'
+        },
+        {
+          prop: "option",
+          label: "操作", 
+          width: 303,
+          align:'right'
         },
       ],
       requestParams: {
         page: 0,
-        size: 10,
-        sort: "sort,desc",
-        isRefresh:0,
+        size: 30,
+        sort: "sort,desc", 
         title:'',
       },
-      data:[],
-      currentPage: 1,
-      selectItem:[],
+      isRefresh:0, 
       loading:true, 
     };
-  },
-  // created(){
-  //   this.getData();
-  // },
-  methods: {
-    // getData:function(){
-    //   this.loading = true;
-    //   getCates(this.requestParams).then(res=>{ 
-    //     this.data = res.content;
-    //     this.total = res.total;
-    //     this.loading = false;
-    //   })
-    // },
+  }, 
+  methods: { 
     AddCategory: function () {
       this.$router.push("/addCategory");
-    },
-    SelectItem:function(e){
-      this.selectItem = e;
-    },
-    RowClick: function (e) {
-      console.log(e);
+    }, 
+    RowClick: function (e) { 
       this.$router.push("/editCategory");
       localStorage.setItem('categoryDetail',JSON.stringify(e))
     }, 
-    Del:function(){  
+    Del:function(e,selectItem){  
       let par = [];
-      this.selectItem.map(i=>{
-        console.log(i);
+      selectItem.map(i=>{ 
         par.push(i.id)
-      })
-      console.log(par);
+      }) 
       del(par).then(res=>{ 
         this.$message.success('删除成功'); 
-        this.requestParams.isRefresh += 1; 
+        this.isRefresh += 1;
       })
     }
   },
@@ -230,10 +156,7 @@ export default {
     display: flex;
     justify-content: space-around;
     border-bottom: 1px solid #f1f1f6;
-    flex-wrap: wrap;
-    /deep/ .el-input__inner {
-      padding: 0 8px;
-    }
+    flex-wrap: wrap; 
     .search-box {
       display: flex;
       flex: 1;
@@ -251,17 +174,7 @@ export default {
     padding: 14px 0;
     text-align: center;
   }
-}
-/deep/.el-input__inner {
-  height: 36px !important;
-}
-/deep/.el-input__icon {
-  line-height: 36px !important;
-}
-
-/deep/ .el-range-separator {
-  line-height: 35px;
-}
+}  
 </style>
 <style lang="scss">
 .show {
@@ -331,6 +244,7 @@ export default {
   display: inline-block;
   font-weight: 400;
   margin-left: 10px;
+  text-decoration: underline;
 } 
 // 调整表格头部选框位置
 /deep/ .el-checkbox:last-of-type {

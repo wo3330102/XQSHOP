@@ -660,10 +660,7 @@ h1 {
   padding: 0 -10px;
   /deep/.el-input--suffix {
     width: 55px !important;
-  }
-  /deep/.el-input__inner {
-    padding: 0 10px !important;
-  }
+  } 
 }
 /deep/.el-input-group__append {
   background: #fff;

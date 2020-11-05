@@ -3,30 +3,63 @@
     <h1 class="title">
       <span>
         优惠活动
-        <i class="el-icon-video-camera-solid" @click="showVideo = true" style="margin-left:7px;cursor:pointer;"></i>
+        <i
+          class="el-icon-video-camera-solid"
+          @click="showVideo = true"
+          style="margin-left: 7px; cursor: pointer"
+        ></i>
       </span>
-      <span style="font-size:0;">
+      <span style="font-size: 0">
         <el-button
-          style="color: #f2f3fa;
-    background-color: #2d3259;
-    border-color: #2d3259;"
-        @click="ToAddActivity"
-        >创建活动</el-button>
+          style="
+            color: #f2f3fa;
+            background-color: #2d3259;
+            border-color: #2d3259;
+          "
+          @click="ToAddActivity"
+          >创建活动</el-button
+        >
       </span>
     </h1>
     <div class="content">
       <div class="conditions">
         <div class="search-box">
           <el-input v-model="searchVal" placeholder="请输入优惠活动或优惠码 ">
-            <el-button slot="append">搜索</el-button>
+            <el-button slot="append" @click="Search">搜索</el-button>
           </el-input>
         </div>
-      </div> 
-      <table-tem 
-        :tableData="tableData"
-        :optionList="['开启','关闭','删除']"
+      </div>
+      <table-tem
+        :requestUrl="'api/yxStorePromotions'"
+        :requestParams="requestParams"
+        :optionList="['开启', '关闭', '删除']"
         :tableHeader="tableHeader"
-      ></table-tem>
+        @rowClick="rowClick"
+      >
+        <el-table-column
+          v-for="(item, index) in tableHeader"
+          :key="index"
+          :width="item.width ? item.width : ''"
+          :prop="item.prop ? item.prop : ''"
+          :label="item.label ? item.label : ''"
+          :align="item.align ? item.align : ''"
+          :sortable="item.sortable"
+        >
+          <template slot-scope="scope">
+            <span v-if="item.prop == 'status'">{{
+              scope.row.status === 1 ? "开启" : "关闭"
+            }}</span>
+            <span v-else-if="item.prop == 'discountType'">{{
+              scope.row.discountType === 0
+                ? "减免$" + scope.row.discountMoney
+                : scope.row.discountType === 1
+                ? "减" + scope.row.discountQuota + "%"
+                : "免运费"
+            }}</span>
+            <span v-else>{{ scope.row[item.prop]?scope.row[item.prop]:0 }}</span>
+          </template>
+        </el-table-column>
+      </table-tem>
       <el-dialog :visible.sync="showVideo" width="40%" center>
         <video-player
           class="video-player vjs-custom-skin"
@@ -39,41 +72,57 @@
   </div>
 </template>
 <script>
-import { videoPlayer } from 'vue-video-player'
-import tableTem from '@/components/tableTem'
+import { videoPlayer } from "vue-video-player";
+import tableTem from "@/components/tableTem"; 
 import "video.js/dist/video-js.css";
 export default {
   components: {
     videoPlayer,
-    tableTem
+    tableTem,
   },
   data() {
     return {
+      requestParams: {
+        size: 30,
+        page: 0,
+        discountName:'', 
+      },
       searchVal: "",
-      tableHeader:[{
-        label:'优惠代码',
-        width:130
-      },{
-        label:'活动名称',
-        width:208
-      },{
-        label:'活动内容',
-        width:208
-      },{
-        label:'使用次数',
-        width:140,
-        sortable:true
-      },{
-        label:'有效期',
-        width:260,
-        sortable:true
-      },{
-        label:'状态',
-        width:100
-      }],
-      tableData: [],
-      currentPage: 1,
-      showVideo:false,
+      tableHeader: [
+        {
+          prop: "promoCode",
+          label: "优惠代码",
+          width: 130,
+        },
+        {
+          prop: "discountName",
+          label: "活动名称",
+          width: 208,
+        },
+        {
+          prop: "discountType",
+          label: "活动内容",
+          width: 208,
+        },
+        {
+          prop: "nums",
+          label: "使用次数",
+          width: 140,
+          sortable: true,
+        },
+        {
+          prop: "period",
+          label: "有效期",
+          width: 260,
+          sortable: true,
+        },
+        {
+          prop: "status",
+          label: "状态",
+          width: 100,
+        },
+      ],
+      showVideo: false,
       playerOptions: {
         playbackRates: [0.5, 1.0, 1.5, 2.0, 3.0], // 可选的播放速度
         autoplay: true, // 如果为true,浏览器准备好时开始回放。
@@ -86,7 +135,8 @@ export default {
         sources: [
           {
             type: "video/mp4", // 类型
-            src: "https://gss3.baidu.com/6LZ0ej3k1Qd3ote6lo7D0j9wehsv/tieba-smallvideo-transcode-cae/50463985_c1fbf4ebadf2ed65ff3b723f5f5ce28f_0_cae.mp4", // url地址
+            src:
+              "https://gss3.baidu.com/6LZ0ej3k1Qd3ote6lo7D0j9wehsv/tieba-smallvideo-transcode-cae/50463985_c1fbf4ebadf2ed65ff3b723f5f5ce28f_0_cae.mp4", // url地址
           },
         ],
         poster: "", // 封面地址
@@ -101,30 +151,25 @@ export default {
     };
   },
   methods: {
-    ToAddActivity:function(){
-      this.$router.push('/addActivity')
+    ToAddActivity: function () {
+      // this.$router.push({
+      //   path:'/editActivity',
+      //   query:id
+      // })
+      this.$router.push("/editActivity");
     },
-    ChangeActive: function (index) {
-      this.acitve = index;
+    rowClick:function(e){
+      this.$router.push({
+        name:'EditActivity',
+        query:{
+          id:e.id
+        }
+      })
+      localStorage.setItem('activityDetail',JSON.stringify(e))
     },
-    ChangeSelect: function (e) {
-      console.log(e);
-    },
-    handleSelectionChange: function (e) {
-      console.log(e);
-    },
-    handleEdit: function (e) {
-      console.log(e);
-    },
-    handleDelete: function (e) {
-      console.log(e);
-    },
-    handleSizeChange: function (e) {
-      console.log(e);
-    },
-    handleCurrentChange: function (e) {
-      console.log(e);
-    },
+    Search:function(){  
+      this.requestParams.discountName = this.searchVal 
+    }
   },
 };
 </script>
@@ -177,10 +222,7 @@ export default {
     display: flex;
     justify-content: space-around;
     border-bottom: 1px solid #f1f1f6;
-    flex-wrap: wrap;
-    /deep/ .el-input__inner {
-      padding: 0 8px;
-    }
+    flex-wrap: wrap; 
     .search-box {
       display: flex;
       flex: 1;
@@ -198,14 +240,5 @@ export default {
     padding: 14px 0;
     text-align: center;
   }
-}
-/deep/.el-input__inner {
-  height: 36px !important;
-}
-/deep/.el-input__icon {
-  line-height: 36px !important;
-}
-/deep/ .el-range-separator {
-  line-height: 35px;
-}
+}  
 </style>

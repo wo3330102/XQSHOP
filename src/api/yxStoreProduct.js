@@ -1,5 +1,13 @@
 import request from '@/utils/request'
 
+export function get(params) {
+  return request({
+    url: 'api/yxStoreProduct',
+    method: 'get',
+    params
+  })
+}
+
 export function add(data) {
   return request({
     url: 'api/yxStoreProduct/addOrSave',
@@ -12,6 +20,14 @@ export function del(id) {
   return request({
     url: 'api/yxStoreProduct/' + id,
     method: 'delete'
+  })
+}
+
+export function delMany(data) {
+  return request({
+    url: 'api/yxStoreProduct',
+    method: 'delete',
+    data
   })
 }
 
@@ -74,3 +90,14 @@ export function getInfo(e) {
     method: 'get'
   })
 }
+
+export function onsaleAll(data) {
+  return request({
+    url: 'api/yxStoreProduct/onsaleAll',
+    method: 'post',
+    data
+  })
+}
+
+
+

@@ -11,21 +11,18 @@ axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 // 创建axios实例
 const service = axios.create({
   // axios中请求配置有baseURL选项，表示请求URL公共部分
-  baseURL: 'http://192.168.8.158:8013',
+  baseURL: 'http://192.168.8.158:8001',
   // baseURL: 'https://admin2.xqkj.top',
   // 超时
   timeout: 1000000
 })
 // request拦截器
 service.interceptors.request.use(config => {
-  // 是否需要设置 token
-  const isToken = (config.headers || {}).isToken === false
-  if (getToken() && !isToken) {
-    config.headers['Authorization'] = getToken() // 让每个请求携带自定义token 请根据实际情况自行修改
-  }
+  // 是否需要设置 token 
+  config.headers['Authorization'] = getToken() // 让每个请求携带自定义token 请根据实际情况自行修改
   const storeId = localStorage.getItem('storeId')
 
-  if (config.method === 'post' || config.method === 'put') {
+  if ((config.method === 'post' || config.method === 'put') && config.url.indexOf('api/yxStoreProductReply')<0) {
     config.data = {
       storeId: storeId,
       ...config.data
@@ -35,10 +32,9 @@ service.interceptors.request.use(config => {
       storeId: storeId,
       ...config.params
     }
-  } 
+  }
 
-  if(config.url.indexOf('onStatus') >-1){ 
-    console.log(1);
+  if(config.url.indexOf('onStatus') >-1){  
     if (config.method === 'post' || config.method === 'put') {
       delete config.data.storeId
     } else if (config.method === 'get') {
@@ -57,8 +53,7 @@ function getToken() {
   if (token) {
     return token
   } else {
-    return false
-    router.push('/')
+    return false 
   }
 }
 

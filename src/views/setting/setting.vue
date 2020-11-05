@@ -3,7 +3,7 @@
     <h1 class="title">
       <span>设置</span>
     </h1>
-    <div class="content">
+    <div class="content"> 
       <ul>
         <li v-for="item in settingList" :key="item.id" @click="ToPage(item.url)">
           <img :src="item.icon" alt height="100" />
@@ -15,13 +15,12 @@
   </div>
 </template>
 <script>
-import pic1 from '@/assets/img/settings/accout.png'
+import pic1 from '@/assets/img/settings/accout.png' 
 export default {
 	
   data() {
     let url = "http://ddd.xshoppy.shop";
-    // let url = "@/assets/img/settings";
-	
+    // let url = "@/assets/img/settings"; 
     return {
       settingList: [
         {

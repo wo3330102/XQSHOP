@@ -69,6 +69,7 @@ export default {
         size: 20,
       };
       get(par).then((res) => {
+        console.log(res);
         this.tableData = res.content;
       });
     },
@@ -140,21 +141,12 @@ export default {
         background: #fff;
         color: #000000;
       }
-    }
-    /deep/ .el-input__inner {
-      padding: 0 8px;
-    }
+    } 
   }
   .pagination {
     padding: 14px 0;
     text-align: center;
   }
-}
-/deep/.el-input__icon {
-  line-height: 36px !important;
-}
-/deep/ .el-range-separator {
-  line-height: 35px;
-}
+}  
 </style>
 

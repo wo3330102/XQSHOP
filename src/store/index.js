@@ -5,8 +5,16 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    url:'',
+    reflash:false,
   },
   mutations: {
+    setUrl:function(state,url){ 
+      state.url = url;
+    },
+    isReflash:function(state,val){
+      state.reflash = val;
+    }
   },
   actions: {
   },

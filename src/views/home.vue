@@ -12,15 +12,14 @@
         </div>
         <el-menu
           :default-active="openUrl"
-          @select="Select"
           class="el-menu-vertical-demo"
           @open="handleOpen"
-          @close="handleClose"
           background-color="#34385c"
           text-color="#c1c2cc"
           active-text-color="#8b99f0"
           unique-opened
           router
+          style="overflow:auto"
         >
           <el-menu-item index="/">
             <i class="el-icon-s-home"></i>
@@ -64,8 +63,13 @@
               <el-menu-item index="/activity">优惠活动</el-menu-item>
               <el-menu-item index="/discount">梯度优惠</el-menu-item>
               <el-menu-item index="/share">激励分享</el-menu-item>
+              <el-menu-item index="/seckill">秒杀产品</el-menu-item>
             </el-menu-item-group>
           </el-submenu>
+          <el-menu-item index="/appHome">
+            <i class="el-icon-menu"></i>
+            <span slot="title">应用中心</span>
+          </el-menu-item>
           <el-submenu index="5">
             <template slot="title">
               <i class="el-icon-s-shop"></i>
@@ -73,6 +77,7 @@
             </template>
             <el-menu-item-group>
               <el-menu-item index="/themeShop">店铺装修</el-menu-item>
+              <el-menu-item index="/homeSwiper">首页轮播图</el-menu-item>
               <el-menu-item index="/pageManage">页面管理</el-menu-item>
               <el-menu-item index="/menuManage">菜单栏</el-menu-item>
               <el-menu-item index="/trackSettings">追踪设置</el-menu-item>
@@ -92,9 +97,14 @@
             v-model="storeId"
             @change="ChangeShop"
             placeholder="请选择店铺"
-            style="margin-right:10px"
+            style="margin-right: 10px"
           >
-            <el-option v-for="item in storeList" :key="item.id" :label="item.name" :value="item.id"></el-option>
+            <el-option
+              v-for="item in storeList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            ></el-option>
           </el-select>
           <el-dropdown class="notice">
             <span class="el-dropdown-link">
@@ -106,22 +116,32 @@
               <el-dropdown-item icon="el-icon-circle-plus-outline">螺蛳粉</el-dropdown-item> -->
             </el-dropdown-menu>
           </el-dropdown>
-          <i class="el-icon-help" @click="ToHelp"></i>
+          <i class="el-icon-help"></i>
           <el-avatar size="small" :src="circleUrl" class="avatar"></el-avatar>
           <el-dropdown trigger="click" @command="Command">
             <span class="el-dropdown-link">
-              {{userName}}
+              {{ userName }}
               <i class="el-icon-arrow-down el-icon--right"></i>
             </span>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item icon="el-icon-lock" command="topage">修改密码</el-dropdown-item>
-              <el-dropdown-item icon="el-icon-notebook-2" command="layOut" @click="LayOut()">退出登入</el-dropdown-item>
+              <el-dropdown-item icon="el-icon-lock" command="topage"
+                >修改密码</el-dropdown-item
+              >
+              <el-dropdown-item
+                icon="el-icon-notebook-2"
+                command="layOut"
+                @click="LayOut()"
+                >退出登入</el-dropdown-item
+              >
             </el-dropdown-menu>
           </el-dropdown>
         </div>
         <div class="router-view">
           <transition name="fade" mode="out-in">
-            <router-view style="padding-bottom:50px" v-if="isRouterAlive"></router-view>
+            <router-view
+              style="padding-bottom: 50px"
+              v-if="isRouterAlive"
+            ></router-view>
           </transition>
         </div>
       </div>
@@ -142,14 +162,25 @@ export default {
       openUrl: "/home",
       storeId: "",
       storeList: [],
-      isRouterAlive:true
+      isRouterAlive: true,
     };
+  },  
+  watch: {
+    "$store.state.url"(val) { 
+      this.openUrl = val;
+      this.reload();
+    },
+    "$store.state.reflash"(val) {
+      if(val){
+        this.$store.commit("isReflash", false); 
+        this.reload();
+      }
+    },
   },
   created() {
     // 获取用户信息
     getInfo()
       .then((res) => {
-        console.log(res);
         this.userName = res.username;
       })
       .catch(() => {
@@ -173,35 +204,35 @@ export default {
     // 设置当前路由
     let path = localStorage.getItem("router-path");
     if (path) {
+      this.$store.commit("setUrl", path);
       this.openUrl = path;
     }
   },
   methods: {
-    Select: function (indexPath) {
-      console.log(indexPath);
-    },
     handleOpen: function (index) {
-      console.log(index);
       switch (index) {
         case "2":
-          this.openUrl = "/order";
+          // this.$store.commit("setUrl", "/order");
+          this.openUrl = '/order';
           this.$router.push("/order");
           break;
         case "3":
-          this.openUrl = "/commodityList";
+          // this.$store.commit("setUrl", "/commodityList");
+          this.openUrl = '/commodityList';
           this.$router.push("/commodityList");
           break;
         case "4":
-          this.openUrl = "/activity";
+          // this.$store.commit("setUrl", "/activity");
+          this.openUrl = '/activity';
           this.$router.push("/activity");
           break;
         case "5":
-          this.openUrl = "/themeShop";
+          // this.$store.commit("setUrl", "/themeShop");
+          this.openUrl = '/themeShop';
           this.$router.push("/themeShop");
       }
     },
     Command: function (e) {
-      console.log(e);
       if (e == "layOut") {
         localStorage.removeItem("token");
         this.$router.push("/login");
@@ -209,34 +240,28 @@ export default {
         this.$NavgitorTo("/updataPassword");
       }
     },
-    handleClose: function (res) {
-      console.log(res);
-    },
-    ToHelp: function (res) {
-      console.log(res);
-    },
     ChangeShop: function (res) {
-      localStorage.setItem('storeId', this.storeId)
+      console.log(this.storeId);
+      localStorage.setItem("storeId", this.storeId);
       this.reload();
     },
-    reload() { 
-      this.isRouterAlive = false
-      this.$nextTick(function() {
-        this.isRouterAlive = true
-      })
-    }
+    reload() {
+      this.isRouterAlive = false; 
+      this.$nextTick(function () {
+        this.isRouterAlive = true;
+      });
+    },
   },
 };
 </script>
 <style lang="scss" scoped>
-.logo-wrap{
+.logo-wrap {
   display: flex;
   align-content: center;
   justify-content: center;
   font-size: 20px;
   font-weight: bold;
-  span{
-	  
+  span {
     display: inline-block;
     color: #ffffff;
     line-height: 68px;

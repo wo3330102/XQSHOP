@@ -23,21 +23,13 @@
           <el-table
             height="400px"
             v-el-table-infinite-scroll="load"
+            :infinite-scroll-delay="100"
+            :infinite-scroll-distance="100"
             :data="tableData"
             :show-header="false"
             v-loading="loading"
-            @selection-change="SelectionChange"  
+            @selection-change="SelectionChange"
           >
-            <!-- v-infinite-scroll="load"  -->
-            <!-- <el-table-column prop="image" width="80">
-              <template slot-scope="scope">
-                <span
-                  class="small-img"
-                  :style="{ backgroundImage: 'url(' + scope.row.image + ')' }"
-                ></span>
-              </template>
-            </el-table-column>
-            <el-table-column prop="title" width="351"></el-table-column> -->
             <el-table-column
               v-if="tableData.length > 0"
               type="selection"
@@ -61,8 +53,9 @@
                   :style="{ backgroundImage: 'url(' + scope.row.pic + ')' }"
                 ></span>
                 <el-input
-                  v-else-if="item.prop == 'input'"  
-                  v-model="scope.row.value"
+                  v-else-if="item.prop == 'url'"
+                  v-model="url"
+                  placeholder="请输入自定义链接"
                 ></el-input>
                 <span v-else>{{ scope.row[item.prop] }}</span>
               </template>
@@ -88,12 +81,12 @@ export default {
       default: false,
     },
     index: {
-      default: "", 
+      default: "",
     },
   },
   directives: {
     "el-table-infinite-scroll": elTableInfiniteScroll,
-  }, 
+  },
   created() {
     if (this.index) {
       this.active = Number(this.index);
@@ -121,9 +114,11 @@ export default {
         },
         {
           label: "自定义链接",
+          url: "",
         },
         {
           label: "政策条款",
+          url: "",
         },
       ],
       active: 0,
@@ -133,9 +128,10 @@ export default {
         page: 0,
         size: 20,
       },
-      subData: [], 
-      inputValue:'',
-      loading:true,
+      subData: [],
+      inputValue: "",
+      loading: true,
+      url:'',
     };
   },
   methods: {
@@ -144,69 +140,82 @@ export default {
     },
     SelectionChange: function (e) {
       let that = this;
-      let arr = []; 
-      let input = '';
-      e.map(j => {
+      let arr = [];
+      let input = "";
+      console.log(e);
+      e.map((j) => {
         let object = {};
+        console.log(j);
         object.name = j.storeName || j.title;
         object.id = j.id;
-        object.label = that.active;
-        arr.push(object); 
-      });
-      // 至此  arr 为需要数据 
+        object.label = that.active; 
+        arr.push(object);
+      }); 
+      // 至此  arr 为需要数据
       let onOff = false;
       this.subData.map((i) => {
         // 如果当前对象在提交数据变量中，则开关打开
         if (i && i.label == that.active) {
-          onOff = true
-          i.data = arr; 
+          onOff = true;
+          i.data = arr;
         }
       });
-      if(!onOff){
+      if (!onOff) {
         //提交数据变量中含有不含有该分类数据，新增
         let obj = {
-          label:that.active,
-          data:arr
-        }  
+          label: that.active,
+          data: arr,
+        };
         that.subData.push(obj);
-      }    
-      that.subData.map(i=>{
-        if(i.data.length>0){
-          input += this.nav[i.label].label + '('+i.data.length+')，' 
+      }
+      that.subData.map((i) => {
+        if (i.data.length > 0) {
+          input += this.nav[i.label].label + "(" + i.data.length + ")，";
         }
-      })
-      that.inputValue = input
+      });
+      that.inputValue = input;
     },
-    submitForm: function (res) { 
+    submitForm: function (res) {
       let arr = [];
-      this.subData.map(i=>{
-        console.log(i.data)
+      console.log(this.subData)
+      this.subData.map((i) => { 
+        if(i.label === 3){
+          console.log('自定义链接')
+          i.data[0].url = this.url
+        }
         arr = arr.concat(i.data);
-      })
-      console.log(arr);
+      }); 
       this.$emit("selectData", arr);
       this.$emit("Close", false);
     },
     load() {
-      let that = this; 
-      this.params += 1; 
-      request({
+      let that = this;
+      if (this.params.page === 0) {
+        this.params.page += 1;
+      } else {
+        request({
           url:
             that.nav[that.active].url +
             "?" +
             qs.stringify(that.params, { indices: false }),
           method: "get",
         }).then((res) => {
-          this.tableData.concat(res.content);
+          let arr = this.tableData.concat(res.content);
+          if (arr.length <= res.totalElements) {
+            this.tableData = arr;
+          }
         });
-      // this.tableData = this.tableData.concat();
+        this.params.page += 1;
+      }
     },
     getData(e) {
+      console.log("初始请求");
       this.loading = true;
       this.active = e;
       let that = this;
       this.tableData = [];
-      this.tableHeader = []; 
+      this.tableHeader = [];
+      this.params.page = 0;
       switch (e) {
         case 0:
           that.tableHeader = [
@@ -219,7 +228,7 @@ export default {
               label: "标题",
               width: 351,
             },
-          ]; 
+          ];
           break;
         case 1:
           that.tableHeader = [
@@ -235,20 +244,20 @@ export default {
           ];
           break;
         case 2:
-          that.tableHeader = [ 
+          that.tableHeader = [
             {
-              prop: "title", 
+              prop: "title",
             },
           ];
           break;
         case 3:
-          that.tableHeader = [ 
+          that.tableHeader = [
             {
-              prop: "input", 
+              prop: "url",
             },
           ];
           break;
-      }
+      } 
       if (that.nav[e].url) {
         request({
           url:
@@ -260,6 +269,16 @@ export default {
           this.tableData = res.content;
           this.loading = false;
         });
+      } else {
+        if(e == 3){
+          this.tableData = [{
+            url:'',
+            id:0,
+            title:'External links'
+          }];
+          this.loading = false;
+          console.log("自定义输入框");
+        }
       }
     },
   },
@@ -296,16 +315,16 @@ export default {
       box-sizing: border-box;
       cursor: pointer;
     }
-  } 
+  }
 }
 .el-table {
   border-left: 1px solid #ddd;
-  /deep/.cell { 
+  /deep/.cell {
     vertical-align: center;
     text-overflow: initial;
   }
-  /deep/ .el-table--enable-row-transition .el-table__body td{
-    height:70px
+  /deep/ .el-table--enable-row-transition .el-table__body td {
+    height: 70px;
   }
   /*滚动条样式*/
   ::-webkit-scrollbar {

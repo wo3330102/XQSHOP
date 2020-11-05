@@ -5,7 +5,15 @@
         数据分析
         <span>(当前为 (GMT+08:00) 北京 时区)</span>
       </div>
-      <span style="font-size:0;top: 47px; right: 226px;width:240px !important;line-height:28px">
+      <span
+        style="
+          font-size: 0;
+          top: 47px;
+          right: 226px;
+          width: 240px !important;
+          line-height: 28px;
+        "
+      >
         <el-date-picker
           v-model="dateList"
           type="daterange"
@@ -15,74 +23,96 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           format="yyyy/MM/dd"
+          value-format="yyyy/MM/dd"
           :picker-options="pickerOptions"
         ></el-date-picker>
       </span>
     </h1>
     <div class="charts">
-      <el-row style="margin-left: -10px; margin-right: -10px;">
-        <el-col :span="12" style="padding-left: 10px; padding-right: 10px;">
+      <el-row style="margin-left: -10px; margin-right: -10px">
+        <el-col :span="12" style="padding-left: 10px; padding-right: 10px">
           <div class="box">
             <h3 class="title">总销售额</h3>
             <div class="info">
-              <span class="value">${{$toDecimal2(subMoney)}}</span>
+              <span class="value">${{ $toDecimal2(detail.sumPrice) }}</span>
               <span>-</span>
             </div>
-            <div style="width:100%;height:270px">
+            <div class="rate">
               <v-chart ref="totalSales" :options="totalSalesOptions" />
             </div>
           </div>
           <div class="box">
             <h3 class="title">订单数量</h3>
             <div class="info">
-              <span class="value">${{$toDecimal2(subMoney)}}</span>
+              <span class="value">{{ $toDecimal2(detail.sumOrder) }}</span>
               <span>-</span>
             </div>
-            <div style="width:100%;height:270px">
+            <div class="rate">
               <v-chart ref="totalOrder" :options="totalOrderOptions" />
             </div>
           </div>
           <div class="box">
             <h3 class="title">店铺统计分享</h3>
-            <div style="width:100%;height:327px">
+            <div style="width: 100%; height: 327px">
               <v-chart ref="totalOrder" :options="shareOptions" />
             </div>
           </div>
           <div class="box">
             <h3 class="title">访客来源</h3>
             <el-table :data="sourceOfVisitorsList" empty-text="暂无数据">
-              <el-table-column width="140" prop="contry" label="国家/地区"></el-table-column>
-              <el-table-column align="right" prop="people" label="访客"></el-table-column>
-              <el-table-column align="right" prop="order" label="订单"></el-table-column>
-              <el-table-column align="right" prop="baifenbi" label="订单转化"></el-table-column>
+              <el-table-column
+                width="140"
+                prop="contry"
+                label="国家/地区"
+              ></el-table-column>
+              <el-table-column
+                align="right"
+                prop="people"
+                label="访客"
+              ></el-table-column>
+              <el-table-column
+                align="right"
+                prop="order"
+                label="订单"
+              ></el-table-column>
+              <el-table-column
+                align="right"
+                prop="baifenbi"
+                label="订单转化"
+              ></el-table-column>
             </el-table>
           </div>
           <div class="box">
             <h3 class="title">页面排行</h3>
             <el-table :data="pageTopList" empty-text="暂无数据">
               <el-table-column prop="contry" label="页面地址"></el-table-column>
-              <el-table-column width="100" align="right" prop="people" label="访问次数"></el-table-column>
+              <el-table-column
+                width="100"
+                align="right"
+                prop="people"
+                label="访问次数"
+              ></el-table-column>
             </el-table>
           </div>
         </el-col>
-        <el-col :span="12" style="padding-left: 10px; padding-right: 10px;">
+        <el-col :span="12" style="padding-left: 10px; padding-right: 10px">
           <div class="box">
             <h3 class="title">访客数量</h3>
             <div class="info">
-              <span class="value">{{subMoney}}</span>
+              <span class="value">{{ detail.sumUser }}</span>
               <span>-</span>
             </div>
-            <div style="width:100%;height:270px">
+            <div class="rate">
               <v-chart ref="totalSales" :options="totalVisitorsOption" />
             </div>
           </div>
           <div class="box">
             <h3 class="title">客单价</h3>
             <div class="info">
-              <span class="value">${{$toDecimal2(subMoney)}}</span>
+              <span class="value">${{ $toDecimal2(detail.averagePrice) }}</span>
               <span>-</span>
             </div>
-            <div style="width:100%;height:270px">
+            <div class="rate">
               <v-chart ref="totalOrder" :options="totalOrderOptions" />
             </div>
           </div>
@@ -116,33 +146,75 @@
               </el-tooltip>
             </h3>
             <div class="info conversion">
-              <span class="value">{{subMoney}}%</span>
+              <span class="value">{{ paySuccessRate }}</span>
             </div>
             <el-table
               :data="visitorConversionRate"
               empty-text="暂无数据"
               class="no-border"
-              :header-row-style="{'line-height':'34px'}"
+              :header-row-style="{ 'line-height': '34px' }"
             >
-              <el-table-column width="140" prop="label" label="转化行为"></el-table-column>
-              <el-table-column align="right" prop="number" label="访客数"></el-table-column>
-              <el-table-column align="right" prop="percentage" label="占比"></el-table-column>
+              <el-table-column
+                width="140"
+                prop="label"
+                label="转化行为"
+              ></el-table-column>
+              <el-table-column
+                align="right"
+                prop="number"
+                label="访客数"
+              ></el-table-column>
+              <el-table-column
+                align="right"
+                prop="percentage"
+                label="占比"
+              ></el-table-column>
             </el-table>
           </div>
           <div class="box">
             <h3 class="title">支付渠道统计</h3>
-            <el-table :data="pageTopList" empty-text="暂无数据">
-              <el-table-column width="120" prop="contry" label="支付渠道"></el-table-column>
-              <el-table-column width="190" align="right" prop="people" label="订单数"></el-table-column>
-              <el-table-column align="right" prop="people" label="占比"></el-table-column>
+            <el-table :data="payData" empty-text="暂无数据">
+              <el-table-column
+                width="120"
+                prop="payType"
+                label="支付渠道"
+              ></el-table-column>
+              <el-table-column
+                width="190"
+                align="right"
+                prop="num"
+                label="订单数"
+              ></el-table-column>
+              <el-table-column align="right" prop="payTypeRate" label="占比">
+                <template slot-scope="scope">{{
+                  Rate(scope.row.payTypeRate)
+                }}</template>
+              </el-table-column>
             </el-table>
           </div>
           <div class="box">
             <h3 class="title">复购率</h3>
-            <el-table :data="pageTopList" empty-text="暂无数据">
-              <el-table-column width="150" prop="contry" label="新用户"></el-table-column>
-              <el-table-column width="150" align="right" prop="people" label="老用户"></el-table-column>
-              <el-table-column align="right" prop="people" label="复购率"></el-table-column>
+            <el-table :data="repurchaseRateDto" empty-text="暂无数据">
+              <el-table-column
+                width="150"
+                prop="newUser"
+                label="新用户"
+              ></el-table-column>
+              <el-table-column
+                width="150"
+                align="right"
+                prop="oldUser"
+                label="老用户"
+              ></el-table-column>
+              <el-table-column
+                align="right"
+                prop="repurchaseRate"
+                label="复购率"
+              >
+                <template slot-scope="scope">{{
+                  Rate(scope.row.repurchaseRate)
+                }}</template>
+              </el-table-column>
             </el-table>
           </div>
         </el-col>
@@ -151,19 +223,48 @@
     <div class="hot">
       <h3 class="title">热销商品分析</h3>
       <el-table :data="hotShopData" empty-text="暂无数据">
-        <el-table-column align="center" width="55" prop="no" label="序号"></el-table-column>
+        <el-table-column
+          align="center"
+          width="55"
+          prop="no"
+          label="序号"
+        ></el-table-column>
         <el-table-column align="center" width="84" prop="no"></el-table-column>
-        <el-table-column width="290" prop="no" label="产品名称"></el-table-column>
-        <el-table-column align="center" width="100" prop="no" label="加购商品数"></el-table-column>
-        <el-table-column align="center" width="110" prop="no" label="销量"></el-table-column>
-        <el-table-column prop="no" width="120" label="净销售额"></el-table-column>
-        <el-table-column prop="no" width="184" label="总销售额"></el-table-column>
+        <el-table-column
+          width="290"
+          prop="no"
+          label="产品名称"
+        ></el-table-column>
+        <el-table-column
+          align="center"
+          width="100"
+          prop="no"
+          label="加购商品数"
+        ></el-table-column>
+        <el-table-column
+          align="center"
+          width="110"
+          prop="no"
+          label="销量"
+        ></el-table-column>
+        <el-table-column
+          prop="no"
+          width="120"
+          label="净销售额"
+        ></el-table-column>
+        <el-table-column
+          prop="no"
+          width="184"
+          label="总销售额"
+        ></el-table-column>
         <el-table-column prop="no" label="操作"></el-table-column>
       </el-table>
     </div>
   </div>
 </template>
 <script>
+var color = ["#E8E6F0", "#412B92"];
+import { getChartCount } from "@/api/getChartCount";
 import ECharts from "vue-echarts";
 import "echarts/lib/chart/line";
 import "echarts/lib/chart/pie";
@@ -174,13 +275,21 @@ export default {
   components: {
     "v-chart": ECharts,
   },
+  watch: {
+    dateList: function (val) {
+      console.log(val);
+      this.Init();
+    },
+  },
   data() {
     return {
       dateList: "",
-      inputMin: "",
-      inputMax: "",
-      pickerOptions: "",
-      subMoney: 0.0,
+      pickerOptions: {
+        disabledDate(time) {
+          return time.getTime() > new Date().getTime();
+        },
+      },
+      detail: {},
       totalSalesOptions: {},
       totalOrderOptions: {},
       shareOptions: {},
@@ -195,11 +304,12 @@ export default {
       pageTopList: [],
       totalVisitorsOption: {},
       priceOption: {},
+      paySuccessRate: "",
       visitorConversionRate: [
         {
           label: "访问店铺",
-          number: 2,
-          percentage: "100%",
+          number: 0,
+          percentage: "0%",
         },
         {
           label: "加购物车",
@@ -222,79 +332,18 @@ export default {
           percentage: "0%",
         },
       ],
+      payData: [],
+      repurchaseRateDto: [],
+      hotShopData: [],
     };
   },
   created() {
     let that = this;
-    // 总销售额
-    this.totalSalesOptions = {
-      xAxis: {
-        type: "category",
-        boundaryGap: false,
-        data: [
-          "2020/09/09 00:00",
-          "2020/09/09 01:00",
-          "2020/09/09 02:00",
-          "2020/09/09 03:00",
-          "2020/09/09 04:00",
-          "2020/09/09 05:00",
-          "2020/09/09 06:00",
-          "2020/09/09 07:00",
-          "2020/09/09 08:00",
-        ],
-      },
-      yAxis: {
-        type: "value",
-      },
-      tooltip: {
-        trigger: "axis",
-        formatter: "{b0}<br />${c0}",
-      },
-      series: [
-        {
-          type: "line",
-          data: [100, 200, 100, 150],
-        },
-      ],
-    };
-    // 订单数量
-    this.totalOrderOptions = {
-      xAxis: {
-        type: "category",
-        boundaryGap: false,
-        data: [
-          "2020/09/09 00:00",
-          "2020/09/09 01:00",
-          "2020/09/09 02:00",
-          "2020/09/09 03:00",
-          "2020/09/09 04:00",
-          "2020/09/09 05:00",
-          "2020/09/09 06:00",
-          "2020/09/09 07:00",
-          "2020/09/09 08:00",
-        ],
-      },
-      yAxis: {
-        type: "value",
-      },
-      legend: {
-        data: ["2"],
-        bottom: 0,
-      },
-      tooltip: {
-        trigger: "axis",
-        formatter: "{b0}<br />${c0}",
-        textStyle: {
-          width: 120,
-        },
-      },
-      series: [
-        {
-          type: "line",
-          data: [1000, 2000, 1000, 1500],
-        },
-      ],
-    };
+    this.dateList = [
+      new Date().toLocaleDateString(),
+      new Date().toLocaleDateString(),
+    ];
+    this.Init();
     // 店铺分享统计
     this.shareOptions = {
       tooltip: {
@@ -326,90 +375,154 @@ export default {
         },
       ],
     };
-    // 访客数量
-    this.totalVisitorsOption = {
-      xAxis: {
-        type: "category",
-        boundaryGap: false,
-        data: [
-          "2020/09/09 00:00",
-          "2020/09/09 01:00",
-          "2020/09/09 02:00",
-          "2020/09/09 03:00",
-          "2020/09/09 04:00",
-          "2020/09/09 05:00",
-          "2020/09/09 06:00",
-          "2020/09/09 07:00",
-          "2020/09/09 08:00",
-        ],
-      },
-      yAxis: {
-        type: "value",
-      },
-      legend: {
-        data: ["2"],
-        bottom: 0,
-      },
-      tooltip: {
-        trigger: "axis",
-        formatter: "{b0}<br />${c0}",
-        textStyle: {
-          width: 120,
-        },
-      },
-      series: [
-        {
-          type: "line",
-          data: [1000, 2000, 1000, 1500],
-        },
-      ],
-    };
-    // 客单价
-    this.priceOption = {
-      xAxis: {
-        type: "category",
-        boundaryGap: false,
-        data: [
-          "2020/09/09 00:00",
-          "2020/09/09 01:00",
-          "2020/09/09 02:00",
-          "2020/09/09 03:00",
-          "2020/09/09 04:00",
-          "2020/09/09 05:00",
-          "2020/09/09 06:00",
-          "2020/09/09 07:00",
-          "2020/09/09 08:00",
-        ],
-      },
-      yAxis: {
-        type: "value",
-      },
-      legend: {
-        data: ["2"],
-        bottom: 0,
-      },
-      tooltip: {
-        trigger: "axis",
-        formatter: "{b0}<br />${c0}",
-        textStyle: {
-          width: 120,
-        },
-      },
-      series: [
-        {
-          type: "line",
-          data: [1000, 2000, 1000, 1500],
-        },
-      ],
-    };
   },
-  mounted() {
-    this.$nextTick(() => {
-      this.DrawTotalSales();
-    });
-  },
+  mounted() {},
   methods: {
-    DrawTotalSales(id) {},
+    Init: function () {
+      let colors = ["#E8E6F0", "#412B92"];
+      // 获取所有表格数据
+      let par = {
+        beginTime: this.dateList[0].replace(/\//g, "-") + " 00:00:00",
+        endTime: this.dateList[1].replace(/\//g, "-") + " 23:59:59",
+      };
+      getChartCount(par).then((res) => {
+        let that = this;
+        // 总销售额
+        this.detail = res;
+        this.ChartsOptions(res.chartPrice, "totalSalesOptions");
+        // 访客量
+        this.ChartsOptions(res.userNum, "totalVisitorsOption");
+        // 订单量
+        this.ChartsOptions(res.chartOrder, "totalOrderOptions");
+        // 客单价
+        this.ChartsOptions(res.chartPrice, "priceOption");
+        // 访客转化率
+        this.paySuccessRate = that.Rate(res.visitorRateDto.paySuccessRate);
+        this.visitorConversionRate = [
+          {
+            label: "访问店铺",
+            number: res.visitorRateDto.sumUser,
+            percentage: that.Rate(res.visitorRateDto.sumUserRate),
+          },
+          {
+            label: "加购物车",
+            number: res.visitorRateDto.addCart,
+            percentage: that.Rate(res.visitorRateDto.addCartRate),
+          },
+          {
+            label: "发起结账",
+            number: res.visitorRateDto.pay,
+            percentage: that.Rate(res.visitorRateDto.payRate),
+          },
+          {
+            label: "填写顾客信息",
+            number: res.visitorRateDto.register,
+            percentage: that.Rate(res.visitorRateDto.registerRate),
+          },
+          {
+            label: "已付款",
+            number: res.visitorRateDto.paySuccess,
+            percentage: that.Rate(res.visitorRateDto.paySuccessRate),
+          },
+        ];
+        // 支付渠道
+        this.payData = res.PayTypeList;
+        // 复购率
+        this.repurchaseRateDto = [res.repurchaseRateDto];
+      });
+    },
+    ChartsOptions: function (obj, el) {
+      let time = [];
+      let data = [];
+      let that = this;
+      obj.map((i) => {
+        time.push(i.time);
+        data.push(i.num);
+      });
+      let option = {
+        color: "#412B92",
+        tooltip: {
+          trigger: "axis",
+        },
+        xAxis: {
+          type: "category",
+          data: time,
+        },
+        yAxis: {
+          type: "value",
+        },
+        series: [
+          {
+            data: data,
+            type: "line",
+            smooth: true,
+          },
+        ],
+      };
+      that[el] = { ...option };
+      // 需要同一个图表有两段数据时使用
+      // let chartOption = {
+      //   color: ["#E8E6F0", "#412B92"],
+      //   xAxis: [
+      //     {
+      //       type: "category",
+      //       boundaryGap: false,
+      //       position: "bottom",
+      //       axisLine: {
+      //         onZero: false,
+      //         lineStyle: {
+      //           color: "#ffffff",
+      //         },
+      //       },
+      //       axisPointer: {
+      //         label: {
+      //           formatter: function (params) {
+      //             return params.value;
+      //           },
+      //         },
+      //       },
+      //       data: [],
+      //     },
+      //     {
+      //       type: "category",
+      //       boundaryGap: false,
+      //       position: "bottom",
+      //       axisLine: {
+      //         onZero: false,
+      //       },
+      //       axisPointer: {
+      //         label: {
+      //           formatter: function (params) {
+      //             return params.value;
+      //           },
+      //         },
+      //       },
+      //       data: [],
+      //     },
+      //   ],
+      //   yAxis: {
+      //     type: "value",
+      //   },
+      //   tooltip: {
+      //     trigger: "axis",
+      //   },
+      //   series: [
+      //     {
+      //       type: "line",
+      //       xAxisIndex: 1,
+      //       data: [],
+      //     },
+      //     {
+      //       type: "line",
+      //       data: [],
+      //     },
+      //   ],
+      // };
+    },
+    // 辅助函数（用于转换百分比）
+    Rate: function (el) {
+      return el == 1 ? "100%" : el * 100 + "%";
+    },
   },
 };
 </script>
@@ -463,6 +576,10 @@ h1 {
     }
   }
 }
+.rate {
+  width: 100%;
+  height: 270px;
+}
 .table-list {
   border-collapse: collapse;
   width: 100%;
@@ -508,13 +625,14 @@ h1 {
     border: 0;
   }
 }
-.hot{
+.hot {
   margin-top: 20px;
-      box-shadow: 0 1px 3px 0 rgba(35,35,112,.12), 0 0 0 1px rgba(67,67,145,.05);
-    background: #fff;
-    border-radius: 4px;
-    overflow: hidden;
-  .title{
+  box-shadow: 0 1px 3px 0 rgba(35, 35, 112, 0.12),
+    0 0 0 1px rgba(67, 67, 145, 0.05);
+  background: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+  .title {
     padding-left: 12px;
     height: 54px;
     line-height: 54px;

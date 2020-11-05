@@ -18,10 +18,36 @@
         </div>
       </div> 
       <table-tem 
-        :tableData="tableData"
+        :requestUrl="'api/yxStoreGradient'"
+        :requestParams="requestParams"
         :optionList="['删除']"
-        :tableHeader="tableHeader"
-      ></table-tem>
+        :tableHeader="tableHeader" 
+        @rowClick="rowClick"
+      >
+        <el-table-column
+          v-for="(item, index) in tableHeader"
+          :key="index"
+          :width="item.width ? item.width : ''"
+          :prop="item.prop ? item.prop : ''"
+          :label="item.label ? item.label : ''"
+          :align="item.align ? item.align : ''"
+          :sortable="item.sortable" 
+        >
+          <template slot-scope="scope">
+            <span v-if="item.prop == 'status'">{{
+              scope.row.status === 1 ? "开启" : "关闭"
+            }}</span>
+            <span v-else-if="item.prop == 'discountType'">{{
+              scope.row.discountType === 0
+                ? "减免$" + scope.row.discountMoney
+                : scope.row.discountType === 1
+                ? "减" + scope.row.discountQuota + "%"
+                : "免运费"
+            }}</span>
+            <span v-else>{{ scope.row[item.prop]?scope.row[item.prop]:0 }}</span>
+          </template>
+        </el-table-column> 
+      </table-tem>
       <el-dialog :visible.sync="showVideo" width="40%" center>
         <video-player
           class="video-player vjs-custom-skin"
@@ -33,7 +59,7 @@
     </div>
   </div>
 </template>
-<script>
+<script> 
 import { videoPlayer } from 'vue-video-player'
 import tableTem from '@/components/tableTem'
 import "video.js/dist/video-js.css";
@@ -46,25 +72,32 @@ export default {
     return {
       searchVal: "",
       tableHeader:[{
+        prop:'name',
         label:'优惠名称',
         width:273
       },{
+        prop:'title',
         label:'优惠描述',
         width:273
       },{
+        prop:'nums',
         label:'使用次数',
         width:140,
         sortable:true
       },{
+        prop:'period',
         label:'有效期',
         width:260,
         sortable:true
       },{
+        prop:'status',
         label:'状态',
         width:100
       }],
-      tableData: [],
-      currentPage: 1,
+      requestParams:{
+        size:30,
+        page:0,
+      },  
       showVideo:false,
       playerOptions: {
         playbackRates: [0.5, 1.0, 1.5, 2.0, 3.0], // 可选的播放速度
@@ -92,30 +125,18 @@ export default {
       },
     };
   },
-  methods: {
-    ChangeActive: function (index) {
-      this.acitve = index;
-    },
-    ChangeSelect: function (e) {
-      console.log(e);
-    },
-    handleSelectionChange: function (e) {
-      console.log(e);
-    },
-    handleEdit: function (e) {
-      console.log(e);
-    },
-    handleDelete: function (e) {
-      console.log(e);
-    },
-    handleSizeChange: function (e) {
-      console.log(e);
-    },
-    handleCurrentChange: function (e) {
-      console.log(e);
-    },
+  methods: { 
     ToAddDiscount:function(){
-      this.$router.push('./addDiscount')
+      this.$router.push('./editDiscount')
+    },
+    rowClick:function(e){
+      this.$router.push({
+        name:'EditDiscount',
+        query:{
+          id:e.id
+        }
+      })
+      localStorage.setItem('discountDetail',JSON.stringify(e))
     }
   },
 };
@@ -137,7 +158,7 @@ export default {
     font-size: 14px;
     border-radius: 4px;
   }
-}
+} 
 .content {
   overflow: hidden;
   border-radius: 4px;
@@ -169,10 +190,7 @@ export default {
     display: flex;
     justify-content: space-around;
     border-bottom: 1px solid #f1f1f6;
-    flex-wrap: wrap;
-    /deep/ .el-input__inner {
-      padding: 0 8px;
-    }
+    flex-wrap: wrap; 
     .search-box {
       display: flex;
       flex: 1;
@@ -190,14 +208,5 @@ export default {
     padding: 14px 0;
     text-align: center;
   }
-}
-/deep/.el-input__inner {
-  height: 36px !important;
-}
-/deep/.el-input__icon {
-  line-height: 36px !important;
-}
-/deep/ .el-range-separator {
-  line-height: 35px;
-}
+}  
 </style>

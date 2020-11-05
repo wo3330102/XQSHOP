@@ -76,7 +76,7 @@ export default {
     return {
       themeList: [{
         pcImage:'',
-
+        check:false,
       }],
       showDetail: false,
       radio: 0,
@@ -91,30 +91,33 @@ export default {
     };
   },
   created() {
-    getStoreTemplate().then((res) => {
-      this.themeList = res.content;
-      this.show = true;
-    });
     let id = localStorage.getItem('storeId');
-    getShopById(id).then(res=>{ 
-      if(res.tempLink){
-        this.themeList.map(i=>{
-          if(i.tempLink == res.tempLink){
+    let that = this;
+    getStoreTemplate().then((obj) => {
+      let object = obj.content;
+      that.show = true; 
+      getShopById(id).then(res=>{ 
+      if(res.tempId){
+        object.map(i=>{ 
+          if(i.id == res.tempId){ 
             i.check = true;
           } 
         })
       }
+      that.themeList = object
     })
+    });
+    
+    
   },
   methods: {
-    ShowDetail: function (index) {
-      console.log(index);
+    ShowDetail: function (index) { 
       this.showDetail = true;
       this.title = this.themeList[index].name;
       this.index = index;
     },
     CheckThemeShop: function () {
-      let that = this; 
+      let that = this;
       for (var i in that.themeList) {
         that.themeList[i].check = false;
       }

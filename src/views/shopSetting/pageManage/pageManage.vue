@@ -165,24 +165,12 @@ export default {
     /deep/ .el-button {
       height: 36px;
       padding: 0 15px;
-    }
-    /deep/ .el-input__inner {
-      padding: 0 8px;
-    }
+    } 
   }
   .pagination {
     padding: 14px 0;
     text-align: center;
   }
-}
-/deep/.el-input__inner {
-  height: 36px !important;
-}
-/deep/.el-input__icon {
-  line-height: 36px !important;
-}
-/deep/ .el-range-separator {
-  line-height: 35px;
-}
+}  
 </style>
 

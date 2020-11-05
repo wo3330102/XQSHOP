@@ -117,8 +117,7 @@ export default {
   border-radius: 4px;
   box-shadow: 0 1px 3px 0 rgba(35, 35, 112, 0.2),
     0 0 0 1px rgba(67, 67, 145, 0.05);
-  background-color: #fff;
-   
+  background-color: #fff; 
   .conditions {
     padding: 9px 12px;
     display: flex;
@@ -132,29 +131,16 @@ export default {
         background: #fff;
         color: #000000;
       }
-    }
-    
+    } 
     /deep/ .el-button {
       height: 36px;
       padding: 0 15px;
-    }
-    /deep/ .el-input__inner {
-      padding: 0 8px;
-    }
+    } 
   }
   .pagination {
     padding: 14px 0;
     text-align: center;
   }
-}
-/deep/.el-input__inner {
-  height: 36px !important;
-}
-/deep/.el-input__icon {
-  line-height: 36px !important;
-}
-/deep/ .el-range-separator {
-  line-height: 35px;
-}
+}  
 </style>
 

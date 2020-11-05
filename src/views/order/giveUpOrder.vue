@@ -243,10 +243,7 @@ export default {
     display: flex;
     justify-content: space-around;
     border-bottom: 1px solid #f1f1f6;
-    flex-wrap: wrap;
-    /deep/ .el-input__inner {
-      padding: 0 8px;
-    }
+    flex-wrap: wrap; 
     .search-box {
       display: flex;
       flex: 1;
@@ -264,14 +261,5 @@ export default {
     padding: 14px 0;
     text-align: center;
   }
-}
-/deep/.el-input__inner {
-  height: 36px !important;
-}
-/deep/.el-input__icon {
-  line-height: 36px !important;
-}
-/deep/ .el-range-separator {
-  line-height: 35px;
-}
+}  
 </style>

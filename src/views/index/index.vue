@@ -1,19 +1,201 @@
 <template>
   <div class="container">
-    <h1>欢迎来到XQShopy,{{userName}}</h1>
-    <em>请按照以下开店引导进行开店。</em>
-    <div class="stepList">
-      <div v-for="item in stepList" :key="item.id">
-        <div class="text">
-          <img :src="item.icon" />
-          {{item.title}}
-        </div>
-        <div class="des">{{item.tip}}</div>
-        <div class="option">
-          <el-button>{{item.btn}}</el-button>
+    <h1>欢迎来到XQShopy,{{ userName }}</h1>
+    <template v-if="failInit">
+      <em>请按照以下开店引导进行开店。</em>
+      <div class="stepList">
+        <div v-for="item in stepList" :key="item.id">
+          <div class="text">
+            <img :src="item.icon" />
+            {{ item.title }}
+          </div>
+          <div class="des">{{ item.tip }}</div>
+          <div class="option">
+            <el-button @click="toDetail(item.url)">{{ item.btn }}</el-button>
+          </div>
         </div>
       </div>
-    </div>
+    </template>
+    <template v-else>
+      <!-- 头部仪表盘 -->
+      <div class="flex" style="margin-bottom:40px">
+        <dl class="overview">
+          <dt class="icon">
+            <img
+              src="data:image/png;base64,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"
+            />
+          </dt>
+          <dd class="value">
+            ${{ navData.totalMoney ? navData.totalMoney : "0.00" }}
+          </dd>
+          <dd class="desc">总销售额</dd>
+        </dl>
+        <dl class="overview">
+          <dt class="icon">
+            <img
+              src="data:image/png;base64,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"
+            />
+          </dt>
+          <dd class="value">{{ navData.orderNum ? navData.orderNum : "0" }}</dd>
+          <dd class="desc">订单数量</dd>
+        </dl>
+        <dl class="overview">
+          <dt class="icon">
+            <img
+              src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAFMN540AAAAAXNSR0IArs4c6QAABWpJREFUSA3NVn1QVFUUP+/xAPlQEBsVNAUUCWsqrU00lXQMohlxJJl0pij/QSdl5EsEswZRaFBkcxGSzI/RSoohyNFpkEZrBBHtY3RMRhHJD1Sk+NxkWXb3ds5b7tu3Cys05Uxn5r577jm/c8+959x77gMYIO3GjX9wXujNK2BEV6rCmIDSjSjYwbUiMjv5wGNTCgFkSuaMbE+DUenJICCRiUyGHVq5F+fszo8ZkNl18eSau6clZCYk7CYEeUlDheL5C30pzJvfI1vPjGoQ5GWQpSxx+KiX6aCyDV1sLCTt2bLlxFyNxny6rq5OkePyq8iFpbuH1iYTKcW+nQXLcBQpI93d5E6bHAmZcVPNksUClbIEPxZRhGsnZ8Jr0STxFJVQcYCtF1rFc7d+v2gT2DiPTcnrxEVFuuctOLeask5+dwPH5WrZsPx2VlLiilsrwWY0/9k+sDHGzldXs9zMzFj1DDzbOYYdBbGMwVNqpXviWhA8PNQi0He2g7evn4jHgEmoScEAbkbDweRmjduZ41+DZ/8H4OllTYjFzGiTguQmSa6DraySvl06mdHI37UOsBQQjSbT9w7SYYcldbWfE4jvOQiXTuEdllKPfVNfXFsTTkBuzI2ExPkLm3JfXxokudgO3A/XG6Go5kz68YbLygHnBo79LBSkTAeo+HTrVn1WQsIVzJdywRzBfByIzHOGfG00pu1GWWyckmNi8hIT9RzIe0oV0UKm1V4yGFkzMw+VM4B0nc4rODTUHLd+vbIfeTnNWVlk2GGdx/l3xbp14uaVEb0cQcYfTvQYM6xhc8NFOHUgBN5a/WAUrk0OtHgna1sNn8lZX5i2AAy3V4H/ZOt5SowO6ias9ISH19D1A5Vln3wEMwMPw5JI+4xOCuj3JONH3GRSD00+76dn4MnMwz0LrUNDnEvRUL79YkldTbVzmFPNKdKISZXlSnVyClUpBmrSzySihDd09P4VHRUaNlmFccqG5GbPQ2UnAeTTcuH2rc9MzBL/yrSQsc6sqMiF63bFtPb01HOMctRqm2/oLra0PBzv7f1qoN84rgeT2QwZJ441Lzu4bxwaXlUUj5tZjg62YFuCTT5eeMGEpb6+ycxsvsqvXU9HB6suLWWFGRm925KSylA+7BW2P3bWbSzA7iVsWnyAVqCfXJxomlVl/R6vr4PYA/tA9PFRixW+v68PDuTk9N9payvevndvkqJQMbwUkCgQ2xsGrbYCjCwBL12+9QEaujQIzus1uLq7w5rsbIrQhqkBAe9dv3kzPm///lIcK8RDQg+QLxauxczImtDVDAXhjJGU8+EMASeOaMHQWe4aOLbqaFrcy+fVQNrxC5Ik6fU5O7/EkIaplY/kxcGOjQYDHP04HQTjKdCEWyB4AkBwFM0yGjzP3tQkLnvxcOG3P8WThBwvRqcTGfwDp2TpYg1W290W+EqXCkFTLkHwdDwcs0k5mDTzRkNTY9sq1CiO6VF+ZzDUuaTXaIQ1i56F8RN6wG8cpZLB1csgN7LCF1+W0f+fABYQREY9u9+iV8IkSaIoCsDGEnSkFLcgAuIgYqRwGYfXh3nvScvkRqLJYjH1mUxyIePCx9GTD/LF56ZEaecWFjx2xwM+rH/c6JQXEOGZif6H6jekxmPk+aL+k54K9Zzduw5fvn/vXZxQyaiS7Ad6fWXRudoaL1e3cM2TU2zV+l+4Lz575lrMof1v3u5oL3Cchu/YTj55zJiQ+dNCStMiFs162j9gSIydgWrw2727LP/H07/WNDWuvNPd3ahS2bEjmVR4e7ZmOT7gqyf5+MzwdHP1dXeR5CLdZzZ1PTT2d7Z0dV3DBB088suFCpxdCaedp//L4G/dxjNl9Ak5kgAAAABJRU5ErkJggg=="
+            />
+          </dt>
+          <dd class="value">{{ navData.pie ? navData.pie : "0.00" }}%</dd>
+          <dd class="desc">转换率</dd>
+        </dl>
+        <dl class="overview">
+          <dt class="icon">
+            <img
+              src="data:image/png;base64,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"
+            />
+          </dt>
+          <dd class="value">{{ navData.people ? navData.people : "0" }}</dd>
+          <dd class="desc">访客数量</dd>
+        </dl>
+        <dl class="overview">
+          <dt class="icon">
+            <img
+              src="data:image/png;base64,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"
+            />
+          </dt>
+          <dd class="value">{{ navData.monitor ? navData.monitor : "0" }}</dd>
+          <dd class="desc">实时访客</dd>
+        </dl>
+      </div>
+      <!-- 内容 -->
+      <el-row style="margin-left: -10px; margin-right: -10px">
+        <el-col :span="16" style="padding-left: 10px; padding-right: 10px">
+          <!-- 通知板块 -->
+          <div
+            class="jh-notify-warpper"
+            v-for="(item, index) in noticeList"
+            :key="item.id"
+          >
+            <div class="jh-notify-container notify-info">
+              <i
+                class="jh-notify-close-icon el-icon-circle-close"
+                @click="removeNotice(index)"
+              ></i>
+              <div class="box">
+                <div class="title">{{ item.title }}</div>
+                <div class="content" v-html="item.desc"></div>
+              </div>
+              <div class="footer">
+                <el-button size="small">查看详情</el-button>
+              </div>
+            </div>
+          </div>
+          <!-- 邮件板块 -->
+          <div class="box email-box">
+            <h3 class="title">
+              弃单邮件
+              <el-tooltip
+                class="item"
+                effect="dark"
+                content="不包含今天的数据"
+                placement="bottom"
+              >
+                <span class="option">最近30天</span>
+              </el-tooltip>
+            </h3>
+            <p class="info">
+              <span
+                >最近30天，您的店铺已发送弃单召回邮件32封，邮件打开率34.38%。成功召回了0个订单，召回率0.00%，其它店铺平均激活率为7%。</span
+              >
+              <span
+                >当前激活率较低，建议您<span class="text-info"
+                  >调整发送时间</span
+                >或邮件营销策略</span
+              >
+            </p>
+            <div class="flex mail-info">
+              <dl style="flex: 1">
+                <dt>已发送未付款邮件</dt>
+                <dd>32</dd>
+              </dl>
+              <dl style="flex: 1">
+                <dt>成功激活订单</dt>
+                <dd>0</dd>
+              </dl>
+              <dl style="flex: 1">
+                <dt>订单激活率</dt>
+                <dd>0.00%</dd>
+              </dl>
+              <dl style="flex: 1.2">
+                <dt>其他店铺平均订单激活率</dt>
+                <dd>7%</dd>
+              </dl>
+            </div>
+          </div>
+          <!-- 邮件板块 -->
+          <div class="box email-box">
+            <h3 class="title">
+              未发货订单
+              <el-tooltip
+                class="item"
+                effect="dark"
+                content="不包含今天的数据"
+                placement="bottom"
+              >
+                <span class="option">最近30天</span>
+              </el-tooltip>
+            </h3>
+            <p class="info">
+              <span
+                >当前您有15订单未发货，最近30天平均发货周期为86小时，发货效率会直接影响到买家客诉率。</span
+              >
+            </p>
+            <div class="flex mail-info">
+              <dl style="flex: 1">
+                <dt>未发货订单</dt>
+                <dd>32</dd>
+              </dl>
+              <dl style="flex: 1">
+                <dt>平均发货周期</dt>
+                <dd>0</dd>
+              </dl> 
+            </div>
+          </div>
+          <!-- 邮件板块 -->
+          <div class="box email-box">
+            <h3 class="title">
+              运费险
+              <el-tooltip
+                class="item"
+                effect="dark"
+                content="不包含今天的数据"
+                placement="bottom"
+              >
+                <span class="option">最近30天</span>
+              </el-tooltip>
+            </h3> 
+            <div class="flex mail-info">
+              <dl style="flex: 1">
+                <dt>运费险订单</dt>
+                <dd>32</dd>
+              </dl>
+              <dl style="flex: 1">
+                <dt>顾客购买运费险比例</dt>
+                <dd>100%</dd>
+              </dl> 
+              <dl style="flex: 1">
+                <dt>增加利润</dt>
+                <dd>$2.76</dd>
+              </dl> 
+            </div>
+          </div>
+        </el-col>
+        <el-col
+          :span="16"
+          style="padding-left: 10px; padding-right: 10px"
+        ></el-col>
+      </el-row>
+    </template>
   </div>
 </template>
 <script>
@@ -21,6 +203,7 @@ export default {
   data() {
     return {
       userName: "admin",
+      failInit: false,
       stepList: [
         {
           icon:
@@ -29,7 +212,7 @@ export default {
           tip:
             "您可以手动添加一个商品，或者进入到商品管理页面批量导入shopify的商品。",
           btn: "添加",
-          url: "",
+          url: "/commodityList",
         },
         {
           icon:
@@ -37,15 +220,16 @@ export default {
           title: "装修店铺",
           tip: "选择适合您的模板，打造个性店铺。",
           btn: "装修",
-          url: "",
+          url: "/themeShop",
         },
         {
           icon:
             "data:image/png;base64,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",
           title: "设置物流方式",
-          tip:"设置店铺可支持的物流配送地区，以及在订单结账页中，提供可供客户选择的物流配送方案。",
+          tip:
+            "设置店铺可支持的物流配送地区，以及在订单结账页中，提供可供客户选择的物流配送方案。",
           btn: "设置",
-          url: "",
+          url: "/logisticsManagement",
         },
         {
           icon:
@@ -53,7 +237,7 @@ export default {
           title: "绑定域名",
           tip: "绑定合适的域名可以让您的店铺更具品牌效应。",
           btn: "设置",
-          url: "",
+          url: "/setting",
         },
         {
           icon:
@@ -62,17 +246,46 @@ export default {
           tip:
             "设置店铺用于收款的账户，可以同时支持PayPal和信用卡收款方式供顾客选择。",
           btn: "设置",
-          url: "",
+          url: "/setting",
+        },
+      ],
+      navData: {
+        totalMoney: "",
+        orderNum: 0,
+        pie: 0,
+        people: 0,
+        monitor: 0,
+      },
+      noticeList: [
+        {
+          title: "通知1",
+          desc:
+            "<p>尊敬的用户：</p><p>测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试</p>",
+        },
+        {
+          title: "通知2",
+          desc:
+            "<p>尊敬的用户：</p><p>测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试</p>",
         },
       ],
     };
+  },
+  methods: {
+    toDetail: function (url) {
+      this.$store.commit("setUrl", url);
+      this.$NavgitorTo(url);
+    },
+    removeNotice: function (index) {
+      console.log(index);
+      this.noticeList.splice(index, 1);
+    },
   },
 };
 </script>
 <style lang="scss" scoped>
 h1 {
   font-size: 24px;
-  margin-bottom:12px;
+  margin-bottom: 12px;
   font-weight: 400;
   line-height: 40px;
   justify-items: center;
@@ -109,6 +322,157 @@ em {
     .option {
       width: 80px;
       text-align: center;
+    }
+  }
+}
+.flex {
+  display: flex;
+  align-items: center; 
+  justify-content: space-between;
+}
+.overview {
+  box-shadow: 0 1px 3px 0 rgba(35, 35, 112, 0.12),
+    0 0 0 1px rgba(67, 67, 145, 0.05);
+  border-radius: 4px;
+  background: #fff;
+  text-align: center;
+  padding: 30px 0;
+  height: 120px;
+  flex: 0 0 210px;
+  position: relative;
+  .icon {
+    margin-bottom: 22px;
+  }
+  .value {
+    color: #25313e;
+    font-size: 30px;
+    font-weight: 500;
+    margin-bottom: 14px;
+    line-height: 32px;
+  }
+  .desc {
+    color: #6e7e8c;
+    height: 16px;
+    line-height: 16px;
+  }
+}
+.jh-notify-warpper {
+  margin-bottom: 12px;
+  padding-left: 3px;
+  box-sizing: border-box;
+  .jh-notify-container {
+    position: relative;
+    border-radius: 4px;
+    background-color: #fff;
+    .box {
+      margin-bottom: 20px;
+      padding: 12px;
+      box-sizing: border-box;
+      background-color: #fff;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px 0 rgba(35, 35, 112, 0.2),
+        0 0 0 1px rgba(67, 67, 145, 0.05);
+      overflow: hidden;
+      .title {
+        font-weight: 600;
+        color: #212b36;
+        font-size: 14px;
+        padding-bottom: 12px;
+      }
+      .content {
+        margin-bottom: 12px;
+        line-height: 20px;
+        width: 600px;
+        text-overflow: ellipsis;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+        max-height: 40px;
+      }
+    }
+    i {
+      font-size: 20px;
+      color: #999;
+      opacity: 1;
+      position: absolute;
+      background: #fff;
+      border-radius: 20px;
+      top: -8px;
+      right: -6px;
+      z-index: 999;
+      display: none;
+      cursor: pointer;
+    }
+  }
+  .notify-info {
+    box-shadow: 0 1px 3px 0 rgba(35, 35, 112, 0.12),
+      0 0 0 1px rgba(67, 67, 145, 0.05), -4px 0 0 0 #273a8a;
+    color: #212b36;
+  }
+  .footer {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    top: 0;
+    right: 18px;
+    height: 100%;
+  }
+
+  &:hover {
+    i {
+      display: block !important;
+    }
+  }
+}
+.box {
+  margin-bottom: 20px;
+  padding: 12px;
+  box-sizing: border-box;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px 0 rgba(35, 35, 112, 0.2),
+    0 0 0 1px rgba(67, 67, 145, 0.05);
+  overflow: hidden;
+  .title {
+    color: #1a1d2c;
+    font-size: 14px;
+    font-weight: 600;
+    padding-bottom: 12px;
+    .option {
+      font-size: 14px;
+      float: right;
+      font-weight: 400;
+      color: rgb(151, 149, 157);
+      text-decoration: none;
+      cursor: default;
+    }
+    .tooltip-text {
+      position: relative;
+    }
+  }
+}
+.flex {
+  display: flex;
+  align-items: center;
+}
+.email-box {
+  .mail-info {
+    margin-top: 16px;
+    padding: 20px 0 10px;
+    border-top: 1px solid #ebedf6;
+    dl {
+      text-align: center;
+      dt {
+        color: #212b36;
+        font-size: 12px;
+        margin-bottom: 20px;
+      }
+      dd {
+        font-size: 20px;
+        color: #4d5384;
+      }
+      &:last-child{
+        border-left: 1px solid #ebedf6;
+      }
     }
   }
 }

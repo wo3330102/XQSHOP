@@ -114,8 +114,8 @@ export default {
     }
   },
   methods: { 
-    DelMenu:function(index,i){  
-      this.selectData.splice(i,1);
+    DelMenu:function(index){   
+      this.selectData.splice(index,1);
     },
     GetData:function(e){  
       if(this.selectData.length>0){ 
@@ -140,8 +140,11 @@ export default {
       if(this.selectData.length == 0){
         this.$message.error('请选择菜单项')
         return false
+        
       }
+      console.log(this.selectData)
       this.detail.menuItems = this.selectData
+      console.log(this.detail)
       if(this.id){
         edit(this.detail).then(res=>{
           this.$message.success('修改成功')

@@ -18,7 +18,7 @@
       <div class="conditions">
         <!-- 分类 -->
         <el-select
-          v-model="subscribeType"
+          v-model="requestParams.isSubscribe"
           clearable
           placeholder="订阅状态"
           @change="ChangeSelect"
@@ -42,9 +42,10 @@
           format="yyyy/MM/dd"
           value-format="yyyy-MM-dd"
           style="width:230px;margin-right: 10px;"
+          :picker-options="endOptions"
         ></el-date-picker>
         <!-- 标签 -->
-        <el-select
+        <!-- <el-select
           v-model="countryType"
           clearable
           placeholder="国家/地区"
@@ -57,10 +58,10 @@
             :label="item.label"
             :value="item.id"
           ></el-option>
-        </el-select>
+        </el-select> -->
         <div class="search-box">
-          <el-input v-model="searchVal" placeholder="订单编号、商品名称、SKU、支付编号、顾客邮箱、物流单号 ">
-            <el-button slot="append">搜索</el-button>
+          <el-input v-model="searchVal" placeholder="请输入姓名、邮箱、手机">
+            <el-button slot="append" @click="Search">搜索</el-button>
           </el-input>
         </div>
         <div style="line-height:36px; align-self: center; margin-left: 20px;">
@@ -75,12 +76,12 @@
                 <div class="item">
                   <div class="inp-number">
                     <span class="inp-number-prepend">最小金额</span>
-                    <el-input v-model="minPrice" placeholder></el-input>
+                    <el-input v-model="minMoney" placeholder></el-input>
                   </div>
                   <span style="margin: 0px 10px;">-</span>
                   <div class="inp-number">
-                    <span class="inp-number-prepend">最小金额</span>
-                    <el-input v-model="maxPrice" placeholder></el-input>
+                    <span class="inp-number-prepend">最大金额</span>
+                    <el-input v-model="maxMoney" placeholder></el-input>
                   </div>
                 </div>
                 <div class="item">
@@ -95,7 +96,7 @@
                   </div>
                 </div>
                 <div class="option-btn">
-                  <el-button>筛选</el-button>
+                  <el-button @click="Screen">筛选</el-button>
                 </div>
               </div>
             </el-dropdown-menu>
@@ -103,7 +104,7 @@
         </div>
       </div>
       <table-tem 
-        :requestUrl="'api/yxUser'"
+        :requestUrl="'api/yxUser/QueryParam'"
         :requestParams="requestParams"
         :optionList="['删除']" 
         :tableHeader="tableHeader"
@@ -126,13 +127,45 @@ export default {
     exportFunction,
     tableTem,
   },
+  watch: {
+    searchVal:function(val){
+      if(val == ''){
+        this.requestParams.keyword = '';
+      }
+    },
+    minOrder:function(val){
+      if(val == ''){
+        this.requestParams.minOrder = '';
+      }
+    },
+    maxOrder:function(val){
+      if(val == ''){
+        this.requestParams.maxOrder = '';
+      }
+    },
+    minMoney:function(val){
+      if(val == ''){
+        this.requestParams.minMoney = '';
+      }
+    },
+    maxMoney:function(val){
+      if(val == ''){
+        this.requestParams.maxMoney = '';
+      }
+    },
+  },
   data() {
     return {
       requestParams:{
         page: 0,
-        size: 10,
-        sort: 'uid,desc',
-        userType:'',
+        size: 30,  
+        beginTime:'',
+        endTime:'',
+        keyword:'',
+        minOrder:'',
+        maxOrder:'',
+        minMoney:'',
+        maxMoney:'',
       },
       showExport: false,
       nav: [
@@ -145,29 +178,28 @@ export default {
           label: "注册会员",
         },
       ],
-      acitve: 0,
-      subscribeType: "",
+      acitve: 0, 
       subscribeTypeList: [
         {
           id: 1,
           label: "已订阅",
         },
         {
-          id: 2,
+          id: 0,
           label: "未订阅",
         },
       ],
-      countryType: "",
-      countryTypeList: [
-        {
-          id: 1,
-          label: "中国",
-        },
-      ],
+      // countryType: "",
+      // countryTypeList: [
+      //   {
+      //     id: 1,
+      //     label: "中国",
+      //   },
+      // ],
       date: "",
       searchVal: "",
-      minPrice: "",
-      maxPrice: "",
+      minMoney: "",
+      maxMoney: "",
       minOrder: "",
       maxOrder: "",
       tableData: [],
@@ -175,7 +207,7 @@ export default {
         {
           width: 263,
           label: "姓名",
-          prop:'username',
+          prop:'nickname',
         },
         {
           width: 261,
@@ -197,14 +229,25 @@ export default {
       ],
       currentPage: 1,
       selectItem:[],// 选中的数据
+      endOptions:{
+        disabledDate(time) {
+          return time.getTime() > new Date().getTime() ;
+        },
+      },
     };
-  },
+  }, 
   methods: {
     ChangeActive: function (index) {
       this.acitve = index;
     },
-    ChangeSelect: function (e) {
-      console.log(e);
+    ChangeSelect: function (newVal) {
+      if(newVal){
+        this.requestParams.beginTime = newVal[0];
+        this.requestParams.endTime = newVal[1];
+      } else {
+        this.requestParams.beginTime = ''
+        this.requestParams.endTime = ''
+      }
     }, 
     toDetail:function(e){ 
       localStorage.setItem('customerDetail',JSON.stringify(e))
@@ -219,6 +262,15 @@ export default {
       this.selectItem.map(i=>{
         
       })
+    },
+    Screen:function(){ 
+      this.requestParams.minOrder = this.minOrder
+      this.requestParams.maxOrder = this.maxOrder
+      this.requestParams.minMoney = this.minMoney
+      this.requestParams.maxMoney = this.maxMoney
+    },
+    Search:function(){
+      this.requestParams.keyword = this.searchVal
     },
   },
 };
@@ -275,10 +327,7 @@ export default {
     display: flex;
     justify-content: space-around;
     border-bottom: 1px solid #f1f1f6;
-    flex-wrap: wrap;
-    /deep/ .el-input__inner {
-      padding: 0 8px;
-    }
+    flex-wrap: wrap; 
     .search-box {
       display: flex;
       flex: 1;
@@ -374,16 +423,7 @@ export default {
       }
     }
   }
-}
-/deep/.el-input__inner {
-  height: 36px !important;
-}
-/deep/.el-input__icon {
-  line-height: 36px !important;
-}
-/deep/ .el-range-separator {
-  line-height: 35px;
-}
+}  
 /deep/ .el-table--enable-row-transition .el-table__body td{
   height: 70px;
 }

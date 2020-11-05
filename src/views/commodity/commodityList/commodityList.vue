@@ -23,16 +23,16 @@
       <div class="conditions">
         <!-- 分类 -->
         <el-select
-          v-model="requestParams.cateId"
+          v-model="requestParams.tagId"
           clearable
           placeholder="分类"
           style="margin-right: 10px; width: 210px"
         >
           <el-option
             v-for="item in categoryList"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
+            :key="item.id"
+            :label="item.title"
+            :value="item.id"
           ></el-option>
         </el-select>
         <!-- 标签 -->
@@ -46,32 +46,38 @@
           <el-option label="商品名称" value="storeName"></el-option>
         </el-select>
         <div class="search-box">
-          <el-input v-model="searchVal" placeholder="请输入商品名称或SKU ">
+          <el-input
+            v-model="searchVal"
+            placeholder="请输入商品名称或SKU"
+            @change="
+              (e) => {
+                requestParams.storeName = e;
+              }
+            "
+          >
             <el-button slot="append" @click="Search">搜索</el-button>
           </el-input>
         </div>
       </div>
-      <table-tem
-        :showImg="true"
-        :option="'操作（预览）'"
+      <table-tem  
         :option-list="[active == 0 ? '下架' : '上架', '删除']"
         :requestUrl="'api/yxStoreProduct'"
         :requestParams="requestParams"
-        :tableHeader="tableHeader"
-        :selectItemArr="selectItem"
-        @GetCategory="
-          (e) => {
-            categoryList = e;
-          }
-        "
-        @SelectionChange="
-          (e) => {
-            selectItem = e;
-          }
-        "
+        :tableHeader="tableHeader" 
+        :isrefresh="isrefresh" 
         @rowClick="toDetail"
         @BatchOption="BatchOption"
-      ></table-tem>
+      >
+        <template slot="image" slot-scope="params">
+          <span
+            class="small-img"
+            :style="{ backgroundImage: 'url(' + params.params.image + ')' }"
+          ></span>
+        </template>
+        <template slot="option" slot-scope="params">
+          <span @click.stop="(e)=>{params}" class="textBtn">预览</span>
+        </template>
+      </table-tem> 
     </div>
     <!-- 导入 -->
     <el-dialog title="使用CSV文件导入商品" :visible.sync="showImport">
@@ -127,7 +133,8 @@
 <script>
 import exportFunction from "@/components/exportFunction";
 import tableTem from "@/components/tableTem";
-import { onsale, del } from "@/api/yxStoreProduct";
+import { delMany, onsaleAll } from "@/api/yxStoreProduct";
+import { getCates } from "@/api/yxStoreCategory";
 export default {
   components: {
     exportFunction,
@@ -137,13 +144,12 @@ export default {
     return {
       requestParams: {
         page: 0,
-        size: 10,
+        size: 30,
         sort: "id,desc",
         isShow: 1,
-        isDel: 0,
-        cateId: "",
-        isrefresh: 0,
+        isDel: 0, 
       },
+      isrefresh:0,
       nav: [
         {
           id: 1,
@@ -168,6 +174,7 @@ export default {
       tableHeader: [
         {
           prop: "image",
+          label: "",
         },
         {
           prop: "storeName",
@@ -180,13 +187,27 @@ export default {
           label: "分类",
           width: "443",
         },
+        {
+          prop: "option",
+          label: "操作",
+          width: "80",
+        },
       ],
       currentPage: 1,
       showExport: false,
       showImport: false,
-      checkImport: true,
-      selectItem: [], // 选中的商品
+      checkImport: true, 
     };
+  },
+  created() {
+    // 获取分类信息
+    let par = {
+      size: 99,
+      page: 0,
+    };
+    getCates(par).then((res) => { 
+      this.categoryList = res.content;
+    });
   },
   methods: {
     // 改变搜索条件
@@ -196,79 +217,55 @@ export default {
     },
     // 搜索
     Search: function () {
-      let searchVal = this.searchVal;
-      let searchType = this.searchType;
-      if (searchType) {
-        let par = {
-          type: searchType,
-          value: searchVal,
-          [searchType]: searchVal,
+      let searchVal = this.searchVal; 
+      let par = { 
+          storeName: searchVal, 
           ...this.requestParams,
         };
         this.requestParams = par;
-      } else {
-        let par = this.requestParams;
-        delete par["storeName"];
-        delete par["type"];
-        this.requestParams = { ...par };
-      }
     },
     // 批量操作
-    BatchOption: function (e) {
+    BatchOption: function (e,selectItem) {
       console.log(e);
       let that = this;
       // 0为上下架  1为删除
       if (e === 0) {
         // 0为下架  1为上架
+        let arr = [];
+        let par = {};
+        selectItem.map((i) => {
+          arr.push(i.id);
+        });
         if (this.active == 0) {
-          let par = { status: 1 };
-          this.selectItem.map((i) => {
-            onsale(i.id, par).then(() => {
-              that.$message.success("操作成功");
-              that.requestParams.isrefresh += 1;
-              that.selectItem = [];
-            });
-          });
+          par = {
+            ids: arr,
+            status: 0,
+          };
         } else {
-          let par = { status: 0 };
-          this.selectItem.map((i) => {
-            onsale(i.id, par).then(() => {
-              that.$message.success("操作成功");
-              that.requestParams.isrefresh += 1;
-              that.selectItem = [];
-            });
-          });
+          par = {
+            ids: arr,
+            status: 1,
+          };
         }
+        onsaleAll(par).then(() => {
+          that.$message.success("操作成功");
+          that.requestParams.isrefresh += 1; 
+        });
       } else {
-        this.selectItem.map((i) => {
-          del(i.id).then(() => {
-            that.$message.success("操作成功");
-            that.requestParams.isrefresh += 1;
-            that.selectItem = [];
-          });
+        let arr = [];
+        selectItem.map((i) => {
+          arr.push(i.id);
+        });
+        delMany(arr).then(() => {
+          that.$message.success("操作成功");
+          that.requestParams.isrefresh += 1; 
         });
       }
     },
-    handleSelectionChange: function (e) {
-      console.log(e);
-    },
-    handleEdit: function (e) {
-      console.log(e);
-    },
-    handleDelete: function (e) {
-      console.log(e);
-    },
-    handleSizeChange: function (e) {
-      console.log(e);
-    },
-    handleCurrentChange: function (e) {
-      console.log(e);
-    },
     ToAddShop: function () {
-      this.$router.push("/commodity/add");
+      this.$router.push("/commodity/edit");
     },
-    toDetail: function (e) {
-      console.log(e);
+    toDetail: function (e) { 
       this.$router.push({ path: "/commodity/edit", query: { id: e.id } });
     },
   },
@@ -285,15 +282,6 @@ export default {
   justify-items: center;
   justify-content: space-between;
   flex: 1;
-  /deep/.el-button,
-  .el-button--medium {
-    padding: 10px 20px;
-    font-size: 14px;
-    border-radius: 4px;
-  }
-  /deep/.el-button + .el-button {
-    margin-left: 20px !important;
-  }
 }
 .content {
   overflow: hidden;
@@ -326,22 +314,11 @@ export default {
     display: flex;
     justify-content: space-around;
     border-bottom: 1px solid #f1f1f6;
-    flex-wrap: wrap;
-    /deep/ .el-input__inner {
-      padding: 0 8px;
-    }
+    flex-wrap: wrap; 
     .search-box {
       display: flex;
       flex: 1;
-      /deep/.el-input-group__append {
-        background: #fff;
-        color: #000000;
-      }
-    }
-    /deep/ .el-button {
-      height: 36px;
-      padding: 0 15px;
-    }
+    } 
   }
 }
 .download-tpl-link-new {
@@ -351,15 +328,15 @@ export default {
   cursor: pointer;
   float: right;
 }
-
-/deep/.el-input__inner {
-  height: 36px !important;
-}
-/deep/.el-input__icon {
-  line-height: 36px !important;
-}
-/deep/ .el-range-separator {
-  line-height: 35px;
-}
+.textBtn {
+  padding: 10px 0;
+  color: #273a8a;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: 400;
+  margin-left: 10px;
+  text-decoration: underline;
+}  
 </style>
 

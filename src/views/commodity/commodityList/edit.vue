@@ -42,6 +42,7 @@
             <span class="text-span">售价</span>
             <el-input
               class="box-item-entry"
+              type="number"
               v-model.number="attr.price"
               size="medium"
               placeholder="请输入商品现价"
@@ -53,6 +54,7 @@
             <span class="text-span">库存数量</span>
             <el-input
               v-model.number="attr.stock"
+              type="number"
               size="medium"
               placeholder="请输入商品库存"
             ></el-input>
@@ -98,17 +100,17 @@
             <el-select
               class="box-item-entry"
               size="medium"
-              v-model="detail.tagIds"
+              v-model="tagIds"
               multiple
               placeholder="请选择商品分类"
             >
               <el-option
-                v-for="item in categoryList" 
+                v-for="item in categoryList"
                 :key="item.id"
                 :label="item.title"
                 :value="item.id"
               ></el-option>
-            </el-select> 
+            </el-select>
           </div>
         </div>
         <div class="product-right">
@@ -116,6 +118,7 @@
             <span class="text-span">原价</span>
             <el-input
               class="box-item-entry"
+              type="number"
               v-model.number="attr.ot_price"
               size="medium"
               placeholder="请输入商品原价"
@@ -124,14 +127,15 @@
             </el-input>
           </div>
           <div class="item-margin" v-if="show">
-            <span class="text-span" >商品重量</span>
+            <span class="text-span">商品重量</span>
             <el-input
               class="box-item-entry"
+              type="number"
               v-model.number="attr.weight"
               size="medium"
               placeholder="请输入商品重量"
             >
-              <span slot="append">Kg</span>
+              <span slot="append">g</span>
               <!-- <el-select v-model="shopWeightSelectValue" >
                 <el-option
                   v-for="item in shopWeightList"
@@ -145,20 +149,21 @@
           <div class="item-margin">
             <span class="text-span">标签</span>
             <el-input
-                  class="input-new-tag"
-                  v-model="tags"
-                  ref="saveTagInput"
-                  size="medium"
-                  placeholder="请在此输入内容并按回车键"
-                  @keyup.enter.native="AddTag"
-                ></el-input>
+              class="input-new-tag"
+              v-model="classIds"
+              ref="saveTagInput"
+              size="medium"
+              placeholder="请在此输入内容并按回车键"
+              @keyup.enter.native="AddTag"
+            ></el-input>
             <el-tag
               :key="index"
-              v-for="(item,index) in tagList"
+              v-for="(item, index) in classList"
               closable
               :disable-transitions="false"
-              @close="tagList.splice(index,1)">
-              {{item}}
+              @close="classList.splice(index, 1)"
+            >
+              {{ item }}
             </el-tag>
           </div>
         </div>
@@ -231,13 +236,14 @@
           <div class="spec-category">
             <div
               v-for="(item, index) in shopAttributeList"
-              :key="item.value"
+              :key="index"
               class="item"
             >
               <el-input
                 v-model="item.value"
                 size="medium"
                 style="width: 200px"
+                @change="CheckAttrName(index)"
               ></el-input>
               <div class="detail">
                 <el-tag
@@ -314,7 +320,10 @@
                     @click.stop="SelectPicture(scope.$index)"
                     class="tableImage"
                   >
-                    <el-image :src="scope.row[item.slot]">
+                    <el-image
+                      :src="scope.row[item.slot]"
+                      style="width: 100%; height: 100%"
+                    >
                       <div slot="error" class="image-slot">
                         <i
                           class="el-icon-plus"
@@ -326,6 +335,7 @@
                   </div>
                   <input
                     class="edit-inp"
+                    type="number"
                     v-model.number="scope.row[item.slot]"
                     v-else-if="
                       item.title == '售价' ||
@@ -463,12 +473,10 @@
   </div>
 </template> 
 <script>
-let storeId = localStorage.getItem("storeId"); // 初始化请求参数
-
 import tinymceEditor from "@/components/tinymce-editor";
 import tableTem from "@/components/tableTem";
 import { add, edit, getInfo, isFormatAttr } from "@/api/yxStoreProduct";
-import {getCates} from "@/api/yxStoreCategory"
+import { getCates } from "@/api/yxStoreCategory";
 export default {
   components: {
     tinymceEditor,
@@ -476,6 +484,7 @@ export default {
   },
   data() {
     return {
+      id: "",
       token: "",
       isGrounding: true,
       price: "",
@@ -503,9 +512,10 @@ export default {
         },
       ],
       categoryValue: "", // 分类值
+      tagIds: "",
       categoryList: [], // 分类列表
-      tags: "", // 商品标签
-      tagList:[],// 商品标签列表
+      classIds: "", // 商品标签
+      classList: [], // 商品标签列表
       msg: "", // 富文本内容
       upLoadHeaders: {}, // 上传头部字段
       dialogVisible: false, // 上传图片是否显示
@@ -538,8 +548,10 @@ export default {
       showTable: false,
       tableData: [],
       specifications: "", // 规格设置
-      detail: {},
-      id: "",
+      detail: {
+        store_name: "",
+        description: "",
+      },
       // 表格变量
       isActive: false, // 批量操作按钮是否可以点击
       optionIndex: 0, // 批量修改类型
@@ -557,12 +569,16 @@ export default {
           value: 3,
         },
         {
-          label: "修改库存",
+          label: "修改图片",
           value: 4,
         },
         {
-          label: "修改重量",
+          label: "修改库存",
           value: 5,
+        },
+        {
+          label: "修改重量",
+          value: 6,
         },
       ],
       requestParams: {},
@@ -576,65 +592,97 @@ export default {
       selectItem: [],
       batchOperation: false, // 是否显示批量修改输入框
       batchValue: "",
-      attr: {}, // 单规格时数据
+      attr: {
+        price: "",
+        ot_price: "",
+        weight: "",
+        stock: "",
+      }, // 单规格时数据
       // 编辑网站seo
       editSEO: false,
       seoTitle: "",
       seoLink: "",
       seoDesc: "",
-      show:true,// 是否显示其他项
+      show: true, // 是否显示其他项
     };
   },
   created() {
-    console.log(this.$route.query.id);
-    this.id = this.$route.query.id;
+    if (this.$route.query.id) {
+      this.id = this.$route.query.id;
+    } else {
+      this.id = 0;
+    }
     this.GetInfo();
     this.token = localStorage.getItem("token");
   },
   methods: {
     // 获取信息
     GetInfo() {
+      let that = this;
+      let storeId = localStorage.getItem("storeId"); // 初始化请求参数
       let par = {
-        id: this.$route.query.id,
+        id: this.id,
         storeId,
       };
-      let that = this;
-      getInfo(par).then((res) => { 
-        that.detail = { ...res.productInfo };
-        that.attr = res.productInfo.attr;
-        that.detail.cate_id = Number(that.detail.cate_id);
-        that.weight = res.productInfo.attr.weight;
-        // 判断是否上架
-        that.detail.is_show == Number(that.isGrounding);
-        // 判断是单规格还是多规格
-        if(res.productInfo.spec_type == 1){ 
-          // 多规格
-          that.shopAttributeList = res.productInfo.items;
-          that.InitFormatAttr();
-          this.show = false;
-        } 
-        // 初始化图片列表
-        let arr = [];
-        arr.push({ url: res.productInfo.image });
-        res.productInfo.slider_image.map((i) => {
-          let obj = {};
-          obj.url = i;
-          arr.push(obj);
-        });
-        that.fileList = arr;
+      getInfo(par).then((res) => {
+        if (that.id === 0) {
+          this.detail = { ...res.productInfo };
+          this.temp_id = "";
+        } else {
+          that.detail = { ...res.productInfo };
+          that.tagIds = res.tagList;
+          if (res.productInfo.classIds) {
+            that.classList = res.productInfo.classIds.split(",");
+            // if(res.productInfo.classIds.indexOf(',')<0){
+            //   that.classList.push(res.productInfo.classIds)
+            // } else {
 
-        // 分类和标签 
+            // }
+          }
 
-        this.detail.tagIds = res.tagList 
+          that.attr = res.productInfo.attr;
+          if (res.productInfo.attr.weight === 0) {
+            that.attr.weight = "";
+          }
+          if (res.productInfo.attr.ot_price === 0) {
+            that.attr.ot_price = "";
+          }
+          if (res.productInfo.attr.stock === 0) {
+            that.attr.stock = "";
+          }
+          that.detail.cate_id = Number(that.detail.cate_id);
+          // that.weight = res.productInfo.attr.weight;
+          // // 判断是否有标签
+          // if (res.productInfo.classIds) {
+          //   that.classIds = res.productInfo.classIds;
+          // }
+          // 判断是否上架
+          that.detail.is_show == Number(that.isGrounding);
+          // 判断是单规格还是多规格
+          if (res.productInfo.spec_type == 1) {
+            // 多规格
+            that.shopAttributeList = res.productInfo.items;
+            that.InitFormatAttr();
+            this.show = false;
+          }
+          // 初始化图片列表
+          let arr = [];
+          arr.push({ url: res.productInfo.image });
+          res.productInfo.slider_image.map((i) => {
+            let obj = {};
+            obj.url = i;
+            arr.push(obj);
+          });
+          that.fileList = arr;
+        }
       });
       let params = {
         page: 0,
         size: 20,
-      }
-      getCates(params).then(res=>{
-        console.log(res);
-        this.categoryList = res.content
-      })
+      };
+      getCates(params).then((res) => {
+        this.categoryList = res.content;
+      });
     },
     PictureCardPreview(file) {
       this.imageUrl = file.url;
@@ -656,12 +704,26 @@ export default {
       this.showUpload = false;
     },
     // 添加规格
-    AddOption: function () { 
-      this.shopAttributeList.push({
-        value: "",
-        inputValue: "",
-        detail: [],
-      });
+    AddOption: function () {
+      if (this.shopAttributeList.length === 0) {
+        this.shopAttributeList.push({
+          value: "color",
+          inputValue: "",
+          detail: [],
+        });
+      } else if (this.shopAttributeList.length === 1) {
+        this.shopAttributeList.push({
+          value: "size",
+          inputValue: "",
+          detail: [],
+        });
+      } else {
+        this.shopAttributeList.push({
+          value: "",
+          inputValue: "",
+          detail: [],
+        });
+      }
     },
     // 关闭规格
     CloseOption: function (e) {
@@ -669,38 +731,57 @@ export default {
       this.shopAttributeList.splice(e, 1);
       this.InitFormatAttr();
     },
+    // 判断属性名称是否一样
+    CheckAttrName:function(index){ 
+      let val = this.shopAttributeList[index].value; 
+      console.log(val);
+      for(var i in this.shopAttributeList){
+        if(this.shopAttributeList[i].value == val && index != i){ 
+          this.$message.warning('重复属性')
+          this.shopAttributeList[index].value = '';
+          return false
+        }
+      }
+    },
     // 新增规格值
     InputConfirm: function (index) {
       let val = this.shopAttributeList[index].inputValue;
-      let detail = this.shopAttributeList[index].detail;
-      if (detail.indexOf(val) > -1) {
-        console.log("已存在该标签");
+      val = val.replace(/(^\s*)|(\s*$)/g, ""); // 使用正则去除首尾空格
+      if (val) {
+        let detail = this.shopAttributeList[index].detail;
+        if (detail.indexOf(val) > -1) {
+          this.$message.error("已存在该标签");
+          return false;
+        } else {
+          detail.push(val);
+          this.showTable = true;
+        }
+        // 删除对应存在的规格值
+        delete this.shopAttributeList[index].inputValue;
+        this.InitFormatAttr();
       } else {
-        detail.push(val);
-        this.showTable = true;
+        this.shopAttributeList[index].inputValue = "";
       }
-      console.log(this.shopAttributeList);
-      // 删除对应存在的规格值
-      delete this.shopAttributeList[index].inputValue;
-      this.InitFormatAttr();
     },
     // 关闭规格值
     CloseTag: function (item, index) {
       let arr = this.shopAttributeList;
       arr[index].detail.splice(arr[index].detail.indexOf(item), 1);
-      if (arr[index].detail.length == 0) {
-        arr.splice(index, 1);
-        this.InitFormatAttr();
-      }
+      this.InitFormatAttr();
     },
     // 初始化规格
     InitFormatAttr: function () {
       // 多规格时初始化表单
+      let arr = [];
+      this.shopAttributeList.map((i) => {
+        if (i.detail.length > 0) {
+          arr.push(i);
+        }
+      });
       let par = {
-        attrs: this.shopAttributeList,
+        attrs: arr,
       };
-      console.log(this.$route.query.id);
-      isFormatAttr(this.$route.query.id, par).then((r) => {
+      isFormatAttr(this.id, par).then((r) => {
         let headerData = [...r.header];
         let arr = [];
         r.header.map((v, i) => {
@@ -714,11 +795,15 @@ export default {
           }
         });
         this.tableHeader = arr;
-        console.log(r.value);
-        r.value.map((v, i) => {
-          v.index = i;
-        });
-        this.table = r.value;
+        if (this.id !== "" && this.detail.spec_type == 1 && this.table == '') {
+          this.table = this.detail.attrs;
+        } else {
+          console.log(r.value);
+          r.value.map((v, i) => {
+            v.index = i;
+          });
+          this.table = r.value;
+        }
       });
     },
     // 选择批量操作数据
@@ -729,17 +814,25 @@ export default {
     BatchOperation: function (e) {
       let item = this.selectItem;
       let table = this.table;
+      console.log(e);
       this.optionIndex = e - 1;
-      // 1 删除; 2 修改价格; 3 修改原价; 4 修改库存; 5 修改重量
+      // 1 删除; 2 修改价格; 3 修改原价; 4 修改图片; 5 修改库存; 6 修改重量
       if (e == 1) {
         let arr = [];
         item.map((i) => {
           table.map((item, inx) => {
-            if (item.index == i.index) {
+            if (item.index == i.index) {  
+              
+              if(this.shopAttributeList.length === 1){ 
+                this.shopAttributeList[0].detail.splice(this.shopAttributeList[0].detail.indexOf(table[inx].value1),1) 
+              }
               table.splice(inx, 1);
+              item.is_show = 0;
             }
           });
         });
+      } else if (e == 4) {
+        this.showDialog = true;
       } else {
         this.batchOperation = true;
       }
@@ -779,7 +872,6 @@ export default {
     },
     // 选择图片
     SelectPicture: function (index) {
-      console.log(index);
       this.tableIndex = index;
       if (this.table[index].pic) {
         this.showDelImage = true;
@@ -789,65 +881,77 @@ export default {
     // 提交图片
     SubImage: function () {
       let that = this;
-      that.table[that.tableIndex].pic = that.fileList[that.active].url;
+      if (that.fileList[that.active].url.indexOf("blob:") === 0) {
+        that.fileList[that.active].url =
+          that.fileList[that.active].response.link;
+      }
+      if (that.tableIndex === "") {
+        that.table.map((i) => {
+          i.pic = that.fileList[that.active].url;
+        });
+      } else {
+        that.table[that.tableIndex].pic = that.fileList[that.active].url;
+      }
       this.showDialog = false;
+      this.tableIndex = "";
     },
     DelImage: function () {
       this.table[this.tableIndex].pic = "";
       this.showDialog = false;
     },
     // 添加商品标签
-    AddTag(){
-      if(this.tags){
-          
-      }
-      this.tagList.map(i=>{
-        if(i == this.tags){
-          this.$message.error('')
+    AddTag() {
+      let that = this;
+      this.classIds = this.classIds.replace(/(^\s*)|(\s*$)/g, ""); // 使用正则去除首尾空格
+      if (this.classIds) {
+        for (var i in this.classList) {
+          if (this.classList[i] == this.classIds) {
+            that.$message.error("已存在该标签");
+            return false;
+          }
         }
-      })
-      this.tagList.push(this.tags);
-      console.log(this.tagList);
-      this.tags = '';
+        this.classList.push(this.classIds);
+        this.classIds = "";
+      }
     },
     // 保存修改
     Save: function () {
       let that = this;
+      // 判断是否输入标题
+      if (this.detail.store_name == "" || this.detail.store_name == undefined) {
+        that.$message.error("请输入商品名称");
+        return false;
+      }
+      // 判断是否选择分类
+      if (!this.tagIds || this.tagIds.length === 0) {
+        that.$message.error("请选择商品分类");
+        return false;
+      }
+      // 判断是否有标签
+      console.log(this.classList);
+      if (this.classList) {
+        this.detail.classIds = this.classList.toString();
+        console.log(this.detail.classList);
+      }
+      // 判断是否输入商品详情
+      if (!this.detail.description) {
+        that.$message.error("请输入商品详情");
+        return false;
+      }
       // 判断是否上传图片
-      if (this.fileList.length < 0) {
-        return that.$message.error("请上传商品图片");
+      if (this.fileList.length <= 0) {
+        that.$message.error("请上传商品图片");
+        return false;
       }
       // 判断是否有新增图片
       this.fileList.map((i) => {
         if (i.hasOwnProperty("response")) {
           i.url = i.response.link;
         }
-      }); 
-      // 判断是否选择分类
-      if(this.detail.tagIds){
-        this.detail.tagIds = this.detail.tagIds.toString();
-      } else {
-        this.$message.error('请选择商品分类')
-        return false;
-      }
-      // 判断是否为多规格数据控制库存
-      if (this.table.length === 0) { 
-        if(this.attr.price == '' ||this.attr.price == 0){
-          return that.$message.error("商品售价不能为0");
-        }
-      } else {
-        let arr = this.table;  
-        for(let i in arr){ 
-          if(arr[i].price == 0 || arr[i].price == ''){
-            return that.$message.error("请完善多规格表单，商品售价不能为0");
-          }
-        }
-      }
-      this.detail.is_show = Number(this.isGrounding); 
-      this.detail.image = this.fileList[0].url;
-      this.detail.attr = this.attr; 
+      });
       // 初始化轮播图
       this.detail.slider_image = [];
+      this.detail.image = this.fileList[0].url;
       // 如果只有一张图片，则该图片既为主图又为轮播图，否则其他图片作为轮播图
       if (this.fileList.length == 1) {
         this.detail.slider_image.push(this.fileList[0].url);
@@ -857,40 +961,152 @@ export default {
           this.detail.slider_image.push(i.url);
         });
       }
-      // 判断是否修改多规格数据 
+      // 判断是否为多规格数据控制库存
+      if (this.table.length === 0) {
+        // 判断用户是否输入售价
+        if (this.attr.price == "" || this.attr.price == 0) {
+          that.$message.error("商品售价不能为0");
+          return false;
+        }
+        // 判断是否输入原价
+        if (this.attr.ot_price > 0) {
+          if (this.attr.price > this.attr.ot_price) {
+            that.$message.error("商品售价不能大于商品原价");
+            return false;
+          }
+        } else {
+          this.attr.ot_price = 0;
+        }
+        // 判断用户是否输入库存，默认为空
+        if (this.attr.stock == "") {
+          this.attr.stock = 0;
+        }
+        // 判断用户是否输入重量，默认为空
+        if (this.attr.weight == "") {
+          this.attr.weight = 0;
+        }
+      } else {
+        console.log("多商品");
+        let arr = this.table;
+        for (let i in arr) {
+          if (arr[i].price == 0 || arr[i].price == "") {
+            that.$message.error("请完善多规格表单，商品售价不能为0");
+            return false;
+          }
+          if (arr[i].ot_price == "") {
+            arr[i].ot_price = 0;
+          }
+          if (arr[i].stock == "") {
+            arr[i].stock = 0;
+          }
+          if (arr[i].weight == "") {
+            arr[i].weight = 0;
+          }
+        }
+      }
+      // 判断是否修改多规格数据
       if (this.table.length > 0) {
-        // 多规格 
-        this.detail.spec_type = 1
-        this.table.map((i) => {
-          i.volume = 0;
-        });
-        this.detail.attrs = this.table || ['',this.attr];
+        // 多规格
+        this.detail.spec_type = 1;
         this.detail.items = this.shopAttributeList;
         this.detail.header = this.tableHeader;
-
+        // 多规格
+        let arr = that.table;
+        arr.map((i) => {
+          i.cost = 0;
+          i.volume = 0;
+        });
+        this.detail.attrs = arr;
       } else {
         // 单规格
-        console.log('单规格')
-        this.detail.spec_type = 0
+        this.detail.spec_type = 0;
         this.detail.header = [];
         this.detail.items = [];
         this.detail.attrs = [this.attr];
-        
-        // this.detail.attrs = this.table || [];
-        this.detail.attr = this.attr; 
-      }   
-      // if(this.detail.classIds){
-      //   this.detail.classIds = this.detail.classIds.toString();
-      // } 
-      
-      add(this.detail).then((res) => {
-        that.$message({
-          message: "修改成功",
-          type: "success",
+        this.detail.attr = this.attr;
+      }
+      this.detail.is_show = Number(this.isGrounding);
+      this.detail.tagIds = this.tagIds.toString();
+      // 基础参数
+      let data = {
+        ficti: 0,
+        id: 0,
+        give_integral: 0,
+        is_benefit: 0,
+        is_best: 1,
+        is_good: 0,
+        is_hot: 0,
+        is_new: 0,
+        is_postage: 0,
+        is_sub: 0,
+        header: [],
+        imageArr: [],
+        items: [],
+        selectRule: "",
+        sliderImageArr: [],
+        sort: 0,
+        spec_type: 0,
+        store_info: "",
+        temp_id: 0,
+        unit_name: "",
+        ...this.detail,
+      };
+      console.log(that.fileList);
+      if (that.id === 0) {
+        if (this.table.length > 0) {
+          // 多规格
+          let arr = that.table;
+          arr.map((i) => {
+            i.cost = 0;
+            i.volume = 0;
+          });
+          data.attr = {
+            pic: that.fileList[0].response.link,
+            price: that.attr.price,
+            cost: 0,
+            ot_price: that.attr.ot_price || 0,
+            stock: that.attr.stock,
+            bar_code: "",
+            weight: that.attr.weight,
+            volume: 0,
+            brokerage: 0,
+            brokerage_two: 0,
+          };
+          data.attrs = arr;
+        } else {
+          data.attrs = [
+            {
+              pic: that.fileList[0].response.link,
+              price: that.attr.price,
+              cost: 0,
+              ot_price: that.attr.ot_price || 0,
+              stock: that.attr.stock || 0,
+              bar_code: "",
+              weight: that.attr.weight || 0,
+              volume: 0,
+              brokerage: 0,
+              brokerage_two: 0,
+            },
+          ];
+        }
+        add(data).then((res) => {
+          that.$message({
+            message: "修改成功",
+            type: "success",
+          });
+          that.$router.push("/commodityList");
         });
-        that.$router.push("/commodityList");
-      });
+      } else {
+        add(data).then((res) => {
+          that.$message({
+            message: "修改成功",
+            type: "success",
+          });
+          that.$router.push("/commodityList");
+        });
+      }
     },
+    Error: function (text) {},
   },
 };
 </script>
@@ -956,9 +1172,9 @@ h1 {
       align-items: center;
       line-height: 40px;
       & > .detail {
+        display: flex;
         flex: 1;
         margin: 0 10px;
-        display: flex;
         flex-wrap: wrap;
         align-items: center;
         -webkit-appearance: none;
@@ -968,12 +1184,16 @@ h1 {
         border: 1px solid #dcdfe6;
         box-sizing: border-box;
         color: #606266;
-        font-size: inherit; 
+        font-size: inherit;
         line-height: 36px;
         outline: 0;
         padding: 0 5px;
         transition: border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
         width: 100%;
+        /deep/.input-new-tag {
+          min-width: 200px;
+          flex: 1;
+        }
         /deep/ .el-input__inner {
           border: 0;
           height: 34px;
@@ -1000,10 +1220,7 @@ h1 {
   padding: 0 -10px;
   /deep/.el-input--suffix {
     width: 70px !important;
-  }
-  /deep/.el-input__inner {
-    padding: 0 10px !important;
-  }
+  } 
 }
 /deep/.el-input-group__append {
   background: #fff;

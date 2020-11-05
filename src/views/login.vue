@@ -3,67 +3,106 @@
     <div class="login-box">
       <div class="form">
         <p class="logo">
-         <span style="font-size: 30px;">XQSHOP</span>
+          <span style="font-size: 30px">XQSHOP</span>
         </p>
-        <p class="desc">{{findPassword?'修改密码':'登录你的店铺'}}</p>
+        <p class="desc">{{ findPassword ? "修改密码" : "登录你的店铺" }}</p>
         <div
           class="data"
-          style="margin-top: 18px; text-align: center;"
+          style="margin-top: 18px; text-align: center"
           v-if="findPassword == false"
         >
           <!--{ type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' } -->
-          <el-form :model="loginData" style="width: 366px; margin: 0px auto;" ref="loginData">
+          <el-form
+            :model="loginData"
+            style="width: 366px; margin: 0px auto"
+            ref="loginData"
+          >
             <el-form-item
               prop="email"
               :rules="[
-            { required: true, message: '请输入您的邮箱地址', trigger: 'blur' }, 
-          ]"
+                {
+                  required: true,
+                  message: '请输入您的邮箱地址',
+                  trigger: 'blur',
+                },
+              ]"
             >
-              <el-input v-model="loginData.email" placeholder="请输入您的邮箱地址" style="width: 366px;"></el-input>
+              <el-input
+                v-model="loginData.email"
+                placeholder="请输入您的邮箱地址"
+                style="width: 366px"
+              ></el-input>
             </el-form-item>
             <el-form-item
               prop="password"
-              :rules="[{ required: true, message: '请输入密码', trigger: 'blur' }]"
+              :rules="[
+                { required: true, message: '请输入密码', trigger: 'blur' },
+              ]"
             >
-              <el-input type="password" v-model="loginData.password" placeholder="请输入密码" style="width: 366px;"></el-input>
+              <el-input
+                type="password"
+                v-model="loginData.password"
+                placeholder="请输入密码"
+                style="width: 366px"
+              ></el-input>
             </el-form-item>
-            <el-form-item prop="code" style="margin: 0px;padding: 0px;">
-				<div class="code">
-					<el-image :src="codeImg" > </el-image>
-					<el-input v-model="loginData.code" placeholder="请输入验证码" ></el-input>
-				</div>
-					  
+            <el-form-item prop="code" style="margin: 0px; padding: 0px">
+              <div class="code">
+                <el-image :src="codeImg"> </el-image>
+                <el-input
+                  v-model="loginData.code"
+                  placeholder="请输入验证码"
+                ></el-input>
+              </div>
             </el-form-item>
-            <p class="item" style="margin-top: 30px;">
+            <p class="item" style="margin-top: 30px">
               <el-button
                 type="primary"
-                style="width: 366px; height: 46px;"
+                style="width: 366px; height: 46px"
                 @click="submitForm('loginData')"
-              >登入</el-button>
+                >登入</el-button
+              >
             </p>
-            <p class="item" style="margin-top: 20px; color: rgb(26, 29, 44);">
-              <span style="cursor: pointer;" @click="findPassword = true">忘记密码</span>
+            <p class="item" style="margin-top: 20px; color: rgb(26, 29, 44)">
+              <span style="cursor: pointer" @click="findPassword = true"
+                >忘记密码</span
+              >
             </p>
           </el-form>
         </div>
-        <div class="forgetdata" style="margin-top: 48px; text-align: center;" v-if="findPassword">
-          <el-form :model="findPasswordData" style="width: 366px; margin: 0px auto;">
+        <div
+          class="forgetdata"
+          style="margin-top: 48px; text-align: center"
+          v-if="findPassword"
+        >
+          <el-form
+            :model="findPasswordData"
+            style="width: 366px; margin: 0px auto"
+          >
             <el-form-item>
               <el-input
                 v-model="loginData.name"
                 placeholder="请输入您的邮箱地址"
-                style="width: 366px;"
+                style="width: 366px"
                 :disabled="true"
               ></el-input>
             </el-form-item>
             <el-form-item>
-              <el-input v-model="loginData.name" placeholder="请输入密码" style="width: 366px;"></el-input>
+              <el-input
+                v-model="loginData.name"
+                placeholder="请输入密码"
+                style="width: 366px"
+              ></el-input>
             </el-form-item>
-            <p class="item" style="margin-top: 30px;">
-              <el-button type="primary" style="width: 366px; height: 46px;">登入</el-button>
+            <p class="item" style="margin-top: 30px">
+              <el-button type="primary" style="width: 366px; height: 46px"
+                >登入</el-button
+              >
             </p>
-            <p class="item" style="margin-top: 20px; color: rgb(26, 29, 44);">
-              <span style="cursor: pointer;" @click="findPassword = true">忘记密码</span>
+            <p class="item" style="margin-top: 20px; color: rgb(26, 29, 44)">
+              <span style="cursor: pointer" @click="findPassword = true"
+                >忘记密码</span
+              >
             </p>
           </el-form>
         </div>
@@ -90,10 +129,8 @@ export default {
       //按下回车提交
       let key = window.event.keyCode;
       //事件中keycode=13为回车事件
-      console.log(key);
       if (key == 13 && that.findPassword == false) {
         // _this.append();
-        console.log(1);
         that.submitForm("loginData");
       }
     };
@@ -110,6 +147,7 @@ export default {
         });
     },
     submitForm(formName) {
+      console.log("测试");
       let that = this;
       this.$refs[formName].validate((valid) => {
         if (valid) {
@@ -118,24 +156,27 @@ export default {
             encrypt(this.loginData.password),
             this.loginData.code,
             this.loginData.uuid
-          ).then((res) => {
-            console.log()
-            localStorage.setItem("token", res.token);
-            this.$router.push("/");
-          }).catch(res=>{ 
-            that.GetCode() 
-          });
-        } else { 
-          console.log("error submit!!");
+          )
+            .then((res) => {
+              localStorage.setItem("token", res.token);
+              this.$router.push("/");
+            })
+            .catch((res) => {
+              that.GetCode();
+            });
+        } else {
           return false;
         }
       });
     },
   },
+  beforeDestroy() {
+    console.log("销毁");
+    document.onkeydown = function(){};
+  },
 };
 </script>
 <style lang="scss" scoped>
-
 .login {
   width: 100%;
   height: 100%;
@@ -181,16 +222,16 @@ export default {
     box-sizing: border-box;
   }
 }
-.code{
-	display: flex !important;
-	justify-content: flex-start!important;
+.code {
+  display: flex !important;
+  justify-content: flex-start !important;
 }
-.code .el-image{
-	padding: 0px 20px 0 0;
-	width: 40%;
-	height: 36px;
+.code .el-image {
+  padding: 0px 20px 0 0;
+  width: 40%;
+  height: 36px;
 }
-.code .el-input .el-input--medium{
-	width: 100%;
+.code .el-input .el-input--medium {
+  width: 100%;
 }
 </style>

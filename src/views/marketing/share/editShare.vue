@@ -2,21 +2,29 @@
   <div class="container">
     <router-link
       to="/share"
-      style="color: #5e7185;margin-bottom:12px;display:inline-block;height:20px;line-height:20px"
+      style="
+        color: #5e7185;
+        margin-bottom: 12px;
+        display: inline-block;
+        height: 20px;
+        line-height: 20px;
+      "
     >
       <i class="el-icon-arrow-left"></i>
       <span>激励分享</span>
     </router-link>
     <h1>
       激励分享
-      <el-dropdown @command="(e)=>command = e">
+      <el-dropdown @command="(e) => (command = e)">
         <el-button>
-          {{command == 1?'开启':'关闭'}}
+          {{ command === 1 ? "开启" : "关闭" }}
           <i class="el-icon-arrow-down el-icon--right"></i>
         </el-button>
-        <el-dropdown-menu slot="dropdown" >
-          <el-dropdown-item v-if="command == 2" :command="1">开启</el-dropdown-item>
-          <el-dropdown-item v-else :command="2">关闭</el-dropdown-item> 
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item v-if="command === 0" :command="1"
+            >开启</el-dropdown-item
+          >
+          <el-dropdown-item v-else :command="0">关闭</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </h1>
@@ -34,11 +42,11 @@
               >
                 <span>优惠描述</span>
               </el-tooltip>
-              <span class="subTitle">{{discountDes.length}}/40字符</span>
-            </h3> 
+              <span class="subTitle">{{ detail.title.length }}/40字符</span>
+            </h3>
             <div>
               <el-input
-                v-model="discountDes"
+                v-model="detail.title"
                 size="medium"
                 maxlength="40"
                 placeholder="请输入分享英文描述"
@@ -56,15 +64,15 @@
               >
                 <span>选择优惠码</span>
               </el-tooltip>
-              <a class="option" target="_blank" href="/discount" >编辑优惠码</a>
+              <a class="option" target="_blank" href="/discount">编辑优惠码</a>
             </h3>
-            <div >
-              <el-select v-model="appliedObjectValue" style="width:100%">
+            <div>
+              <el-select v-model="detail.promId" style="width: 100%">
                 <el-option
-                  v-for="item in appliedObjectList"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
+                  v-for="item in codeList" 
+                  :key="item.id"
+                  :label="item.discountName"
+                  :value="item.id"
                 ></el-option>
               </el-select>
             </div>
@@ -72,186 +80,105 @@
           <!-- 适用对象 -->
           <div class="box">
             <h3 class="title">
-                <el-tooltip
+              <el-tooltip
                 class="item"
                 effect="dark"
                 content="自动使用与手动优惠码相同的适用对象，以方便用户下单。"
                 placement="bottom-start"
               >
                 <span>适用对象</span>
-              </el-tooltip></h3> 
-             <div >
-              <el-select v-model="appliedObjectValue" :disabled="true">
+              </el-tooltip>
+            </h3>
+            <div>
+              <el-select v-model="detail.promId" :disabled="true" style="width:180px">
                 <el-option
-                  v-for="item in appliedObjectList"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
+                  v-for="item in codeList"
+                  :key="item.id"
+                  :label="item.discountName"
+                  :value="item.id"
                 ></el-option>
               </el-select>
             </div>
-          </div>  
+          </div>
         </el-col>
         <el-col :span="8">
           <div class="box">
             <p class="infoTip">信息提示</p>
-            <p class="infoContent">激励分享与手动优惠码互相绑定，若需要使用激励分享，请确保绑定的手动优惠码长时间有效。</p>
+            <p class="infoContent">
+              激励分享与手动优惠码互相绑定，若需要使用激励分享，请确保绑定的手动优惠码长时间有效。
+            </p>
           </div>
         </el-col>
       </el-row>
       <div class="pageSaveBtn">
         <el-button @click="$NavgitorTo('/share')">取消</el-button>
-        <el-button type="primary" :disabled="save">保存</el-button>
-      </div> 
+        <el-button type="primary" @click="Save">保存</el-button>
+      </div>
     </div>
   </div>
 </template> 
 <script>
+import {get} from '@/api/yxStorePromotions'
+import {getShare,edit,add} from '@/api/yxStorePromotionsSharing'
 export default {
   data() {
-    return {
-      command: 1,
-      discountName: "", // 优惠名称
-      discountDes: "", // 优惠描述
-      consumptionValue: 2, // 默认选中的消费条件
-      consumptionList: [
-        // 商品属性列表
-        {
-          value: 1,
-          label: "消费满特定件数",
-        },
-        {
-          value: 2,
-          label: "消费满特定金额",
-        },
-      ],
-      reductionValue: 2, // 默认选中的减免条件
-      reductionList: [
-        // 商品属性列表
-        {
-          value: 1,
-          label: "减免固定金额",
-        },
-        {
-          value: 2,
-          label: "减免%折扣",
-        },
-      ],
-      appliedObjectValue: 3, // 适用对象
-      appliedObjectList: [
-        // 商品属性列表
-        {
-          value: 1,
-          label: "整个订单",
-        },
-        {
-          value: 2,
-          label: "指定商品分类",
-        },
-        {
-          value: 3,
-          label: "指定商品",
-        },
-      ],
-      shopDetailSettingList: [
-        {
-          consumption: "",
-          reduction: "",
-        },
-      ],
-      isPopup: 1, // 是否显示弹窗
-      isShowButton: 1, // 是否显示按钮
-      btnText: "", // 按钮文案
-      checkPage: "", // 选中的模板页面
-      pageList: [], // 模板页面列表
-      showDiscountDetail: false, // 是否显示右边优惠详情
-      save: true,
-      showPage: false,
-
-      activityStartDate: "", // 活动开始时间
-      activityEndDate: "", // 活动结束时间
-      shopDialog: false, // 是否显示选择商品对话框
-      shopCategoryDialog: false, // 是否显示选择商品分类对话框
-      shopLabelValue: "", // 商品标签
-      shopLabelList: [], // 商品标签列表
-      shopCategoryValue: "", // 商品分类
-      shopCategoryList: [], // 商品分类列表
-      shopContent: "", // 商品内容
-      shopData: [], // 表单数据
+    return { 
+      command:0,
+      detail: {
+        title:'',
+        promId:'', 
+      },
+      id:'',
+      codeList: [],
     };
-  },
-  watch: {
-    discountTypeValue: function (n, o) {
-      switch (n) {
-        case 1:
-          this.discountTypeValueOfInfomation = {
-            maxlength: 8,
-            placeholder: "请填写优惠金额",
-            prepend: "优惠金额",
-          };
-          break;
-        case 2:
-          this.discountTypeValueOfInfomation = {
-            maxlength: 2,
-            placeholder: "如输入12，相当于适用对象八八折",
-            prepend: "折扣额度",
-          };
-          break;
+  }, 
+  created(){
+    if (this.$route.query.hasOwnProperty("id")) {
+      this.id = this.$route.query.id;
+    }
+    let par = {
+      status:1
+    }
+    get(par).then(res=>{
+      console.log(res);
+      this.codeList = res.content;
+    })
+    getShare().then(res=>{
+      console.log(res);
+      if(this.id){
+        this.detail = {
+          title:res.content[0].title,
+          promId:res.content[0].promId,
+          id:this.id,
+        }
+        this.command = res.content[0].status;
       }
-    },
+    }) 
   },
   methods: {
-      CheckSwitch:function(e){
-          console.log(e);
-      },
+    CheckSwitch: function (e) {
+      console.log(e);
+    },
     SekectCommand: function (command) {
       this.command = command;
-    },
-    DiscountPrice: function (e) {
-      console.log(e);
-      let price = this.$toDecimal2(e);
-      this.discountPrice = price;
-      console.log(price);
-    },
-    AddFun: function () {},
-    ShowDiglog: function () {
-      switch (this.appliedObjectValue) {
-        case 2:
-          this.shopCategoryDialog = true;
-          break;
-        default:
-          this.shopDialog = true;
-          break;
+    }, 
+    Save:function(){  
+      this.detail.status = this.command
+      if (this.id) {
+        // 修改
+        edit(this.detail).then((res) => {
+          this.$message.success("修改成功");
+          this.$router.push("/share");
+        });
+      } else {
+        // 新增
+        add(this.detail).then((res) => {
+          this.$message.success("新增成功");
+          this.$router.push("/share");
+        });
       }
-    },
-    ResetShopDetailSettingList: function (type) {
-      this.shopDetailSettingList = [
-        {
-          consumption: "",
-          reduction: "",
-        },
-      ];
-    },
-    AddShopDetailSettingOfItem: function (item) {
-      this.shopDetailSettingList.push({
-        consumption: "",
-        reduction: "",
-      });
-    },
-    DelShopDetailSettingOfItem: function (item) {
-      this.shopDetailSettingList.splice(
-        this.shopDetailSettingList.indexOf(item),
-        1
-      );
-    },
-    ChangeShopDetailSettingListItem: function (index) {
-      console.log(index);
-    },
-  },
-  updated() {
-    console.log("更新");
-    this.save = false;
-  },
+    }
+  }, 
 };
 </script>
 <style lang="scss" scoped>
@@ -298,7 +225,7 @@ h1 {
       float: right;
       font-weight: 400;
     }
-  } 
+  }
   & > .infoTip {
     color: #1a1d2c;
     font-size: 14px;
