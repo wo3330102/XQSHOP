@@ -21,7 +21,7 @@ export default {
       list: [
         {
           id: 0,
-          image: "/static/productGroup.png",
+          image: "/static/productReview.png",
           title: "商品评论",
           desc:
             "可以为商品添加评论，为买家提供购买后的反馈，以提高商品的加购率。",
@@ -29,7 +29,7 @@ export default {
         },
         {
           id: 1,
-          image: "/static/productGroup.png",
+          image: "/static/shippingInsurance.png",
           title: "运费险",
           desc:
             "帮助卖家收取额外费用，同时可以增加买家的信任。此功能在各大平台都有很好的表现",
