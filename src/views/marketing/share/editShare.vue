@@ -67,11 +67,15 @@
               <a class="option" target="_blank" href="/discount">编辑优惠码</a>
             </h3>
             <div>
-              <el-select v-model="detail.promId" style="width: 100%">
+              <el-select
+                v-model="detail.promId"
+                @change="ChangeCode"
+                style="width: 100%"
+              >
                 <el-option
-                  v-for="item in codeList" 
+                  v-for="item in codeList"
                   :key="item.id"
-                  :label="item.discountName"
+                  :label="item.promoCode"
                   :value="item.id"
                 ></el-option>
               </el-select>
@@ -89,15 +93,50 @@
                 <span>适用对象</span>
               </el-tooltip>
             </h3>
-            <div>
-              <el-select v-model="detail.promId" :disabled="true" style="width:180px">
+            <div style="display: flex">
+              <el-select
+                v-model="applyObjectDetail.applyObject"
+                :disabled="true"
+                style="width: 180px; margin-right: 20px"
+              >
                 <el-option
-                  v-for="item in codeList"
+                  v-for="item in appliedObjectList"
                   :key="item.id"
-                  :label="item.discountName"
+                  :label="item.label"
                   :value="item.id"
                 ></el-option>
               </el-select>
+              <div v-if="applyObjectDetail.applyObject !== 0" style="flex: 1">
+                <el-select
+                  v-model="select"
+                  :disabled="true"
+                  :placeholder="
+                    applyObjectDetail.applyObject === 2
+                      ? '选择一个或者多个商品'
+                      : '选择一个或者多个商品分类'
+                  "
+                  style="width: 100%"
+                >
+                  <el-option :label="1" :value="1"></el-option>
+                </el-select>
+                <div class="productListTarget">
+                  <table class="discountTargetList">
+                    <tbody>
+                      <tr v-for="item in table" :key="item.id">
+                        <td class="img">
+                          <span
+                            class="small-img"
+                            :style="{
+                              backgroundImage: 'url(' + item.image + ')',
+                            }"
+                          ></span>
+                        </td>
+                        <td class="text">{{ item.title }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         </el-col>
@@ -118,52 +157,111 @@
   </div>
 </template> 
 <script>
-import {get} from '@/api/yxStorePromotions'
-import {getShare,edit,add} from '@/api/yxStorePromotionsSharing'
+import { get, getShare, edit, add } from "@/api/yxStorePromotionsSharing";
 export default {
   data() {
-    return { 
-      command:0,
+    return {
+      command: 0,
       detail: {
-        title:'',
-        promId:'', 
-      },
-      id:'',
+        title: "",
+        yxStorePromotions: {},
+      }, 
+      id: "",
+      select: "",
       codeList: [],
+      applyObjectDetail: {
+        applyObject: 0,
+      },
+      appliedObjectList: [
+        // 商品属性列表
+        {
+          id: 0,
+          label: "整个订单",
+        },
+        {
+          id: 1,
+          label: "指定商品分类",
+        },
+        {
+          id: 2,
+          label: "指定商品",
+        },
+      ],
+      table: [],
     };
-  }, 
-  created(){
+  },
+
+  created() {
     if (this.$route.query.hasOwnProperty("id")) {
       this.id = this.$route.query.id;
     }
-    let par = {
-      status:1
-    }
-    get(par).then(res=>{
-      console.log(res);
-      this.codeList = res.content;
-    })
-    getShare().then(res=>{
-      console.log(res);
-      if(this.id){
-        this.detail = {
-          title:res.content[0].title,
-          promId:res.content[0].promId,
-          id:this.id,
+    get().then((res) => {
+      this.codeList = res;
+    });
+    getShare().then((res) => {
+      if (this.id) {
+        let bool = false;
+        this.codeList.map(i=>{
+          if(i.id == res.content[0].promId){
+            bool = true;
+          }
+        })
+        if(!bool){
+          console.log(1);
+          res.content[0].promId = '';
+        } else {
+          if (res.content[0].yxStorePromotions) {
+          this.applyObjectDetail = res.content[0].yxStorePromotions;
+          this.InitTable(res.content[0].yxStorePromotions);
         }
-        this.command = res.content[0].status;
+        }
+        this.detail = res.content[0]; 
+        this.$nextTick(() => {
+          this.command = res.content[0].status;
+        }); 
+        
       }
-    }) 
+    });
   },
   methods: {
     CheckSwitch: function (e) {
       console.log(e);
     },
-    SekectCommand: function (command) {
-      this.command = command;
-    }, 
-    Save:function(){  
-      this.detail.status = this.command
+    ChangeCode: function (e) {
+      this.codeList.map((i) => {
+        if (i.id === e) {
+          this.applyObjectDetail = i;
+          this.InitTable(i);
+        }
+      });
+    },
+    InitTable: function (e) {
+      let obj = e;
+      let arr = [];
+      if (e) {
+        console.log("1");
+        switch (e.applyObject) {
+          case 0:
+            break;
+          case 1:
+            // 指定商品分类
+            arr = JSON.parse(obj.tagIds);
+            this.table = arr;
+            break;
+          case 2:
+            // 指定商品
+            arr = JSON.parse(obj.prodIds);
+            this.table = arr;
+            break;
+        }
+      }
+    },
+    Save: function () {
+      this.detail.status = this.command;
+      if(this.detail.promId == '' || this.detail.promId == null || this.detail.promId == undefined){
+        this.$message.error('请选择优惠码');
+        return false;
+      }
       if (this.id) {
         // 修改
         edit(this.detail).then((res) => {
@@ -177,8 +275,8 @@ export default {
           this.$router.push("/share");
         });
       }
-    }
-  }, 
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
@@ -327,6 +425,38 @@ h1 {
       color: #1a1d2c;
       line-height: 20px;
       margin-bottom: 8px;
+    }
+  }
+}
+.discountTargetList {
+  margin: 2px 0;
+  width: 100%;
+  line-height: 23px;
+  .img {
+    width: 60px;
+    .small-img {
+      display: inline-block;
+      vertical-align: middle;
+      width: 50px;
+      height: 50px;
+      border-radius: 4px;
+      border: 1px solid #dadde4;
+      background-color: #f7f8fd;
+      background-origin: content-box;
+      background-position: 50% 50%;
+      background-size: contain;
+      background-repeat: no-repeat;
+      overflow: hidden;
+    }
+  }
+  .text {
+    padding-left: 12px;
+  }
+  tr {
+    display: flex;
+    align-items: center;
+    td {
+      padding: 10px 0;
     }
   }
 }

@@ -22,7 +22,7 @@
         :requestUrl="'api/yxStoreTag'"
         :requestParams="requestParams"
         :tableHeader="tableHeader" 
-        :isRefresh="isRefresh"
+        :isReflash="isReflash"
         @rowClick="RowClick"
         @BatchOption="Del" 
       >
@@ -84,11 +84,11 @@ export default {
         sort: "sort,desc", 
         title:'',
       },
-      isRefresh:0, 
+      isReflash:0, 
       loading:true, 
     };
   }, 
-  methods: { 
+  methods: {
     AddCategory: function () {
       this.$router.push("/addCategory");
     }, 
@@ -97,14 +97,21 @@ export default {
       localStorage.setItem('categoryDetail',JSON.stringify(e))
     }, 
     Del:function(e,selectItem){  
-      let par = [];
-      selectItem.map(i=>{ 
-        par.push(i.id)
-      }) 
-      del(par).then(res=>{ 
+      let par = []; 
+      for(var i in selectItem){
+        if(i.count >0){
+          this.$message.error('所选分类下含有商品，无法删除');
+          return false;
+        }
+        par.push(selectItem[i].id) 
+      } 
+      if(par.length>0){
+        del(par).then(res=>{ 
         this.$message.success('删除成功'); 
-        this.isRefresh += 1;
+        this.isReflash += 1;
       })
+      }
+      
     }
   },
 };

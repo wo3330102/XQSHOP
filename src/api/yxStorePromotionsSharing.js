@@ -7,6 +7,15 @@ export function getShare(params) {
   })
 }
 
+export function get() {
+  return request({
+    url: 'api/yxStorePromotionsSharing/promotion',
+    method: 'get', 
+  })
+}
+
+
+
 export function add(data) {
   return request({
     url: 'api/yxStorePromotionsSharing',

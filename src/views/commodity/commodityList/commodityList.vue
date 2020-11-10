@@ -64,7 +64,7 @@
         :requestUrl="'api/yxStoreProduct'"
         :requestParams="requestParams"
         :tableHeader="tableHeader" 
-        :isrefresh="isrefresh" 
+        :isReflash="isReflash" 
         @rowClick="toDetail"
         @BatchOption="BatchOption"
       >
@@ -149,7 +149,7 @@ export default {
         isShow: 1,
         isDel: 0, 
       },
-      isrefresh:0,
+      isReflash:0,
       nav: [
         {
           id: 1,
@@ -249,7 +249,7 @@ export default {
         }
         onsaleAll(par).then(() => {
           that.$message.success("操作成功");
-          that.requestParams.isrefresh += 1; 
+          that.isReflash += 1; 
         });
       } else {
         let arr = [];
@@ -258,7 +258,7 @@ export default {
         });
         delMany(arr).then(() => {
           that.$message.success("操作成功");
-          that.requestParams.isrefresh += 1; 
+          that.isReflash += 1; 
         });
       }
     },

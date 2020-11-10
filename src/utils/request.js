@@ -22,7 +22,7 @@ service.interceptors.request.use(config => {
   config.headers['Authorization'] = getToken() // 让每个请求携带自定义token 请根据实际情况自行修改
   const storeId = localStorage.getItem('storeId')
 
-  if ((config.method === 'post' || config.method === 'put') && config.url.indexOf('api/yxStoreProductReply')<0) {
+  if ((config.method === 'post' || config.method === 'put') && config.url.indexOf('api/yxStoreProductReply')<0 && config.url.indexOf('api/yxStorePromotions/mod')<0) {
     config.data = {
       storeId: storeId,
       ...config.data

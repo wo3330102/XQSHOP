@@ -2,7 +2,7 @@
   <div>
     <el-dialog
       title="添加菜单"
-      width="40%"
+      width="640px"
       :visible.sync="showAddMenuCom"
       @close="CloseDialog"
     >
@@ -22,6 +22,7 @@
         <div class="el-table">
           <el-table
             height="400px"
+            ref="table"
             v-el-table-infinite-scroll="load"
             :infinite-scroll-delay="100"
             :infinite-scroll-distance="100"
@@ -29,6 +30,7 @@
             :show-header="false"
             v-loading="loading"
             @selection-change="SelectionChange"
+            @select="Radio"
           >
             <el-table-column
               v-if="tableData.length > 0"
@@ -83,6 +85,10 @@ export default {
     index: {
       default: "",
     },
+    isRadio: {
+      type: Boolean,
+      default: false,
+    },
   },
   directives: {
     "el-table-infinite-scroll": elTableInfiniteScroll,
@@ -131,62 +137,95 @@ export default {
       subData: [],
       inputValue: "",
       loading: true,
-      url:'',
+      url: "",
+      radio: this.isRadio,
     };
   },
   methods: {
     CloseDialog: function () {
       this.$emit("Close", false);
     },
+    Radio: function (e) {
+      if (this.radio) {
+        this.$refs.table.clearSelection();
+        this.$refs.table.toggleRowSelection(e[e.length - 1]);
+      }
+    },
     SelectionChange: function (e) {
       let that = this;
       let arr = [];
       let input = "";
-      console.log(e);
-      e.map((j) => {
-        let object = {};
-        console.log(j);
-        object.name = j.storeName || j.title;
-        object.id = j.id;
-        object.label = that.active; 
-        arr.push(object);
-      }); 
       // 至此  arr 为需要数据
-      let onOff = false;
-      this.subData.map((i) => {
-        // 如果当前对象在提交数据变量中，则开关打开
-        if (i && i.label == that.active) {
-          onOff = true;
-          i.data = arr;
+      if (this.radio) {
+        if (e.length > 0) {
+          if (e[0]) { 
+            let object = {};
+            object.name = e[e.length - 1].storeName || e[e.length - 1].title;
+            object.id = e[e.length - 1].id;
+            object.label = that.active; 
+            that.inputValue = object.name;
+            this.subData = [object];
+          }
+        } else {
+          that.inputValue = "";
+          this.subData = [];
         }
-      });
-      if (!onOff) {
-        //提交数据变量中含有不含有该分类数据，新增
-        let obj = {
-          label: that.active,
-          data: arr,
-        };
-        that.subData.push(obj);
+        // 单选规则
+      } else {
+        //  多选规则
+        e.map((j) => {
+          let object = {};
+          object.name = j.storeName || j.title;
+          object.id = j.id;
+          object.label = that.active;
+          arr.push(object);
+        });
+        let onOff = false;
+        this.subData.map((i) => {
+          // 如果当前对象在提交数据变量中，则开关打开
+          if (i && i.label == that.active) {
+            onOff = true;
+            i.data = arr;
+          }
+        });
+        if (!onOff) {
+          //提交数据变量中含有不含有该分类数据，新增
+          let obj = {
+            label: that.active,
+            data: arr,
+          };
+          that.subData.push(obj);
+        }
+        that.subData.map((i) => {
+          if (i.data.length > 0) {
+            input += this.nav[i.label].label + "(" + i.data.length + ")，";
+          }
+        });
+        that.inputValue = input;
       }
-      that.subData.map((i) => {
-        if (i.data.length > 0) {
-          input += this.nav[i.label].label + "(" + i.data.length + ")，";
-        }
-      });
-      that.inputValue = input;
     },
-    submitForm: function (res) {
+    submitForm: function () {
       let arr = [];
-      console.log(this.subData)
-      this.subData.map((i) => { 
-        if(i.label === 3){
-          console.log('自定义链接')
-          i.data[0].url = this.url
+      if (this.subData.length > 0) {
+        if (this.radio) { 
+          if (this.subData[0].label === 3) {
+            this.subData[0].url = this.url;
+          }
+          arr = this.subData;
+        } else {
+          this.subData.map((i) => {
+            if (i.label === 3) {
+              console.log("自定义链接");
+              i.data[0].url = this.url;
+            }
+            arr = arr.concat(i.data);
+          });
         }
-        arr = arr.concat(i.data);
-      }); 
-      this.$emit("selectData", arr);
-      this.$emit("Close", false);
+        this.$emit("selectData", arr);
+        this.$emit("Close", false);
+      } else {
+        this.$message.warning("请选择页面");
+      }
     },
     load() {
       let that = this;
@@ -208,8 +247,7 @@ export default {
         this.params.page += 1;
       }
     },
-    getData(e) {
-      console.log("初始请求");
+    getData(e) { 
       this.loading = true;
       this.active = e;
       let that = this;
@@ -257,7 +295,7 @@ export default {
             },
           ];
           break;
-      } 
+      }
       if (that.nav[e].url) {
         request({
           url:
@@ -270,12 +308,14 @@ export default {
           this.loading = false;
         });
       } else {
-        if(e == 3){
-          this.tableData = [{
-            url:'',
-            id:0,
-            title:'External links'
-          }];
+        if (e == 3) {
+          this.tableData = [
+            {
+              url: "",
+              id: 0,
+              title: "External links",
+            },
+          ];
           this.loading = false;
           console.log("自定义输入框");
         }

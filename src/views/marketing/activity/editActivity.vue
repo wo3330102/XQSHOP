@@ -70,10 +70,11 @@
               </el-select>
               <!-- 固定金额 -->
               <el-input
-                v-model.number="detail.discountMoney"
+                v-model="detail.discountMoney"
                 @change="DiscountPrice"
                 v-if="detail.discountType === 0"
                 size="medium"
+                type="number"
                 :maxlength="discountTypeValueOfInfomation[0].maxlength"
                 :placeholder="discountTypeValueOfInfomation[0].placeholder"
                 style="flex: 1"
@@ -87,7 +88,7 @@
               </el-input>
               <!-- 折扣 -->
               <el-input
-                v-model.number="detail.discountQuota"
+                v-model="detail.discountQuota"
                 @change="DiscountPrice"
                 v-if="detail.discountType === 1"
                 size="medium"
@@ -112,6 +113,7 @@
                 v-model="detail.applyObject"
                 size="medium"
                 style="flex: 1"
+                @change="detail.list = []"
               >
                 <el-option
                   v-for="item in appliedObjectList"
@@ -131,7 +133,10 @@
                 }}</el-button
               >
             </div>
-            <div class="discountTargetList" v-if="Boolean(detail.list)">
+            <div
+              class="discountTargetList"
+              v-if="detail.list && detail.list.length > 0"
+            >
               <table>
                 <tr v-for="(item, index) in detail.list" :key="item.id">
                   <td class="img">
@@ -256,7 +261,7 @@
                 >
               </p>
               <el-input
-                :disabled="isAutoApplyOffers"
+                :disabled="isAutoApplyOffers || id !== ''"
                 v-model="detail.promoCode"
                 size="medium"
                 placeholder="请输入优惠码，如：XMAS20OFF"
@@ -353,7 +358,7 @@
         </el-col>
       </el-row>
       <div class="pageSaveBtn">
-        <el-button>取消</el-button>
+        <el-button @click="$NavgitorTo('/activity')">取消</el-button>
         <el-button type="primary" @click="Save">保存</el-button>
       </div>
       <el-dialog title="请选择商品" :visible.sync="shopDialog">
@@ -370,7 +375,12 @@
               size
               placeholder="请选择标签"
               style="width: 200px"
-              @change="initData()"
+              @change="
+                () => {
+                  table = [];
+                  initData();
+                }
+              "
             >
               <el-option
                 v-for="item in shopLabelList"
@@ -381,11 +391,16 @@
             </el-select>
             <!-- 商品分类 -->
             <el-select
-              v-model="requestParams.cateId"
+              v-model="requestParams.tagId"
               size
               placeholder="请选择分类"
               style="width: 200px"
-              @change="initData()"
+              @change="
+                () => {
+                  table = [];
+                  initData();
+                }
+              "
             >
               <el-option
                 v-for="item in shopCategoryList"
@@ -450,7 +465,7 @@
             <el-table-column
               align="left"
               prop="storeName"
-              label="商品分类"
+              label="商品名称"
             ></el-table-column>
           </template>
         </el-table>
@@ -626,14 +641,28 @@ export default {
     if (this.$route.query.hasOwnProperty("id")) {
       this.id = this.$route.query.id;
       let detail = JSON.parse(localStorage.getItem("activityDetail"));
-      if (detail.prodIds) {
-        detail.list = JSON.parse(detail.prodIds);
+      detail.list = [];
+      switch (detail.applyObject) {
+        // 商品分类
+        case 1:
+          if (detail.tagIds) {
+            detail.list = JSON.parse(detail.tagIds);
+          }
+          break;
+        // 商品
+        case 2:
+          console.log(detail.prodIds)
+          if (detail.prodIds) {
+            detail.list = JSON.parse(detail.prodIds);
+          }
+          break;
       }
-      if (detail.tagIds) {
-        detail.list = JSON.parse(detail.tagIds);
+      if (detail.promoCode) {
+        this.isAutoApplyOffers = false;
+      } else {
+        this.isAutoApplyOffers = true;
       }
       this.detail = detail;
-      this.isAutoApplyOffers = true;
       this.disabled = true;
     }
     getCates(this.requestParams).then((res) => {
@@ -643,21 +672,21 @@ export default {
     let that = this;
     this.endOptions = {
       disabledDate(time) {
-          return time.getTime() < that.detail.startTime;
-        },
-    }
+        return time.getTime() < that.detail.startTime - 8.64e7;
+      },
+    };
   },
   methods: {
     // 活动操作
-    Option: function (e) { 
-      let storeId = localStorage.getItem('storeId')
+    Option: function (e) {
+      let storeId = localStorage.getItem("storeId");
       switch (e) {
         case 1:
           // 开启或关闭
           let par = {
             id: this.id,
             status: this.detail.status === 1 ? 0 : 1,
-            storeId:storeId
+            storeId: storeId,
           };
           editStatus(par).then((res) => {
             this.$message.success("修改成功");
@@ -676,8 +705,9 @@ export default {
     },
     DiscountPrice: function (e) {
       let num = this.$toDecimal2(e);
-      if (this.discountType === 0) {
-        this.discountMoney = num;
+      console.log(num);
+      if (this.detail.discountType === 0) {
+        this.detail.discountMoney = num;
       }
     },
     // 显示对话框
@@ -687,6 +717,8 @@ export default {
         page: 0,
       };
       this.shopDialog = true;
+      this.table = [];
+      console.log(this.detail.applyObject);
       this.initData();
     },
     // 加载表单数据
@@ -696,14 +728,20 @@ export default {
         case 1:
           getCates(this.requestParams).then((res) => {
             console.log(res);
-            this.table = res.content;
+            let arr = this.table.concat(res.content);
+            if (arr.length <= res.totalElements) {
+              this.table = arr;
+            }
             this.tableTotal = res.totalElements;
           });
           break;
         case 2:
           get(this.requestParams).then((res) => {
             console.log(res);
-            this.table = res.content;
+            let arr = this.table.concat(res.content);
+            if (arr.length <= res.totalElements) {
+              this.table = arr;
+            }
             this.tableTotal = res.totalElements;
           });
           break;
@@ -717,14 +755,49 @@ export default {
     SelectItem: function (e) {
       this.selectItem = e;
     },
-    CheckSelectItem: function (res) {
-      this.shopDialog = false; 
-      if(this.detail.list.length>0){
-        this.detail.list = this.detail.list.concat(this.selectItem)
-      } else {
-        this.detail.list = this.selectItem;
+    CheckSelectItem: function () {
+      this.shopDialog = false;
+      let arr = [];
+      switch (this.detail.applyObject) {
+        // 商品分类
+        case 1:
+          this.selectItem.map((i) => {
+            let obj = {
+              id: i.id,
+              image: i.pic,
+              title: i.title,
+            };
+            arr.push(obj);
+          });
+          break;
+        // 商品
+        case 2:
+          console.log(2);
+          this.selectItem.map((i) => {
+            let obj = {
+              id: i.id,
+              image: i.image,
+              title: i.storeName,
+            };
+            arr.push(obj);
+          });
+          break;
       }
-      console.log(this.detail.list);
+      if (this.detail.list && this.detail.list.length > 0) {
+        arr.map((i) => {
+          let bool = true;
+          this.detail.list.map((j) => {
+            if (JSON.stringify(i) == JSON.stringify(j)) {
+              bool = false;
+            }
+          });
+          if (bool) {
+            this.detail.list.push(i);
+          }
+        });
+      } else {
+        this.detail.list = arr;
+      }
     },
     Del: function (index) {
       console.log(index);
@@ -735,9 +808,11 @@ export default {
     Search: function () {
       if (this.detail.applyObject == 1) {
         this.requestParams.title = this.shopContent;
+        this.table = [];
         this.initData();
       } else {
         this.requestParams.storeName = this.shopContent;
+        this.table = [];
         this.initData();
       }
     },
@@ -746,55 +821,57 @@ export default {
         this.$message.error("请输入活动名称");
         return false;
       }
-      if (this.detail.startTime == "") {
+      if (this.detail.startTime == "" || this.detail.startTime == null) {
         this.$message.error("请选择活动开始时间");
         return false;
       }
       if (this.detail.endTime) {
         this.detail.endTime = this.detail.endTime + 24 * 60 * 60 * 1000 - 1000;
       }
-      if (this.detail.list.length > 0) {
-        let arr = [];
+      if (this.detail.discountType === 0) {
+        if (this.detail.discountMoney <= 0) {
+          this.$message.error("请填写优惠金额，金额必须大于0");
+          return false;
+        }
+      } else {
+        if (!this.detail.discountQuota) {
+          this.$message.error("请输入优惠折扣");
+          return false;
+        }
+      }
+      if (this.detail.effectCondition == 1) {
+        if (this.detail.effectMoney <= 0) {
+          this.$message.error("请填写生效条件金额，金额必须大于0");
+          return false;
+        }
+      }
+      if (this.detail.list && this.detail.list.length > 0) {
         switch (this.detail.applyObject) {
           // 商品分类
           case 1:
-            this.detail.list.map((i) => {
-              let obj = {
-                id: i.id,
-                image: i.pic,
-                title: i.title,
-              };
-              arr.push(obj);
-            });
-            this.detail.tagIds = JSON.stringify(arr);
-            delete this.detail.list;
+            this.detail.tagIds = JSON.stringify([...this.detail.list]);
             break;
+          // 商品
           case 2:
-            this.detail.list.map((i) => {
-              let obj = {
-                id: i.id,
-                image: i.image,
-                title: i.storeName,
-              };
-              arr.push(obj);
-            });
-            this.detail.prodIds = JSON.stringify(arr);
-            delete this.detail.list;
+            this.detail.prodIds = JSON.stringify([...this.detail.list]);
             break;
         }
       } else {
         this.detail.prodIds = "";
         this.detail.tagIds = "";
       }
+      let par = { ...this.detail }; 
+      delete par.list;
+      console.log(this.detail);
       if (this.id) {
         // 修改
-        edit(this.detail).then((res) => {
+        edit(par).then((res) => {
           this.$message.success("修改成功");
           this.$router.push("/activity");
         });
       } else {
         // 新增
-        add(this.detail).then((res) => {
+        add(par).then((res) => {
           this.$message.success("新增成功");
           this.$router.push("/activity");
         });

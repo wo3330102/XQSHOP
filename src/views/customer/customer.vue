@@ -109,8 +109,7 @@
         :optionList="['删除']" 
         :tableHeader="tableHeader"
         @rowClick="toDetail"
-        @BatchOption="BatchOption"
-        @SelectionChange="SelectionChange"
+        @BatchOption="BatchOption" 
         ></table-tem>
     </div>
 
@@ -173,10 +172,10 @@ export default {
           id: 1,
           label: "全部",
         },
-        {
-          id: 2,
-          label: "注册会员",
-        },
+        // {
+        //   id: 2,
+        //   label: "注册会员",
+        // },
       ],
       acitve: 0, 
       subscribeTypeList: [
@@ -227,8 +226,7 @@ export default {
           prop:'sumMoney',
         },
       ],
-      currentPage: 1,
-      selectItem:[],// 选中的数据
+      currentPage: 1, 
       endOptions:{
         disabledDate(time) {
           return time.getTime() > new Date().getTime() ;
@@ -253,13 +251,9 @@ export default {
       localStorage.setItem('customerDetail',JSON.stringify(e))
       this.$router.push('/customerDetail')
     },
-    // 选中的数据
-    SelectionChange:function(e){
-      this.selectItem = e; 
-    },
     // 批量操作
-    BatchOption:function(e){
-      this.selectItem.map(i=>{
+    BatchOption:function(e,selectItem){
+      selectItem.map(i=>{
         
       })
     },

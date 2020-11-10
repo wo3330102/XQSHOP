@@ -237,6 +237,10 @@ const routes = [{
       name: 'PolicyClauses',
       component: () => import( /* webpackChunkName: "about" */ '../views/setting/policyClauses.vue'),
     }, ]
+  },{
+    path: '/test',
+    name: 'Test',
+    component: () => import( /* webpackChunkName: "home" */ '../views/test.vue'),
   }]
 }, {
   path: '/login',
@@ -255,8 +259,7 @@ VueRouter.prototype.push = function push(location) {
   return originalPush.call(this, location).catch(err => err)
 }
 
-router.beforeEach((to, from, next) => {
-  console.log(to);
+router.beforeEach((to, from, next) => { 
   localStorage.setItem('router-path', to.path)
   next() // 必须使用 next ,执行效果依赖 next 方法的调用参数
 })

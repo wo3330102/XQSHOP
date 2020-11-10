@@ -58,11 +58,11 @@
               size="medium"
               placeholder="请输入商品库存"
             ></el-input>
-          </div>
-          <!-- <div class="item-margin">
+          </div> 
+          <div class="item-margin" v-if="show">
             <span class="text-span">商品SKU</span>
-            <el-input class="box-item-entry" v-model="detail.price" size="medium" placeholder="请输入商品SKU"></el-input>
-          </div> -->
+            <el-input class="box-item-entry" v-model="detail.shopSku" size="medium" placeholder="请输入商品SKU"></el-input>
+          </div>
           <!-- <div class="item-margin">
             <span class="text-span">库存方式</span>
             <el-select class="box-item-entry" size="medium" v-model="stockTypeValue" placeholder>
@@ -485,6 +485,7 @@ export default {
   data() {
     return {
       id: "",
+      isFirst:true,
       token: "",
       isGrounding: true,
       price: "",
@@ -632,14 +633,8 @@ export default {
           that.detail = { ...res.productInfo };
           that.tagIds = res.tagList;
           if (res.productInfo.classIds) {
-            that.classList = res.productInfo.classIds.split(",");
-            // if(res.productInfo.classIds.indexOf(',')<0){
-            //   that.classList.push(res.productInfo.classIds)
-            // } else {
-
-            // }
-          }
-
+            that.classList = res.productInfo.classIds.split(","); 
+          } 
           that.attr = res.productInfo.attr;
           if (res.productInfo.attr.weight === 0) {
             that.attr.weight = "";
@@ -661,7 +656,7 @@ export default {
           // 判断是单规格还是多规格
           if (res.productInfo.spec_type == 1) {
             // 多规格
-            that.shopAttributeList = res.productInfo.items;
+            that.shopAttributeList = res.productInfo.items; 
             that.InitFormatAttr();
             this.show = false;
           }
@@ -795,14 +790,24 @@ export default {
           }
         });
         this.tableHeader = arr;
-        if (this.id !== "" && this.detail.spec_type == 1 && this.table == '') {
-          this.table = this.detail.attrs;
-        } else {
-          console.log(r.value);
+        let array = [];
+        if (this.id !== "" && this.detail.spec_type == 1 && this.isFirst) {  
+          this.isFirst = false;
+          this.detail.attrs.map(i=>{
+            if(i.is_show == 1){
+              array.push(i);
+            }
+          })
+          this.table = array; 
+        } else {  
           r.value.map((v, i) => {
-            v.index = i;
+            v.index = i; 
+            if(v.is_show == 1){
+              array.push(v);
+            }
           });
-          this.table = r.value;
+          console.log(array);
+          this.table = array;
         }
       });
     },
@@ -1271,7 +1276,7 @@ h1 {
   .checkOption {
     overflow: hidden;
     width: 82px;
-    height: 30px;
+    height: 32px;
     line-height: 30px;
     background: #fff;
     padding: 0 12px;
@@ -1280,7 +1285,7 @@ h1 {
     z-index: 1;
     position: absolute;
     left: 0;
-    top: 6px;
+    top: 12px;
     .checkContent {
       width: 100%;
       height: 100%;

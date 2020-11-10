@@ -68,8 +68,7 @@
       </div>
     </div>
     <add-menu-com
-      v-if="showAddMenu"
-      :index="index"
+      v-if="showAddMenu" 
       @Close="(e)=>{showAddMenu = false}"
       @selectData="GetData"
     ></add-menu-com>
@@ -88,8 +87,7 @@ export default {
       radio: "1",
       save: true,
       showAddMenu: false,
-      selectData: [],
-      index:'',
+      selectData: [], 
       id:'',
       detail:{
         status:0,

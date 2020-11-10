@@ -60,14 +60,15 @@
                 type="primary"
                 style="width: 366px; height: 46px"
                 @click="submitForm('loginData')"
+                :loading="showLoading"
                 >登入</el-button
               >
             </p>
-            <p class="item" style="margin-top: 20px; color: rgb(26, 29, 44)">
+            <!-- <p class="item" style="margin-top: 20px; color: rgb(26, 29, 44)">
               <span style="cursor: pointer" @click="findPassword = true"
                 >忘记密码</span
               >
-            </p>
+            </p> -->
           </el-form>
         </div>
         <div
@@ -95,9 +96,9 @@
               ></el-input>
             </el-form-item>
             <p class="item" style="margin-top: 30px">
-              <el-button type="primary" style="width: 366px; height: 46px"
-                >登入</el-button
-              >
+              <el-button type="primary" style="width: 366px; height: 46px"> 
+                登入 
+              </el-button>
             </p>
             <p class="item" style="margin-top: 20px; color: rgb(26, 29, 44)">
               <span style="cursor: pointer" @click="findPassword = true"
@@ -120,6 +121,7 @@ export default {
       findPassword: false,
       loginData: { email: "", password: "", uuid: "" },
       findPasswordData: {},
+      showLoading:false,
     };
   },
   created() {
@@ -149,6 +151,7 @@ export default {
     submitForm(formName) {
       console.log("测试");
       let that = this;
+      this.showLoading = true;
       this.$refs[formName].validate((valid) => {
         if (valid) {
           login(
@@ -159,10 +162,12 @@ export default {
           )
             .then((res) => {
               localStorage.setItem("token", res.token);
-              this.$router.push("/");
+              this.$router.push("/"); 
+              this.showLoading = false;
             })
             .catch((res) => {
               that.GetCode();
+              this.showLoading = false;
             });
         } else {
           return false;

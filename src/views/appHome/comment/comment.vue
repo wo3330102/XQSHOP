@@ -582,7 +582,7 @@ export default {
       this.$router.push({
         path: "/commentDetail",
         query: {
-          id: e.id,
+          id: e.productId || e.id,
         },
       });
       localStorage.setItem("commentDetail", JSON.stringify(e));

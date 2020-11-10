@@ -24,7 +24,7 @@
     <div class="content">
       <div class="conditions">
         <div class="search-box">
-          <el-input v-model="searchVal" placeholder="请输入优惠活动或优惠码 ">
+          <el-input v-model="searchVal" @change="Search" placeholder="请输入优惠活动或优惠码 ">
             <el-button slot="append" @click="Search">搜索</el-button>
           </el-input>
         </div>
@@ -34,6 +34,8 @@
         :requestParams="requestParams"
         :optionList="['开启', '关闭', '删除']"
         :tableHeader="tableHeader"
+        :isReflash="isReflash"
+        @BatchOption="BatchOption"
         @rowClick="rowClick"
       >
         <el-table-column
@@ -56,7 +58,8 @@
                 ? "减" + scope.row.discountQuota + "%"
                 : "免运费"
             }}</span>
-            <span v-else>{{ scope.row[item.prop]?scope.row[item.prop]:0 }}</span>
+            <span v-else-if="item.prop=='promoCode'">{{ scope.row[item.prop]?scope.row[item.prop]:'自动应用优惠码' }}</span>
+            <span v-else>{{ scope.row[item.prop]?scope.row[item.prop]:'0' }}</span>
           </template>
         </el-table-column>
       </table-tem>
@@ -73,6 +76,7 @@
 </template>
 <script>
 import { videoPlayer } from "vue-video-player";
+import {editStatus,del} from '@/api/yxStorePromotions'
 import tableTem from "@/components/tableTem"; 
 import "video.js/dist/video-js.css";
 export default {
@@ -87,6 +91,7 @@ export default {
         page: 0,
         discountName:'', 
       },
+      isReflash:0,
       searchVal: "",
       tableHeader: [
         {
@@ -157,6 +162,52 @@ export default {
       //   query:id
       // })
       this.$router.push("/editActivity");
+    },
+    // 批量操作
+    BatchOption:function(e,selectItem){
+      let index = e;
+      let idArr = [];
+      selectItem.map(i=>{
+        idArr.push(i.id)
+      });
+      let par = '';
+      let storeId = localStorage.getItem('storeId')
+      switch (index) {
+        case 0:
+          par = {
+            id:idArr.toString(),
+            status:1, 
+            storeId:storeId
+          }
+          editStatus(par).then(res=>{
+            this.$message.success('修改成功')
+            console.log(res);
+            this.isReflash += 1;
+          })
+          break; 
+        case 1:
+          par = {
+            id:idArr.toString(),
+            status:0, 
+            storeId:storeId
+          }
+          editStatus(par).then(res=>{
+            this.$message.success('修改成功')
+            console.log(res);
+            this.isReflash += 1;
+          })
+          break;
+        case 2:
+          par = idArr;
+          del(par).then(res=>{
+            this.$message.success('删除成功')
+            console.log(res);
+            this.isReflash += 1;
+          })
+          break;
+        default:
+          break;
+      }
     },
     rowClick:function(e){
       this.$router.push({

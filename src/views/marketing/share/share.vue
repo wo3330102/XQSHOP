@@ -37,18 +37,18 @@
             <div class="info">
               <p>
                 <span class="title">优惠描述：</span>
-                <span class="text">{{ detail.title }}</span>
+                <span class="text">{{ detail.type === 0?detail.title:''}}</span>
               </p>
               <p>
                 <span class="title">优惠码：</span>
                 <span class="text">{{
-                  detail.yxStorePromotions.promoCode
+                  detail.type === 0?detail.yxStorePromotions.promoCode:'' 
                 }}</span>
               </p>
               <p>
                 <span class="title">活动内容：</span>
                 <span class="text">{{
-                  detail.yxStorePromotions.discountName
+                  detail.type === 0?detail.yxStorePromotions.discountName:''  
                 }}</span>
               </p>
             </div>
@@ -187,15 +187,18 @@ export default {
     let start = new Date();
     start = start.getTime() - 3600 * 1000 * 24 * 30;
     this.date = [new Date(start).toLocaleDateString() + " ", end + " "];
-    getShare().then((res) => {
-      console.log(res);
+    getShare().then((res) => { 
       let that = this;
       if (res.content.length > 0) {
         this.isShow = false;
+        this.detail = res.content[0];
+        if(res.content[0].yxStorePromotions == null){
+          this.detail.yxStorePromotions = {};
+        }
       } else {
         this.isShow = true;
-      }
-      this.detail = res.content[0];
+        
+      } 
       setTimeout((res) => {
         that.loading = false;
       }, 1000);
@@ -213,8 +216,8 @@ export default {
     },
     init: function () {
       let par = {
-        startTime: this.date[0],
-        endTime: this.date[1],
+        startTime: this.date[0] + '00:00:00',
+        endTime: this.date[1] + '23:59:59',
       };
       getStatistics(par).then((res) => {
         console.log(res);

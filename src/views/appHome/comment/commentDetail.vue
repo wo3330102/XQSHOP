@@ -111,6 +111,7 @@
         :requestParams="requestParams"
         :tableHeader="tableHeader"
         :isReflash="isReflash"
+        :rowIsClick="false"
         @GetData="ChangeStartProgress"
         @BatchOption="BatchOption"
       >
@@ -215,10 +216,8 @@
           >
           </el-date-picker>
         </el-form-item>
-        <el-form-item 
-          label="SKU" 
-        >
-          <el-select v-model="form.fictitiousSku" placeholder="请选择SKU">
+        <el-form-item label="SKU">
+          <el-select v-model="form.unique" placeholder="请选择SKU"  >
             <el-option
               v-for="item in skuList"
               :key="item.id"
@@ -233,7 +232,7 @@
             v-model="form.comment"
             placeholder="请输入姓名"
           ></el-input>
-        </el-form-item>
+        </el-form-item> 
         <el-form-item label="图片">
           <el-upload
             action="https://admin2.xqkj.top/api/upload"
@@ -354,12 +353,34 @@
             >
               <el-select v-model="item.fictitiousSku" placeholder="请选择SKU">
                 <el-option
-                  v-for="item in skuList"
-                  :key="item.id"
-                  :label="item.sku"
-                  :value="item.sku"
+                  v-for="i in skuList"
+                  :key="i.id"
+                  :label="i.sku"
+                  :value="i.sku"
                 ></el-option>
               </el-select>
+            </el-form-item>
+            <el-form-item label="头像" style="margin: 0 0 0 30px">
+              <el-upload
+                action="https://admin2.xqkj.top/api/upload"
+                :headers="{
+                  Authorization: token,
+                }"
+                class="avatar-uploader"
+                :show-file-list="false"
+                :on-success="
+                  (res, file) => {
+                    item.fictitiousPics = res.link;
+                  }
+                "
+              >
+                <img
+                  v-if="item.fictitiousPics"
+                  :src="item.fictitiousPics"
+                  class="avatar"
+                />
+                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+              </el-upload>
             </el-form-item>
             <el-form-item label="图片" style="margin: 0 0 0 30px">
               <el-upload
@@ -396,7 +417,7 @@
       <span slot="footer">
         <el-button @click="AddFormList" style="float: left">添加</el-button>
         <el-button @click="showAdd = false">取消</el-button>
-        <el-button type="primary" @click="SubComment('addForm')"
+        <el-button type="primary" :disabled="disabled" @click="SubComment('addForm')"
           >确定</el-button
         >
       </span>
@@ -506,12 +527,13 @@ export default {
       isReflash: 0,
       showEditComment: false,
       form: {},
-      limit: 5,
+      limit: 3,
       fileList: [],
       showUpload: false,
       dialogVisible: false,
       imageUrl: "",
       showAdd: false,
+      disabled:false,
       addForm: {
         list: [],
       },
@@ -759,7 +781,7 @@ export default {
       console.log(arr);
       this.form.pics = arr.toString();
       editComment(this.form).then((res) => {
-        this.$message.success("修改成功"); 
+        this.$message.success("修改成功");
         this.showEditComment = false;
         this.isReflash += 1;
       });
@@ -793,6 +815,7 @@ export default {
     },
     // 提交新增
     SubComment(formName) {
+      this.disabled = true;
       let storeId = localStorage.getItem("storeId");
       this.$refs[formName].validate((valid) => {
         if (valid) {
@@ -809,12 +832,14 @@ export default {
             i.pics = arr.toString();
             delete i.fileList;
           });
-          addComment(par).then((res) => { 
-            this.$message.success("新增成功");
+          addComment(par).then((res) => {
             this.showAdd = false;
+            this.$message.success("新增成功");  
             this.isReflash += 1;
+            this.disabled = false;
           });
         } else {
+          this.disabled = false;
           return false;
         }
       });
@@ -999,6 +1024,31 @@ h1 {
     /*滚动条里面轨道*/
     border-radius: 6px;
     background: #f5f5f9;
+  }
+}
+.avatar-uploader {
+  width: 80px;
+  height: 80px;
+  display: block;
+  /deep/.el-upload {
+    width: 80px;
+    height: 80px;
+    line-height: 80px;
+    margin: 0 8px 8px 0;
+    float: left;
+    background-color: #fbfdff;
+    border: 1px dashed #c0ccda;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 26px;
+  }
+  /deep/.avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 80px;
+    height: 80px;
+    line-height: 80px;
+    text-align: center;
   }
 }
 /deep/.el-progress-bar__inner {

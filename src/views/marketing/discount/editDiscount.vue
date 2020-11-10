@@ -170,7 +170,7 @@
                 >
                   <template
                     slot="prefix"
-                    v-if="detail.terms1 == 2"
+                    v-if="detail.terms1 == 1"
                     style="line-height: 36px; margin-left: 3px"
                     >$</template
                   >
@@ -281,10 +281,15 @@
                 </el-select>
                 <span
                   v-show="detail.pageType === 1"
-                  class="model-item-href href"
-                  :style="{ borderColor: detail.menuItem ? '#dcdfe6;' : '' }"
-                  >选择页面</span
-                >
+                  class="model-item-href "
+                  :class="detail.menuItem?'href-border href':''"
+                  @click="showAddMenu = true"
+                  :style="{ borderColor: detail.menuItem ? '#dcdfe6;' : '' }" 
+                  >
+                    {{detail.menuItem?JSON.parse(detail.menuItem)[0].name:'选择页面'}} 
+                    <i class="close el-icon-circle-close" @click.stop="detail.menuItem = ''"></i>
+                  </span
+                > 
               </div>
             </div>
           </div>
@@ -346,7 +351,7 @@
               <p>
                 <span class="title">优惠条件：</span>
                 <span class="text"
-                  >{{ consumptionList[detail.terms1 - 1].label }}，{{
+                  >{{ consumptionList[detail.terms1].label }}，{{
                     appliedObjectList[detail.applyObject].label +
                     reductionList[detail.terms2].label
                   }}</span
@@ -399,7 +404,9 @@
                 <dd>使用次数</dd>
               </dl>
               <dl>
-                <dt>${{ detail.discountTotal ? detail.discountTotal : "0.00" }}</dt>
+                <dt>
+                  ${{ detail.discountTotal ? detail.discountTotal : "0.00" }}
+                </dt>
                 <dd>优惠金额</dd>
               </dl>
               <dl>
@@ -407,27 +414,30 @@
                 <dd>销售总额</dd>
               </dl>
             </div>
-            <div class="detail-item" v-if="showStatistics"> 
+            <div class="detail-item" v-if="showStatistics">
               <p>
                 <span class="label">优惠描述</span>
-                <span class="item"
-                v-for="(item, index) in shopDetailSettingList"
-                :key="index"
-                v-if="item.consumption && item.reduction"
-              >
-                消费满
-                {{
-                  detail.terms1 === 0
-                    ? item.consumption + "件"
-                    : "$" + item.consumption
-                }}，
-                {{ appliedObjectList[detail.applyObject].label }}
-                减免
-                {{
-                  detail.terms2 === 0
-                    ? "$" + item.reduction
-                    : item.reduction + "%"
-                }}</span>
+                <p
+                  class="item"
+                  style="padding:0"
+                  v-for="(item, index) in shopDetailSettingList"
+                  :key="index"
+                  v-if="item.consumption && item.reduction"
+                >
+                  消费满
+                  {{
+                    detail.terms1 === 0
+                      ? item.consumption + "件"
+                      : "$" + item.consumption
+                  }}，
+                  {{ appliedObjectList[detail.applyObject].label }}
+                  减免
+                  {{
+                    detail.terms2 === 0
+                      ? "$" + item.reduction
+                      : item.reduction + "%"
+                  }}</p
+                >
               </p>
               <p>
                 <span class="title">使用次数：</span>
@@ -435,20 +445,32 @@
               </p>
               <p>
                 <span class="title">优惠金额：</span>
-                <span class="text">${{ detail.discountTotal ? detail.discountTotal : "0.00" }}</span>
+                <span class="text"
+                  >${{
+                    detail.discountTotal ? detail.discountTotal : "0.00"
+                  }}</span
+                >
               </p>
               <p>
                 <span class="title">销售金额：</span>
-                <span class="text">${{ detail.saleTotal ? detail.saleTotal : "0.00" }}</span>
+                <span class="text"
+                  >${{ detail.saleTotal ? detail.saleTotal : "0.00" }}</span
+                >
               </p>
             </div>
             <div class="toggleTargetList">
               <span class="btn" @click="showStatistics = !showStatistics">
-                {{showStatistics == false?'展开':'收起'}}
-                <i :class="showStatistics == false?'el-icon-caret-bottom':'el-icon-caret-top'"></i>
+                {{ showStatistics == false ? "展开" : "收起" }}
+                <i
+                  :class="
+                    showStatistics == false
+                      ? 'el-icon-caret-bottom'
+                      : 'el-icon-caret-top'
+                  "
+                ></i>
               </span>
             </div>
-          </div> 
+          </div>
           <div class="box">
             <p class="infoTip">温馨提示</p>
             <p class="infoContent">
@@ -459,7 +481,7 @@
         </el-col>
       </el-row>
       <div class="pageSaveBtn">
-        <el-button>取消</el-button>
+        <el-button @click="$NavgitorTo('/discount')">取消</el-button>
         <el-button type="primary" @click="Save">保存</el-button>
       </div>
       <el-dialog title="请选择商品" :visible.sync="shopDialog">
@@ -476,7 +498,12 @@
               size
               placeholder="请选择标签"
               style="width: 200px"
-              @change="initData()"
+              @change="
+                () => {
+                  table = [];
+                  initData();
+                }
+              "
             >
               <el-option
                 v-for="item in shopLabelList"
@@ -491,7 +518,12 @@
               size
               placeholder="请选择分类"
               style="width: 200px"
-              @change="initData()"
+              @change="
+                () => {
+                  table = [];
+                  initData();
+                }
+              "
             >
               <el-option
                 v-for="item in shopCategoryList"
@@ -593,14 +625,24 @@
         <div class="dialog-preview-bottom-desc">效果仅供参考</div>
       </el-dialog>
     </div>
+    <add-menu-com
+      v-if="showAddMenu" 
+      :isRadio="true"
+      @Close="(e)=>{showAddMenu = false}"
+      @selectData="SetPage"
+    ></add-menu-com>
   </div>
 </template> 
 <script>
 import elTableInfiniteScroll from "el-table-infinite-scroll";
+import addMenuCom from "@/components/addMenuCom";
 import { add, edit, changeMenuBarStatus, del } from "@/api/yxStoreGradient";
 import { get } from "@/api/yxStoreProduct";
 import { getCates } from "@/api/yxStoreCategory";
 export default {
+  components:{
+    addMenuCom
+  },
   data() {
     return {
       requestParams: {
@@ -697,7 +739,9 @@ export default {
         },
       },
       endOptions: {},
-      showStatistics:false,
+      showStatistics: false,
+      showAddMenu:false,
+      index:'',
     };
   },
   directives: {
@@ -728,21 +772,28 @@ export default {
     // 初始化结束日期规则
     this.endOptions = {
       disabledDate(time) {
-        return time.getTime() < that.detail.startTime;
+        return time.getTime() < that.detail.startTime - 8.64e7;
       },
     };
     // 判断是否为编辑优惠
     if (this.$route.query.hasOwnProperty("id")) {
       this.id = this.$route.query.id;
-      let detail = JSON.parse(localStorage.getItem("discountDetail"));
-      console.log(detail);
-      if (detail.prodIds) {
-        detail.list = JSON.parse(detail.prodIds);
-      }
-      if (detail.tagIds) {
-        detail.list = JSON.parse(detail.tagIds);
-      }
-      console.log(detail.list);
+      let detail = JSON.parse(localStorage.getItem("discountDetail")); 
+      detail.list = [];
+      switch (detail.applyObject) {
+        // 商品分类
+        case 1:
+          if (detail.tagIds) {
+            detail.list = JSON.parse(detail.tagIds);
+          }
+          break;
+        // 商品
+        case 2: 
+          if (detail.prodIds) {
+            detail.list = JSON.parse(detail.prodIds);
+          }
+          break;
+      } 
       let arr = [];
       detail.yxStoreGradientItems.map((i) => {
         let par = {
@@ -768,7 +819,7 @@ export default {
     getCates(this.requestParams).then((res) => {
       console.log(res);
       this.shopCategoryList = res.content;
-    });
+    }); 
   },
   methods: {
     // 活动操作
@@ -807,12 +858,13 @@ export default {
       this.initData();
     },
     ResetShopDetailSettingList: function (type) {
-      this.shopDetailSettingList = [
-        {
-          consumption: "",
-          reduction: "",
-        },
-      ];
+      console.log(this.detail);
+      // this.shopDetailSettingList = [
+      //   {
+      //     consumption: "",
+      //     reduction: "",
+      //   },
+      // ];
     },
     AddShopDetailSettingOfItem: function (item) {
       this.shopDetailSettingList.push({
@@ -827,20 +879,24 @@ export default {
       );
     },
     // 加载表单数据
-    initData: function () {
+    initData: function (type) {
       switch (this.detail.applyObject) {
         // 1为商品分类  2为商品
         case 1:
           getCates(this.requestParams).then((res) => {
-            console.log(res);
-            this.table = res.content;
+            let arr = this.table.concat(res.content);
+            if (arr.length <= res.totalElements) {
+              this.table = arr;
+            }
             this.tableTotal = res.totalElements;
           });
           break;
         case 2:
           get(this.requestParams).then((res) => {
-            console.log(res);
-            this.table = res.content;
+            let arr = this.table.concat(res.content);
+            if (arr.length <= res.totalElements) {
+              this.table = arr;
+            }
             this.tableTotal = res.totalElements;
           });
           break;
@@ -854,18 +910,56 @@ export default {
     SelectItem: function (e) {
       this.selectItem = e;
     },
-    CheckSelectItem: function (res) {
-      this.shopDialog = false;
-      console.log(this.selectItem);
-      if (this.detail.list.length > 0) {
-        this.detail.list = this.detail.list.concat(this.selectItem);
-      } else {
-        this.detail.list = this.selectItem;
-      }
-      console.log(this.detail.list);
+    SetPage:function(e){
+      console.log(e);
+      this.$nextTick(()=>{ 
+        this.detail.menuItem = JSON.stringify(e);
+      })
     },
-    Del: function (index) {
-      console.log(index);
+    CheckSelectItem: function (res) {
+      this.shopDialog = false;  
+      let arr = [];
+      switch (this.detail.applyObject) {
+          // 商品分类
+          case 1:
+            this.selectItem.map((i) => {
+              let obj = {
+                id: i.id,
+                image: i.pic,
+                title: i.title,
+              };
+              arr.push(obj);
+            }); 
+            break;
+          // 商品
+          case 2:
+            this.selectItem.map((i) => {
+              let obj = {
+                id: i.id,
+                image: i.image,
+                title: i.storeName,
+              };
+              arr.push(obj);
+            }); 
+            break;
+        } 
+      if (this.detail.list && this.detail.list.length > 0) {
+        arr.map(i => {
+          let bool = true; 
+          this.detail.list.map((j) => { 
+            if (JSON.stringify(i) == JSON.stringify(j)) {
+              bool = false;
+            }
+          });
+          if (bool) {
+            this.detail.list.push(i);
+          }
+        });
+      } else {
+        this.detail.list = arr;
+      }  
+    },
+    Del: function (index) { 
       this.$nextTick(() => {
         this.detail.list.splice(index, 1);
       });
@@ -873,9 +967,11 @@ export default {
     Search: function () {
       if (this.detail.applyObject == 1) {
         this.requestParams.title = this.shopContent;
+        this.table = [];
         this.initData();
       } else {
         this.requestParams.storeName = this.shopContent;
+        this.table = [];
         this.initData();
       }
     },
@@ -892,6 +988,12 @@ export default {
       if (this.detail.startTime == "") {
         this.$message.error("请选择活动开始时间");
         return false;
+      }
+      if(this.detail.pageType === 1){
+        if(this.detail.menuItem == null || this.detail.menuItem == '' || this.detail.menuItem == undefined){
+          this.$message.error("请选择按钮跳转页面");
+          return false;
+        }
       }
       // 以上为表单验证
       // 处理详情设置开始
@@ -916,49 +1018,35 @@ export default {
           that.$message.error("请完善详情设置");
           return false;
         } else {
-          let par = {};
-
-          par[consumption] = that.shopDetailSettingList[i].consumption;
-          par[reduction] = that.shopDetailSettingList[i].reduction;
-          arr.push(par);
+          let j = Number(i)+1; 
+          if(j < that.shopDetailSettingList.length){ 
+            if(that.shopDetailSettingList[j].consumption<that.shopDetailSettingList[i].consumption){ 
+              this.$message.warning('操作失败，请将消费梯度按照从小到大的顺序排列')
+              return false
+            }
+            let par = {}; 
+            par[consumption] = that.shopDetailSettingList[i].consumption;
+            par[reduction] = that.shopDetailSettingList[i].reduction;
+            arr.push(par);
+          }  
         }
-      }
-      this.detail.yxStoreGradientItems = arr;
-      console.log(this.detail);
-      // return false;
+      }   
+      this.detail.yxStoreGradientItems = arr; 
       // 处理详情设置结束
       if (this.detail.endTime) {
         this.detail.endTime = this.detail.endTime + 24 * 60 * 60 * 1000 - 1000;
       }
       // 处理适用对象开始
-
-      if (this.detail.list.length > 0) {
-        let arr = [];
+      if (this.detail.list && this.detail.list.length > 0) {  
         switch (this.detail.applyObject) {
           // 商品分类
-          case 1:
-            this.detail.list.map((i) => {
-              let obj = {
-                id: i.id,
-                image: i.pic,
-                title: i.title,
-              };
-              arr.push(obj);
-            });
-            this.detail.tagIds = JSON.stringify(arr);
+          case 1: 
+            this.detail.tagIds = JSON.stringify([...this.detail.list]);
             delete this.detail.list;
             break;
           // 商品
-          case 2:
-            this.detail.list.map((i) => {
-              let obj = {
-                id: i.id,
-                image: i.image,
-                title: i.storeName,
-              };
-              arr.push(obj);
-            });
-            this.detail.prodIds = JSON.stringify(arr);
+          case 2: 
+            this.detail.prodIds = JSON.stringify([...this.detail.list]);
             delete this.detail.list;
             break;
         }
@@ -966,6 +1054,8 @@ export default {
         this.detail.prodIds = "";
         this.detail.tagIds = "";
       }
+      console.log(this.detail)
+      return false;
       // 处理适用对象结束
       if (this.id) {
         // 修改
@@ -1142,7 +1232,8 @@ h1 {
     }
   }
 }
-.overview > p,.detail-item>p {
+.overview > p,
+.detail-item > p {
   padding: 10px 0;
   color: #293154;
   display: flex;
@@ -1179,19 +1270,19 @@ h1 {
       }
     }
   }
-  .detail-item{
+  .detail-item {
     margin-top: 20px;
     border-top: 1px solid #dcddeb;
     padding: 10px 0;
   }
-  .toggleTargetList{
-        border-top: 1px solid #dcdfe6;
+  .toggleTargetList {
+    border-top: 1px solid #dcdfe6;
     text-align: center;
     padding-top: 10px;
     margin-left: -12px;
     margin-right: -12px;
     color: #909399;
-    .btn{
+    .btn {
       cursor: pointer;
     }
   }
@@ -1205,6 +1296,8 @@ h1 {
   }
 }
 .model-item-href {
+  cursor: pointer;
+  text-decoration: underline;
   margin-left: 12px;
   width: 120px;
   padding: 6px;
@@ -1213,13 +1306,27 @@ h1 {
   border-radius: 3px;
   border: 1px solid transparent;
   color: #273a8a;
+  .close{
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+    line-height: 20px;
+    text-align: center; 
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    display: none;
+    cursor: pointer;  
+  }
 }
-.href {
-  flex: 1;
+.href { 
   cursor: pointer;
   color: #273a8a;
   line-height: 20px;
   text-decoration: underline;
+  .close{
+    display: block;
+  }
 }
 .pageSaveBtn {
   border-top: 1px solid #dcdfe6;
@@ -1318,8 +1425,7 @@ h1 {
     position: absolute;
     border-top: 1px solid #eee;
   }
-}
-
+} 
 .small-img {
   display: inline-block;
   vertical-align: middle;

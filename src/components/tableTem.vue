@@ -32,7 +32,7 @@
         @select="SelectionChange"
         @select-all="SelectionChange"
         @row-click="rowClick"
-        :row-style="rowIsClick ? { cursor: 'pointer' } : ''"
+        :row-style="rowIsClick ? { cursor: 'pointer' } : { cursor: 'initial' }"
       >
         <!-- 是否需要选框 -->
         <el-table-column
@@ -169,7 +169,7 @@ export default {
   watch: {
     requestParams: {
       handler: function (val) {
-        console.log("组件值：", JSON.stringify(val));
+        // console.log("组件值：", JSON.stringify(val));
         this.params = { ...val };
         this.getData();
       },
@@ -206,8 +206,7 @@ export default {
         if (res.hasOwnProperty("cateList")) {
           that.$emit("GetCategory", res.cateList);
         } 
-        if(that.requestUrl === 'api/getYxStoreProductReplyList'){
-          console.log(res);
+        if(that.requestUrl === 'api/getYxStoreProductReplyList'){ 
           this.$emit('GetData',res);
         }
 
@@ -215,9 +214,7 @@ export default {
     },
     // 选择单条数据
     SelectionChange: function (e, row) {
-      this.selectItem = e;
-      console.log(e);
-      // this.$emit("SelectionChange", e);
+      this.selectItem = e;  
     },
     // 批量操作
     DispachSelect: function (e) {
