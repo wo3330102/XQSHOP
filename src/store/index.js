@@ -12,7 +12,7 @@ export default new Vuex.Store({
     setUrl:function(state,url){ 
       state.url = url;
     },
-    isReflash:function(state,val){
+    isRefresh:function(state,val){
       state.reflash = val;
     }
   },

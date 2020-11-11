@@ -110,7 +110,7 @@
         :requestUrl="requestUrl"
         :requestParams="requestParams"
         :tableHeader="tableHeader"
-        :isReflash="isReflash"
+        :isRefresh="isRefresh"
         :default-sort="{ prop: 'num', order: 'descending' }"
         @rowClick="ToDetail"
         @BatchOption="BatchOption"
@@ -366,7 +366,7 @@ export default {
         size: 30,
         storeName: "",
       },
-      isReflash: 0,
+      isRefresh: 0,
       isSelection: false,
       optionList: [],
       tableHeader: [
@@ -556,13 +556,13 @@ export default {
         case 0:
           reviewComment(par).then((res) => {
             this.$message.success("操作成功");
-            this.isReflash += 1;
+            this.isRefresh += 1;
           });
           break;
         case 1:
           del(par).then((res) => {
             this.$message.success("操作成功");
-            this.isReflash += 1;
+            this.isRefresh += 1;
           });
           break;
       }
@@ -606,7 +606,7 @@ export default {
             }
             editMainStatus(par).then((res) => {
               this.$message.success("操作成功");
-              this.isReflash += 1;
+              this.isRefresh += 1;
             });
             break;
         }
@@ -620,13 +620,13 @@ export default {
           case "pass":
             reviewComment([par]).then((res) => {
               this.$message.success("操作成功");
-              this.isReflash += 1;
+              this.isRefresh += 1;
             });
             break;
           case "del":
             del([par]).then((res) => {
               this.$message.success("操作成功");
-              this.isReflash += 1;
+              this.isRefresh += 1;
             });
             break; 
         }

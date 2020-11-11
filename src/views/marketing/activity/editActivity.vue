@@ -73,8 +73,8 @@
                 v-model="detail.discountMoney"
                 @change="DiscountPrice"
                 v-if="detail.discountType === 0"
-                size="medium"
-                type="number"
+                size="medium" 
+                
                 :maxlength="discountTypeValueOfInfomation[0].maxlength"
                 :placeholder="discountTypeValueOfInfomation[0].placeholder"
                 style="flex: 1"
@@ -178,7 +178,7 @@
                 ></el-option>
               </el-select>
               <div v-if="detail.effectCondition == 1" style="flex: 1">
-                <el-input v-model="detail.effectMoney" placeholder>
+                <el-input v-model="detail.effectMoney" @blur="detail.effectMoney = $IsNaN(detail.effectMoney)" maxlength="8" placeholder>
                   <span
                     slot="prefix"
                     style="line-height: 36px; margin-left: 3px"
@@ -370,7 +370,7 @@
           </template>
           <template v-else>
             <!-- 商品标签 -->
-            <el-select
+            <!-- <el-select
               v-model="requestParams.shopLabelValue"
               size
               placeholder="请选择标签"
@@ -388,7 +388,7 @@
                 :label="item.label"
                 :value="item.value"
               ></el-option>
-            </el-select>
+            </el-select> -->
             <!-- 商品分类 -->
             <el-select
               v-model="requestParams.tagId"
@@ -410,7 +410,7 @@
               ></el-option>
             </el-select>
             <el-input
-              style="width: 180px"
+              style="width: 380px"
               size
               v-model="shopContent"
               placeholder="请输入内容"
@@ -706,8 +706,10 @@ export default {
     DiscountPrice: function (e) {
       let num = this.$toDecimal2(e);
       console.log(num);
-      if (this.detail.discountType === 0) {
+      if (this.detail.discountType === 0 && num) {
         this.detail.discountMoney = num;
+      } else{
+        this.detail.discountMoney = '';
       }
     },
     // 显示对话框

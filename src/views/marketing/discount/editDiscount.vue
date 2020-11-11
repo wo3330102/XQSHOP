@@ -108,6 +108,7 @@
                 v-model="detail.applyObject"
                 size="medium"
                 style="flex: 1"
+                @change="detail.list = [];"
               >
                 <el-option
                   v-for="item in appliedObjectList"
@@ -166,7 +167,8 @@
                   v-model="item.consumption"
                   style="width: 210px"
                   :maxlength="8"
-                  :disabled="disabled"
+                  :disabled="disabled" 
+                  @blur="item.consumption = $IsNaN(item.consumption)"
                 >
                   <template
                     slot="prefix"
@@ -179,10 +181,11 @@
                   >，{{ appliedObjectList[detail.applyObject].label }}减免</span
                 >
                 <el-input
-                  v-model.number="item.reduction"
+                  v-model="item.reduction"
                   style="width: 210px"
                   :maxLength="detail.terms2 === 0 ? 8 : 2"
                   :disabled="disabled"
+                  @blur="detail.terms2 === 0 ? item.reduction = $IsNaN(item.reduction):''"
                 >
                   <template
                     slot="prefix"
@@ -547,6 +550,7 @@
           :data="table"
           style="width: 100%"
           empty-text
+          ref="table"
           v-el-table-infinite-scroll="load"
           @selection-change="SelectItem"
         >
@@ -853,8 +857,9 @@ export default {
       this.requestParams = {
         size: 30,
         page: 0,
-      };
+      }; 
       this.shopDialog = true;
+      this.table = [];
       this.initData();
     },
     ResetShopDetailSettingList: function (type) {
@@ -879,23 +884,25 @@ export default {
       );
     },
     // 加载表单数据
-    initData: function (type) {
-      switch (this.detail.applyObject) {
+    initData: function () { 
+      let type = this.detail.applyObject; 
+      switch (type) {
         // 1为商品分类  2为商品
         case 1:
-          getCates(this.requestParams).then((res) => {
-            let arr = this.table.concat(res.content);
+          getCates(this.requestParams).then((res) => { 
+            let arr = this.table.concat(res.content); 
             if (arr.length <= res.totalElements) {
-              this.table = arr;
+              // this.table = arr;
+              this.table.push(...res.content);
             }
             this.tableTotal = res.totalElements;
           });
           break;
         case 2:
           get(this.requestParams).then((res) => {
-            let arr = this.table.concat(res.content);
+            let arr = this.table.concat();
             if (arr.length <= res.totalElements) {
-              this.table = arr;
+              this.table.push(...res.content);
             }
             this.tableTotal = res.totalElements;
           });
@@ -918,7 +925,7 @@ export default {
     },
     CheckSelectItem: function (res) {
       this.shopDialog = false;  
-      let arr = [];
+      let arr = []; 
       switch (this.detail.applyObject) {
           // 商品分类
           case 1:
@@ -1020,7 +1027,9 @@ export default {
         } else {
           let j = Number(i)+1; 
           if(j < that.shopDetailSettingList.length){ 
-            if(that.shopDetailSettingList[j].consumption<that.shopDetailSettingList[i].consumption){ 
+            if(Number(that.shopDetailSettingList[j].consumption)<Number(that.shopDetailSettingList[i].consumption)){ 
+              console.log(that.shopDetailSettingList[j])
+              console.log(that.shopDetailSettingList[i])
               this.$message.warning('操作失败，请将消费梯度按照从小到大的顺序排列')
               return false
             }
@@ -1028,7 +1037,12 @@ export default {
             par[consumption] = that.shopDetailSettingList[i].consumption;
             par[reduction] = that.shopDetailSettingList[i].reduction;
             arr.push(par);
-          }  
+          } else {
+            let par = {}; 
+            par[consumption] = that.shopDetailSettingList[i].consumption;
+            par[reduction] = that.shopDetailSettingList[i].reduction;
+            arr.push(par); 
+          }
         }
       }   
       this.detail.yxStoreGradientItems = arr; 
@@ -1037,8 +1051,9 @@ export default {
         this.detail.endTime = this.detail.endTime + 24 * 60 * 60 * 1000 - 1000;
       }
       // 处理适用对象开始
-      if (this.detail.list && this.detail.list.length > 0) {  
-        switch (this.detail.applyObject) {
+      if(this.detail.applyObject !== 0){
+        if (this.detail.list && this.detail.list.length > 0) {   
+          switch (this.detail.applyObject) {
           // 商品分类
           case 1: 
             this.detail.tagIds = JSON.stringify([...this.detail.list]);
@@ -1049,13 +1064,14 @@ export default {
             this.detail.prodIds = JSON.stringify([...this.detail.list]);
             delete this.detail.list;
             break;
+        }} else {
+          this.$message.warning('请选择适用对象')
+          return false;
         }
       } else {
         this.detail.prodIds = "";
         this.detail.tagIds = "";
-      }
-      console.log(this.detail)
-      return false;
+      }  
       // 处理适用对象结束
       if (this.id) {
         // 修改

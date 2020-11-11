@@ -56,6 +56,7 @@ function getToken() {
     return false 
   }
 }
+let pass = true;
 
 // 响应拦截器
 service.interceptors.response.use(res => {
@@ -81,8 +82,34 @@ service.interceptors.response.use(res => {
       message
     } = error;  
     if (message == 'Request failed with status code 401') {
-      message = '登入过期，请重新登入'
-      router.push('/login')
+      // let token = localStorage.getItem('token');
+      // if(token){
+      //   message = '登入过期，请重新登入' 
+      // } else {
+      //   message = '尚未登入，请登入'
+      // }
+      // router.push('/login') 
+      if(pass){ 
+        pass = false;
+        // MessageBox.confirm(
+        //   '登录状态已过期，您可以继续留在该页面，或者重新登录',
+        //   '系统提示', {
+        //     confirmButtonText: '重新登录',
+        //     cancelButtonText: '取消',
+        //     type: 'warning'
+        //   }
+        // ).then(() => {
+        //   localStorage.clear();
+        //     router.push('/login')
+        // })
+        localStorage.clear();
+            router.push('/login')
+      } else {
+        setTimeout(function(){
+          pass = true;
+        },2000)
+      }
+      
     } else if (message == "Network Error") {
       message = "后端接口连接异常";
     } else if (message.includes("timeout")) {
@@ -94,11 +121,13 @@ service.interceptors.response.use(res => {
         message = "系统接口" + message.substr(message.length - 3) + "异常";
       } 
     }
-    Message({
-      message: message,
-      type: 'error',
-      duration: 5 * 1000
-    })
+    if(pass){
+      Message({
+        message: message,
+        type: 'error',
+        duration: 5 * 1000
+      })
+    } 
     return Promise.reject(error)
   }
 )

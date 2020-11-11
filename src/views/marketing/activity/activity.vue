@@ -34,7 +34,7 @@
         :requestParams="requestParams"
         :optionList="['开启', '关闭', '删除']"
         :tableHeader="tableHeader"
-        :isReflash="isReflash"
+        :isRefresh="isRefresh"
         @BatchOption="BatchOption"
         @rowClick="rowClick"
       >
@@ -91,7 +91,7 @@ export default {
         page: 0,
         discountName:'', 
       },
-      isReflash:0,
+      isRefresh:0,
       searchVal: "",
       tableHeader: [
         {
@@ -182,7 +182,7 @@ export default {
           editStatus(par).then(res=>{
             this.$message.success('修改成功')
             console.log(res);
-            this.isReflash += 1;
+            this.isRefresh += 1;
           })
           break; 
         case 1:
@@ -194,7 +194,7 @@ export default {
           editStatus(par).then(res=>{
             this.$message.success('修改成功')
             console.log(res);
-            this.isReflash += 1;
+            this.isRefresh += 1;
           })
           break;
         case 2:
@@ -202,7 +202,7 @@ export default {
           del(par).then(res=>{
             this.$message.success('删除成功')
             console.log(res);
-            this.isReflash += 1;
+            this.isRefresh += 1;
           })
           break;
         default:

@@ -16,7 +16,7 @@ export default {
     },
     "$store.state.reflash"(val) {
       if(val){
-        this.$store.commit("isReflash", false); 
+        this.$store.commit("isRefresh", false); 
         this.reload();
       }
     },

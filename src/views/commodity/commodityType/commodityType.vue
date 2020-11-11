@@ -22,7 +22,7 @@
         :requestUrl="'api/yxStoreTag'"
         :requestParams="requestParams"
         :tableHeader="tableHeader" 
-        :isReflash="isReflash"
+        :isRefresh="isRefresh"
         @rowClick="RowClick"
         @BatchOption="Del" 
       >
@@ -84,7 +84,7 @@ export default {
         sort: "sort,desc", 
         title:'',
       },
-      isReflash:0, 
+      isRefresh:0, 
       loading:true, 
     };
   }, 
@@ -108,7 +108,7 @@ export default {
       if(par.length>0){
         del(par).then(res=>{ 
         this.$message.success('删除成功'); 
-        this.isReflash += 1;
+        this.isRefresh += 1;
       })
       }
       

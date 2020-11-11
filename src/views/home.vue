@@ -1,6 +1,6 @@
 
 <template>
-  <div class="home">
+  <div class="home" v-if="pageLoading" v-loading="!pageLoading">
     <!-- <div id="tip">
       <p>您的套餐还剩14天</p>
     </div>-->
@@ -93,7 +93,7 @@
       </div>
       <div class="warp-rigth">
         <div class="header">
-          <el-select
+          <!-- <el-select
             v-model="storeId"
             @change="ChangeShop"
             placeholder="请选择店铺"
@@ -105,7 +105,7 @@
               :label="item.name"
               :value="item.id"
             ></el-option>
-          </el-select>
+          </el-select> -->
           <el-dropdown class="notice">
             <span class="el-dropdown-link">
               <i class="el-icon-message-solid"></i>
@@ -150,7 +150,7 @@
 </template>
 <script>
 import { getInfo } from "@/api/login";
-import { getShop } from "@/api/yxSystemStore";
+import { getShop } from "@/api/yxSystemStore"; 
 export default {
   name: "home",
   data() {
@@ -163,6 +163,7 @@ export default {
       storeId: "",
       storeList: [],
       isRouterAlive: true,
+      pageLoading:false,
     };
   },  
   watch: {
@@ -172,7 +173,7 @@ export default {
     },
     "$store.state.reflash"(val) {
       if(val){
-        this.$store.commit("isReflash", false); 
+        this.$store.commit("isRefresh", false); 
         this.reload();
       }
     },
@@ -181,6 +182,7 @@ export default {
     // 获取用户信息
     getInfo()
       .then((res) => {
+        this.pageLoading = true;
         this.userName = res.username;
       })
       .catch(() => {

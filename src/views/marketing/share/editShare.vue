@@ -258,6 +258,7 @@ export default {
     },
     Save: function () {
       this.detail.status = this.command;
+      this.detail.type = 0;
       if(this.detail.promId == '' || this.detail.promId == null || this.detail.promId == undefined){
         this.$message.error('请选择优惠码');
         return false;

@@ -41,11 +41,12 @@
           <div class="item-margin" v-if="show">
             <span class="text-span">售价</span>
             <el-input
-              class="box-item-entry"
-              type="number"
+              class="box-item-entry" 
               v-model.number="attr.price"
+              maxlength="8"
               size="medium"
               placeholder="请输入商品现价"
+              @blur="attr.price = $IsNaN(attr.price)"
             >
               <span slot="append">USD</span>
             </el-input>
@@ -56,6 +57,7 @@
               v-model.number="attr.stock"
               type="number"
               size="medium"
+              maxlength="8"
               placeholder="请输入商品库存"
             ></el-input>
           </div> 
@@ -117,11 +119,12 @@
           <div class="item-margin" v-if="show">
             <span class="text-span">原价</span>
             <el-input
-              class="box-item-entry"
-              type="number"
+              class="box-item-entry" 
               v-model.number="attr.ot_price"
+              maxlength="8"
               size="medium"
               placeholder="请输入商品原价"
+              @blur="attr.ot_price = $IsNaN(attr.ot_price)"
             >
               <span slot="append">USD</span>
             </el-input>
@@ -129,13 +132,14 @@
           <div class="item-margin" v-if="show">
             <span class="text-span">商品重量</span>
             <el-input
-              class="box-item-entry"
-              type="number"
+              class="box-item-entry" 
               v-model.number="attr.weight"
+              maxlength="8"
+              @blur="attr.weight = $IsNaN(attr.weight)"
               size="medium"
               placeholder="请输入商品重量"
             >
-              <span slot="append">g</span>
+              <span slot="append">Kg</span>
               <!-- <el-select v-model="shopWeightSelectValue" >
                 <el-option
                   v-for="item in shopWeightList"
@@ -334,9 +338,9 @@
                     </el-image>
                   </div>
                   <input
-                    class="edit-inp"
-                    type="number"
+                    class="edit-inp" 
                     v-model.number="scope.row[item.slot]"
+                    @blur="scope.row[item.slot] = $IsNaN(scope.row[item.slot])"
                     v-else-if="
                       item.title == '售价' ||
                       item.title == '原价' ||

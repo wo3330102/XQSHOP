@@ -4,8 +4,8 @@ import VueRouter from 'vue-router'
 Vue.use(VueRouter)
 const routes = [{
   path: '/',
-  name: 'Home',
-  component: () => import( /* webpackChunkName: "home" */ '../views/home.vue'),
+  name: '首页',
+  component: () => import( /* webpackChunkName: "home" */ '../views/home.vue'), 
   children: [{
     path: '/',
     name: 'Index',
@@ -132,6 +132,10 @@ const routes = [{
       path: '/shippingInsurance',
       name: 'ShippingInsurance',
       component: () => import( /* webpackChunkName: "about" */ '../views/appHome/shippingInsurance.vue'),
+    }, {
+      path: '/recommend',
+      name: 'Recommend',
+      component: () => import( /* webpackChunkName: "about" */ '../views/appHome/recommend/recommend.vue'),
     }]
   }, {
     path: 'shopSetting',
@@ -242,7 +246,7 @@ const routes = [{
     name: 'Test',
     component: () => import( /* webpackChunkName: "home" */ '../views/test.vue'),
   }]
-}, {
+},{
   path: '/login',
   name: 'Login',
   component: () => import( /* webpackChunkName: "about" */ '../views/login.vue'),
@@ -259,9 +263,20 @@ VueRouter.prototype.push = function push(location) {
   return originalPush.call(this, location).catch(err => err)
 }
 
-router.beforeEach((to, from, next) => { 
-  localStorage.setItem('router-path', to.path)
-  next() // 必须使用 next ,执行效果依赖 next 方法的调用参数
+router.beforeEach((to, from, next) => {  
+  let token = localStorage.getItem('token'); 
+  // 解决死循环问题（当跳转页面为登入页面时，结束token判断）
+  if(Object.is(to.name,'Login')) {
+    next();
+    return
+  }
+  // 判断当前是否含有token
+  if(token){ 
+    localStorage.setItem('router-path', to.path)
+    next();
+  } else { 
+    next('/login') // 否则全部重定向到登录页 
+  }
 })
 
 export default router

@@ -110,7 +110,7 @@
         :requestUrl="'api/getYxStoreProductReplyList'"
         :requestParams="requestParams"
         :tableHeader="tableHeader"
-        :isReflash="isReflash"
+        :isRefresh="isRefresh"
         :rowIsClick="false"
         @GetData="ChangeStartProgress"
         @BatchOption="BatchOption"
@@ -524,7 +524,7 @@ export default {
         },
       ],
       skuList: [],
-      isReflash: 0,
+      isRefresh: 0,
       showEditComment: false,
       form: {},
       limit: 3,
@@ -659,7 +659,7 @@ export default {
           });
           editStatus(1, arr).then((res) => {
             this.$message.success("修改成功");
-            this.isReflash += 1;
+            this.isRefresh += 1;
           });
           break;
         case 1:
@@ -668,7 +668,7 @@ export default {
           });
           editStatus(0, arr).then((res) => {
             this.$message.success("修改成功");
-            this.isReflash += 1;
+            this.isRefresh += 1;
           });
           break;
         case 2:
@@ -681,7 +681,7 @@ export default {
           });
           del(arr).then((res) => {
             this.$message.success("删除成功");
-            this.isReflash += 1;
+            this.isRefresh += 1;
           });
           break;
       }
@@ -693,7 +693,7 @@ export default {
       let status = item.isShow === 1 ? 1 : 0;
       editStatus(status, par).then((res) => {
         that.$message.success("修改成功");
-        this.isReflash += 1;
+        this.isRefresh += 1;
       });
     },
     // 对单个评论的操作
@@ -729,14 +729,14 @@ export default {
           };
           del([delpar]).then((res) => {
             this.$message.success("删除成功");
-            this.isReflash += 1;
+            this.isRefresh += 1;
           });
           break;
         case "top":
           let par = [item.id];
           topping(par).then((res) => {
             this.$message.success("置顶成功");
-            this.isReflash += 1;
+            this.isRefresh += 1;
           });
           break;
       }
@@ -783,7 +783,7 @@ export default {
       editComment(this.form).then((res) => {
         this.$message.success("修改成功");
         this.showEditComment = false;
-        this.isReflash += 1;
+        this.isRefresh += 1;
       });
     },
     // 添加商品评论项
@@ -835,7 +835,7 @@ export default {
           addComment(par).then((res) => {
             this.showAdd = false;
             this.$message.success("新增成功");  
-            this.isReflash += 1;
+            this.isRefresh += 1;
             this.disabled = false;
           });
         } else {

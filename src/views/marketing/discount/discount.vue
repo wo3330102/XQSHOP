@@ -22,7 +22,9 @@
         :requestParams="requestParams"
         :optionList="['删除']"
         :tableHeader="tableHeader" 
+        :isRefresh="isRefresh"
         @rowClick="rowClick"
+        @BatchOption="BatchOption"
       >
         <el-table-column
           v-for="(item, index) in tableHeader"
@@ -60,6 +62,7 @@
   </div>
 </template>
 <script> 
+import {del} from '@/api/yxStoreGradient'
 import { videoPlayer } from 'vue-video-player'
 import tableTem from '@/components/tableTem'
 import "video.js/dist/video-js.css";
@@ -123,6 +126,7 @@ export default {
           fullscreenToggle: true, // 是否显示全屏按钮
         },
       },
+      isRefresh:0,
     };
   },
   methods: { 
@@ -137,6 +141,16 @@ export default {
         }
       })
       localStorage.setItem('discountDetail',JSON.stringify(e))
+    },
+    BatchOption:function(e,selectItem){
+      let par = [];
+      selectItem.map(i=>{
+        par.push(i.id);
+      })
+      del(par).then(res=>{
+        this.$message.success('删除成功');
+        this.isRefresh += 1;
+      })
     }
   },
 };

@@ -150,7 +150,7 @@ export default {
         return [];
       },
     },
-    isReflash: {
+    isRefresh: {
       type: Number,
       default: 0,
     },
@@ -179,7 +179,7 @@ export default {
     tableData: function (val) {
       this.data = val;
     },
-    isReflash: function (val) {
+    isRefresh: function (val) {
       this.getData();
     },
   },
