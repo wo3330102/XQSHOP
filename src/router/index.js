@@ -237,10 +237,6 @@ const routes = [{
       name: 'PolicyClauses',
       component: () => import( /* webpackChunkName: "about" */ '../views/setting/policyClauses.vue'),
     }, ]
-  },{
-    path: '/test',
-    name: 'Test',
-    component: () => import( /* webpackChunkName: "home" */ '../views/test.vue'),
   }]
 }, {
   path: '/login',
