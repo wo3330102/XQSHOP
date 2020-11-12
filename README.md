@@ -1,4 +1,4 @@
-# y-shop
+# xqshop
 
 ## Project setup
 ```
