@@ -979,8 +979,8 @@ export default {
           return false;
         }
         // 判断是否输入原价
-        if (this.attr.ot_price > 0) {
-          if (this.attr.price > this.attr.ot_price) {
+        if (this.attr.ot_price > 0) { 
+          if (Number(this.attr.price) > Number(this.attr.ot_price)) { 
             that.$message.error("商品售价不能大于商品原价");
             return false;
           }
@@ -1003,9 +1003,15 @@ export default {
             that.$message.error("请完善多规格表单，商品售价不能为0");
             return false;
           }
-          if (arr[i].ot_price == "") {
-            arr[i].ot_price = 0;
+          // 判断是否输入原价
+        if (arr[i].ot_price > 0) { 
+          if (Number(arr[i].price) > Number(arr[i].ot_price)) { 
+            that.$message.error("商品售价不能大于商品原价");
+            return false;
           }
+        } else {
+          this.attr.ot_price = 0;
+        } 
           if (arr[i].stock == "") {
             arr[i].stock = 0;
           }

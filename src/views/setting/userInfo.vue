@@ -20,8 +20,8 @@
               >（设置店铺的联系方式，平台和顾客将通过此信息与你联系）</span>
             </h3>
             <div class="content" style="padding-top:17px">
-              <el-form :model="formData" :rules="rules" @validate="ValidateFrom" >
-                <el-form-item prop="name" :rules="{required:true, message: '请输入店铺名称', trigger: 'change' }">
+              <el-form :model="formData" :rules="rules" ref="form">
+                <el-form-item prop="name">
                   <label slot="label">店铺名称</label>
                   <el-input v-model="formData.name" placeholder="请输入店铺名称"></el-input>
                 </el-form-item>
@@ -56,7 +56,7 @@
                   </label>
                   <el-input v-model="formData.detailedAddress"  placeholder="请输入店铺地址"></el-input>
                 </el-form-item>
-                <el-form-item prop="logo">
+                <el-form-item>
                   <label slot="label">
                     店铺logo
                   </label> 
@@ -118,25 +118,31 @@ export default {
       url:localStorage.getItem('uploadUrl'),
       formData: {},
       rules: {
-        name: [{required:true, message: '请填写店铺地址',trigger: "blur"}],
+        name: [{required:true, message: '请填写店铺名称',trigger: "blur"}],
 				accountEmail: [{ validator: checkEmail, trigger: "blur" }],
         contactEmail: [{ validator: checkEmail, trigger: "blur" }],
-        phone:[{pattern: /^[1][3456789]\d{9}$/, required:true, message: '请输入正确的手机号码', trigger: 'blur' }], 
-        logo:[{required:true, message: '请上传门店logo'}],
+        phone:[{pattern: /^[1][3456789]\d{9}$/, required:true, message: '请输入正确的手机号码', trigger: 'blur' }],  
         detailedAddress:[{required:true, message: '请填写店铺地址', trigger: 'blur'}],
       },
       pass:false,
       dialogVisible: false, // 上传图片是否显示
       imageUrl: [], // 图片路径
       showUpload: false, // 是否显示上传按钮 
-      token:localStorage.getItem('token')
+      token:localStorage.getItem('token'), 
     };
   }, 
+  watch:{
+    rules:function(val){
+      console.log(val)
+    }
+  },
   created(){
     let storeId = localStorage.getItem('storeId');
-    getShopById(storeId).then(res=>{
-      console.log(res);
-      this.formData = res
+    getShopById(storeId).then(res=>{ 
+      this.formData = res;
+      if(this.formData.phone == ''){
+        this.formData.phone = null 
+      }
       if(this.formData.image){
       this.imageUrl = [{url:this.formData.image}]; 
       this.showUpload = true;
@@ -145,10 +151,14 @@ export default {
     
   },
   methods: {
-    ValidateFrom: function (boolean, item) {
-      console.log(boolean, item);
-      this.pass= true;
-    },
+    // ValidateFrom: function (boolean, item) {
+    //   console.log(boolean, item);
+    //   if(item){
+    //     this.pass= true; 
+    //   } else {
+    //     this.pass = false; 
+    //   }
+    // },
     PictureCardPreview(file) {
       this.imageUrl = file.url;
       this.dialogVisible = true;
@@ -162,21 +172,29 @@ export default {
     RemoveImg: function (e) {
       this.showUpload = false;
     },
-    Save:function(){
-      if(this.pass){
-        console.log(this.formData)
+    Save:function(){ 
+      this.$refs.form.validate((valid) => {
+        if (valid) {
+         // 向后台发送请求
+         let imageUrl = ''; 
+        if(this.imageUrl.length>0){
+          imageUrl = this.imageUrl[0].url 
+        } else {
+          imageUrl = ''
+          this.$message.error('请上传门店logo')
+          return false;
+        }
+        this.formData.image = imageUrl;
         edit(this.formData).then(res=>{ 
         this.$message.success('编辑成功')
-        this.$router.push('/setting')
-      })
-      } else {
-        this.$message.error('请完善表格数据')
-      }  
+        this.$router.push('/setting')})
+        } else {
+          //就像用户提示发生错误的消息
+          this.$message.error('请完善表格数据')
+        }
+      })  
     }
-  },
-  updated() {
-    console.log("更新");
-  },
+  }
 };
 </script>
 <style lang="scss" scoped>
