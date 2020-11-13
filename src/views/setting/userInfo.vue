@@ -137,7 +137,12 @@ export default {
     getShopById(storeId).then(res=>{
       console.log(res);
       this.formData = res
+      if(this.formData.image){
+      this.imageUrl = [{url:this.formData.image}]; 
+      this.showUpload = true;
+    } 
     })
+    
   },
   methods: {
     ValidateFrom: function (boolean, item) {
@@ -159,6 +164,7 @@ export default {
     },
     Save:function(){
       if(this.pass){
+        console.log(this.formData)
         edit(this.formData).then(res=>{ 
         this.$message.success('编辑成功')
         this.$router.push('/setting')

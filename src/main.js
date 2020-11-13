@@ -9,7 +9,7 @@ Vue.use(ElementUI)
 Vue.prototype.$ELEMENT = {
   size: 'medium'
 }; 
-localStorage.setItem('uploadUrl',process.env.VUE_APP_BASE_API)
+localStorage.setItem('uploadUrl',process.env.VUE_APP_BASE_API)//'http://192.168.8.254:8001/admin')//)
 // Vue.prototype.$msgbox = MessageBox;
 // Vue.prototype.$alert = MessageBox.alert;
 // Vue.prototype.$confirm = MessageBox.confirm;
