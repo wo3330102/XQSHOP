@@ -2,7 +2,13 @@
   <div class="container">
     <router-link
       to="/setting"
-      style="color: #5e7185;margin-bottom:12px;display:inline-block;height:20px;line-height:20px"
+      style="
+        color: #5e7185;
+        margin-bottom: 12px;
+        display: inline-block;
+        height: 20px;
+        line-height: 20px;
+      "
     >
       <i class="el-icon-arrow-left"></i>
       <span>设置</span>
@@ -15,36 +21,51 @@
           <div class="box">
             <h3 class="title">
               活动名称
-              <span
-                style="color: rgb(193, 194, 204);font-weight: normal;"
-              >（设置店铺的联系方式，平台和顾客将通过此信息与你联系）</span>
+              <span style="color: rgb(193, 194, 204); font-weight: normal"
+                >（设置店铺的联系方式，平台和顾客将通过此信息与你联系）</span
+              >
             </h3>
-            <div class="content" style="padding-top:17px">
+            <div class="content" style="padding-top: 17px">
               <el-form :model="formData" :rules="rules" ref="form">
                 <el-form-item prop="name">
                   <label slot="label">店铺名称</label>
-                  <el-input v-model="formData.name" placeholder="请输入店铺名称"></el-input>
+                  <el-input
+                    v-model="formData.name"
+                    placeholder="请输入店铺名称"
+                  ></el-input>
                 </el-form-item>
                 <el-form-item prop="userEmail">
                   <label slot="label">
                     账户邮箱
                     <span class="des">（接收系统通知的邮箱）</span>
                   </label>
-                  <el-input v-model="formData.accountEmail"  placeholder="请输入邮箱"></el-input>
-                </el-form-item> 
-                <el-form-item prop="KeFuEmail" >
+                  <el-input
+                    v-model="formData.accountEmail"
+                    placeholder="请输入邮箱"
+                  ></el-input>
+                </el-form-item>
+                <el-form-item prop="KeFuEmail">
                   <label slot="label">
                     客服邮箱
                     <span class="des">（顾客联系客服的邮箱）</span>
                     <a
                       href="https://help.xshoppy.com/new/#/article/detail/361464"
                       target="_blank"
-                      style="color: rgb(39, 58, 138); text-decoration: underline; cursor: pointer; float: right;"
-                    >如何创建主域名邮箱？</a>
+                      style="
+                        color: rgb(39, 58, 138);
+                        text-decoration: underline;
+                        cursor: pointer;
+                        float: right;
+                      "
+                      >如何创建主域名邮箱？</a
+                    >
                   </label>
-                  <el-input v-model="formData.contactEmail" placeholder="请输入邮箱"></el-input>
+                  <el-input
+                    v-model="formData.contactEmail"
+                    placeholder="请输入邮箱"
+                  ></el-input>
                 </el-form-item>
-                <el-form-item prop="phone">
+                <!-- <el-form-item prop="phone">
                   <label slot="label">
                     联系电话 
                   </label>
@@ -55,30 +76,28 @@
                     店铺地址 
                   </label>
                   <el-input v-model="formData.detailedAddress"  placeholder="请输入店铺地址"></el-input>
-                </el-form-item>
+                </el-form-item> -->
                 <el-form-item>
-                  <label slot="label">
-                    店铺logo
-                  </label> 
-              <el-upload
-                :action="url+'/api/upload'"
-                :headers="{
-                  Authorization: token,
-                }"
-                list-type="picture-card"
-                :on-preview="PictureCardPreview"
-                :on-remove="RemoveImg"
-                :on-change="ChangeImg"
-                :on-success="UploadSuccess"
-                :limit="1"
-                :file-list="imageUrl"
-                :class="showUpload ? 'hide' : ''"
-              >
-                <i class="el-icon-plus"></i>
-              </el-upload>
-              <el-dialog title="查看图片" :visible.sync="dialogVisible">
-                <img width="100%" :src="imageUrl" alt />
-              </el-dialog> 
+                  <label slot="label"> 店铺logo<span style="color:rgb(193, 194, 204)">(建议尺寸：200 x 60)</span></label>
+                  <el-upload
+                    :action="url + '/api/upload'"
+                    :headers="{
+                      Authorization: token,
+                    }"
+                    list-type="picture-card"
+                    :on-preview="PictureCardPreview"
+                    :on-remove="RemoveImg"
+                    :on-change="ChangeImg"
+                    :on-success="UploadSuccess"
+                    :limit="1"
+                    :file-list="imageUrl"
+                    :class="showUpload ? 'hide' : ''"
+                  >
+                    <i class="el-icon-plus"></i>
+                  </el-upload>
+                  <el-dialog title="查看图片" :visible.sync="dialogVisible">
+                    <img width="100%" :src="imageUrl" alt />
+                  </el-dialog>
                 </el-form-item>
               </el-form>
             </div>
@@ -87,7 +106,9 @@
         <el-col :span="8">
           <div class="box-right">
             <p class="infoTip">温馨提示</p>
-            <p class="infoContent">1、设置店铺的联系方式，平台和顾客将通过此信息与你联系。</p>
+            <p class="infoContent">
+              1、设置店铺的联系方式，平台和顾客将通过此信息与你联系。
+            </p>
             <!-- <p class="infoContent">2、完成第一单支付交易后，则不可修改币种。</p>
             <p class="infoContent">1、设置店铺的联系方式，平台和顾客将通过此信息与你联系。</p>-->
           </div>
@@ -99,64 +120,63 @@
     </div>
   </div>
 </template> 
-<script> 
-import {getShopById,edit} from '@/api/yxSystemStore'
+<script>
+import { getShopById, edit } from "@/api/yxSystemStore";
 export default {
   data() {
     var checkEmail = (rule, value, callback) => {
       if (!value) {
         return callback(new Error("邮箱不能为空"));
       }
-      let reg = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/
+      let reg = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
       if (!reg.test(value)) {
         callback(new Error("请输入正确的邮箱"));
       } else {
         callback();
       }
-    }; 
+    };
     return {
-      url:localStorage.getItem('uploadUrl'),
+      url: localStorage.getItem("uploadUrl"),
       formData: {},
       rules: {
-        name: [{required:true, message: '请填写店铺名称',trigger: "blur"}],
-				accountEmail: [{ validator: checkEmail, trigger: "blur" }],
+        name: [{ required: true, message: "请填写店铺名称", trigger: "blur" }],
+        accountEmail: [{ validator: checkEmail, trigger: "blur" }],
         contactEmail: [{ validator: checkEmail, trigger: "blur" }],
-        phone:[{pattern: /^[1][3456789]\d{9}$/, required:true, message: '请输入正确的手机号码', trigger: 'blur' }],  
-        detailedAddress:[{required:true, message: '请填写店铺地址', trigger: 'blur'}],
+        // phone:[{pattern: /^[1][3456789]\d{9}$/, required:true, message: '请输入正确的手机号码', trigger: 'blur' }],
+        // detailedAddress:[{required:true, message: '请填写店铺地址', trigger: 'blur'}],
       },
-      pass:false,
+      pass: false,
       dialogVisible: false, // 上传图片是否显示
       imageUrl: [], // 图片路径
-      showUpload: false, // 是否显示上传按钮 
-      token:localStorage.getItem('token'), 
+      showUpload: false, // 是否显示上传按钮
+      token: localStorage.getItem("token"),
     };
-  }, 
-  watch:{
-    rules:function(val){
-      console.log(val)
-    }
   },
-  created(){
-    let storeId = localStorage.getItem('storeId');
-    getShopById(storeId).then(res=>{ 
+  watch: {
+    rules: function (val) {
+      console.log(val);
+    },
+  },
+  created() {
+    let storeId = localStorage.getItem("storeId");
+    getShopById(storeId).then((res) => {
       this.formData = res;
-      if(this.formData.phone == ''){
-        this.formData.phone = null 
+      if (this.formData.phone == "") {
+        this.formData.phone = null;
       }
-      if(this.formData.image){
-      this.imageUrl = [{url:this.formData.image}]; 
-      this.showUpload = true;
-    } 
-    })
-    
+      if (this.formData.image) {
+        this.imageUrl = [{ url: this.formData.image }];
+        this.showUpload = true;
+      }
+    });
   },
   methods: {
     // ValidateFrom: function (boolean, item) {
     //   console.log(boolean, item);
     //   if(item){
-    //     this.pass= true; 
+    //     this.pass= true;
     //   } else {
-    //     this.pass = false; 
+    //     this.pass = false;
     //   }
     // },
     PictureCardPreview(file) {
@@ -166,35 +186,36 @@ export default {
     ChangeImg(file, fileList) {
       this.showUpload = fileList.length >= 1;
     },
-    UploadSuccess: function (res, file) { 
-      this.imageUrl = [{url:res.link}];
+    UploadSuccess: function (res, file) {
+      this.imageUrl = [{ url: res.link }];
     },
     RemoveImg: function (e) {
       this.showUpload = false;
     },
-    Save:function(){ 
+    Save: function () {
       this.$refs.form.validate((valid) => {
         if (valid) {
-         // 向后台发送请求
-         let imageUrl = ''; 
-        if(this.imageUrl.length>0){
-          imageUrl = this.imageUrl[0].url 
-        } else {
-          imageUrl = ''
-          this.$message.error('请上传门店logo')
-          return false;
-        }
-        this.formData.image = imageUrl;
-        edit(this.formData).then(res=>{ 
-        this.$message.success('编辑成功')
-        this.$router.push('/setting')})
+          // 向后台发送请求
+          let imageUrl = "";
+          if (this.imageUrl.length > 0) {
+            imageUrl = this.imageUrl[0].url;
+          } else {
+            imageUrl = "";
+            this.$message.error("请上传门店logo");
+            return false;
+          }
+          this.formData.image = imageUrl;
+          edit(this.formData).then((res) => {
+            this.$message.success("编辑成功");
+            this.$router.push("/setting");
+          });
         } else {
           //就像用户提示发生错误的消息
-          this.$message.error('请完善表格数据')
+          this.$message.error("请完善表格数据");
         }
-      })  
-    }
-  }
+      });
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
@@ -249,6 +270,7 @@ h1 {
     }
   }
 }
+
 .box-right {
   margin-bottom: 20px;
   padding: 12px;
@@ -290,6 +312,16 @@ h1 {
 }
 /deep/.el-input-group__append {
   background: #fff;
+}
+/deep/ .el-upload-list--picture-card .el-upload-list__item{
+  width: 200px;
+  height: 60px;
+  line-height:60px
+}
+/deep/ .el-upload--picture-card{
+  width: 200px;
+  height: 60px;
+  line-height:60px
 }
 </style>  
 <style>
