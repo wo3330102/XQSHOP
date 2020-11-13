@@ -195,7 +195,7 @@
         </h3>
         <div class="content">
           <el-upload
-            action="https://admin2.xqkj.top/api/upload"
+            :action="url+'/api/upload'"
             :headers="{
               Authorization: token,
             }"
@@ -477,6 +477,7 @@
   </div>
 </template> 
 <script>
+
 import tinymceEditor from "@/components/tinymce-editor";
 import tableTem from "@/components/tableTem";
 import { add, edit, getInfo, isFormatAttr } from "@/api/yxStoreProduct";
@@ -488,6 +489,7 @@ export default {
   },
   data() {
     return {
+      url:localStorage.getItem('uploadUrl'),
       id: "",
       isFirst:true,
       token: "",
@@ -830,8 +832,7 @@ export default {
         let arr = [];
         item.map((i) => {
           table.map((item, inx) => {
-            if (item.index == i.index) {  
-              
+            if (item.index == i.index) {   
               if(this.shopAttributeList.length === 1){ 
                 this.shopAttributeList[0].detail.splice(this.shopAttributeList[0].detail.indexOf(table[inx].value1),1) 
               }

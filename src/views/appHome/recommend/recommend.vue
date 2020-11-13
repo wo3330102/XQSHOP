@@ -34,13 +34,13 @@
           "
           >{{ detail.status === 1 ? "关闭" : "开启" }}</el-button
         >
-        <el-button>配置</el-button>
+        <el-button @click="$NavgitorTo('/recommendOption')">配置</el-button>
       </span>
     </h1>
     <div style="min-height: 200px">
       <el-row style="margin: 0 -10px">
         <el-col :span="16" style="padding-left: 10px; padding-right: 10px">
-          <!-- 适用对象 -->
+          <!-- 建议推荐的商品 -->
           <div class="box">
             <h3 class="title">
               <span>
@@ -52,34 +52,34 @@
             </h3>
             <div class="columns">
               <el-select
-                v-model="detail.shopType"
+                v-model="detail.recommendType"
                 size="medium"
-                style="width:100%"
-                @change="detail.list = []"
+                style="width: 100%"
+                @change="detail.productRecommendInfoVo = []"
               >
                 <el-option
-                :label="item.label"
-                :value="item.id"
-                v-for="item in list"
-                :key="item.id"
-              ></el-option>
+                  :label="item.label"
+                  :value="item.id"
+                  v-for="item in list"
+                  :key="item.id"
+                ></el-option>
               </el-select>
               <el-button
                 style="margin-left: 20px"
                 type="primary"
                 size="medium"
-                v-if="detail.shopType == 1"
+                v-if="detail.recommendType == 1"
                 @click="ShowDiglog"
                 >添加商品</el-button
               >
             </div>
             <div
               class="discountTargetList"
-              v-if="detail.list && detail.list.length > 0"
+              v-if="detail.productRecommendInfoVo && detail.productRecommendInfoVo.length > 0"
             >
               <table>
-                <tr v-for="(item, index) in detail.list" :key="item.id">
-                  <td class="img"> 
+                <tr v-for="(item, index) in detail.productRecommendInfoVo" :key="item.id">
+                  <td class="img">
                     <div
                       class="small-img"
                       :style="{ backgroundImage: 'url(' + item.image + ')' }"
@@ -96,38 +96,55 @@
               </table>
             </div>
           </div>
-          <!-- <div class="box">
-            <h3 class="title">
-              <span>
-                建议推荐的商品
-                <span style="color: #606266; font-weight: normal"
-                  >（以下商品将会在推荐商品列表中被展示）</span
-                >
-              </span>
-            </h3>
-            <el-select
-              v-model="detail.shopType"
-              placeholder="请选择"
-              style="width: 100%"
-            >
-              <el-option
-                :label="item.label"
-                :value="item.id"
-                v-for="item in list"
-                :key="item.id"
-              ></el-option>
-            </el-select>
-          </div> -->
-          <div class="box">
+          <div class="box" style="padding-top: 0px">
             <div class="tab">
-              <div class="fr"></div>
+              <div class="fr">
+                <el-date-picker
+                  v-model="date"
+                  type="daterange"
+                  align="right"
+                  unlink-panels
+                  value-format='yyyy-MM-dd HH:mm:ss'
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  :picker-options="pickerOptions"
+                  :default-time="['00:00:00', '23:59:59']"
+                >
+                </el-date-picker>
+              </div>
               <div
                 class="tab-item"
                 v-for="(item, index) in tabNav"
                 :key="index"
                 :class="active === index ? 'active' : ''"
-              ></div>
+                @click="active = index"
+              >
+                <span>{{ item }}</span>
+              </div>
             </div>
+            <el-table :data="data[active]">
+              <el-table-column prop="image" label="商品" width="86">
+                <template slot-scope="scope">
+                  <span
+                    class="image"
+                    :style="{ backgroundImage: 'url(' + scope.row.image + ')' }"
+                  ></span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="storeName" label=""></el-table-column>
+              <el-table-column label="次数" align="right" width="100">
+                <template slot-scope="scope">
+                  <span>{{
+                    active === 0
+                      ? Number(scope.row.browseNum)
+                      : active === 1
+                      ? Number(scope.row.toCartNum)
+                      : Number(scope.row.buyNum)
+                  }}</span>
+                </template>
+              </el-table-column>
+            </el-table>
           </div>
         </el-col>
         <el-col :span="8" style="padding-left: 10px; padding-right: 10px">
@@ -136,7 +153,7 @@
             <p class="infoContent">
               数据统计为推荐商品页面下的展示数据，统计最近30天内的使用推荐商品后反馈的数据。
             </p>
-          </div> 
+          </div>
         </el-col>
       </el-row>
       <div class="pageSaveBtn">
@@ -144,7 +161,7 @@
       </div>
     </div>
     <!-- 选择商品 -->
-    <el-dialog title="请选择商品" :visible.sync="shopDialog">
+    <el-dialog title="请选择商品" width="640px" :visible.sync="shopDialog">
       <div class="search-conditions">
         <!-- 商品标签
             <el-select
@@ -167,9 +184,9 @@
             </el-select> -->
         <!-- 商品分类 -->
         <el-select
-          v-model="requestParams.tagId"
+          v-model="requestParamsTable.tagId"
           placeholder="请选择分类"
-          style="width: 200px"
+          style="width: 200px;margin-right:10px"
           @change="
             () => {
               table = [];
@@ -195,10 +212,11 @@
       <el-table
         v-if="table.length > 0"
         :data="table"
-        style="width: 100%"
+        style="width: 100%;"
         empty-text
         v-el-table-infinite-scroll="load"
-        @selection-change="e=>selectItem = e"
+        infinite-scroll-delay="200"
+        @selection-change="(e) => (selectItem = e)"
       >
         <el-table-column type="selection" width="55"></el-table-column>
         <el-table-column align="left" width="80" prop="image" label="商品图片">
@@ -225,18 +243,18 @@
     </el-dialog>
   </div>
 </template> 
-<script> 
+<script>
 import elTableInfiniteScroll from "el-table-infinite-scroll";
 import { getCates } from "@/api/yxStoreCategory";
 import { get } from "@/api/yxStoreProduct";
+import { getlist,getInfo,edit } from "@/api/yxStoreProductRecommend";
 // import { get}
 export default {
   data() {
     return {
-      detail: {
-        status: 0,
-        shopType: 0,
-        list:[],
+      detail: { 
+        recommendType: 0,
+        list: [],
       },
       list: [
         {
@@ -253,38 +271,94 @@ export default {
         },
       ],
       shopDialog: false,
-      requestParams: {
+      requestParamsTable: {
         page: 0,
         size: 30,
         tagId: "",
       },
       shopCategoryList: [],
       shopContent: "",
-      table:[],
-      tableTotal:'',
-      selectItem:[], 
+      table: [],
+      tableTotal: "",
+      selectItem: [],
       active: 0,
       tabNav: ["点击次数", "加购次数", "购买次数"],
+      data: [],
+      date: [],
+      pickerOptions: {
+        shortcuts: [
+          {
+            text: "最近一周",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit("pick", [start, end]);
+            },
+          },
+          {
+            text: "最近一个月",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit("pick", [start, end]);
+            },
+          },
+          {
+            text: "最近三个月",
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit("pick", [start, end]);
+            },
+          },
+        ],
+      },
+      requestParams: {
+        beginTime: "",
+        endTime: "",
+        limit: 30,
+        page: 0,
+      },
     };
   },
   directives: {
     "el-table-infinite-scroll": elTableInfiniteScroll,
   },
-  created() {
-    this.Init();
-    getCates(this.requestParams).then((res) => {
-      console.log(res);
-      this.shopCategoryList = res.content;
-    });
+  watch: {
+    date: function (val) { 
+      this.requestParams.beginTime = val[0];
+      this.requestParams.endTime = val[1];
+      this.data = [];
+      this.GetList();
+    },
   },
-  methods: {
-    Init: function () {
-      // get().then((res) => {
-      //   if (res.content.length > 0) {
-      //     this.detail = res.content[0];
-      //     this.detail.type = Boolean(res.content[0].type); 
-      //   }
-      // });
+  created() { 
+    this.Init();
+    getCates().then(res=>{
+      this.shopCategoryList = res.content
+    })
+
+    let time = new Date().toLocaleDateString();
+    this.date = [
+      time.replace(/\//g,'-') + ' 00:00:00',
+      time.replace(/\//g,'-') + ' 23:59:59',
+    ]; 
+  },
+  methods: { 
+    Init:function(){
+      getInfo().then(res=>{ 
+      this.detail = res;
+    })
+    },
+    GetList: function () { 
+      getlist(this.requestParams).then((res) => {
+        this.data.push(res.browseNumList);
+        this.data.push(res.toCartNumList);
+        this.data.push(res.buyNumList);
+      });
     },
     // 显示对话框
     ShowDiglog: function () {
@@ -293,9 +367,8 @@ export default {
       this.initData();
     },
     // 加载表单数据
-    initData: function () {
-      get(this.requestParams).then((res) => {
-        console.log(res);
+    initData: function () { 
+      get(this.requestParamsTable).then((res) => { 
         let arr = this.table.concat(res.content);
         if (arr.length <= res.totalElements) {
           this.table = arr;
@@ -305,15 +378,15 @@ export default {
     },
     // 搜索
     Search: function () {
-      this.requestParams.storeName = this.shopContent;
+      this.requestParamsTable.storeName = this.shopContent;
       this.table = [];
       this.initData();
     },
     // 加载更多
     load: function (res) {
-      this.requestParams.page += 1;
+      this.requestParamsTable.page += 1;
       this.initData();
-    }, 
+    },
     // 确认选中
     CheckSelectItem: function () {
       this.shopDialog = false;
@@ -326,37 +399,46 @@ export default {
         };
         arr.push(obj);
       });
-      if (this.detail.list && this.detail.list.length > 0) {
+      if (this.detail.productRecommendInfoVo && this.detail.productRecommendInfoVo.length > 0) {
         arr.map((i) => {
           let bool = true;
-          this.detail.list.map((j) => {
+          this.detail.productRecommendInfoVo.map((j) => {
             if (JSON.stringify(i) == JSON.stringify(j)) {
               bool = false;
             }
           });
           if (bool) {
-            this.detail.list.push(i);
+            this.detail.productRecommendInfoVo.push(i);
           }
         });
       } else {
-        this.detail.list = arr;
+        this.detail.productRecommendInfoVo = arr;
       }
     },
     // 删除选中商品
-    Del: function (index) { 
-      console.log(this.detail.list)
+    Del: function (index) {
+      console.log(this.detail.productRecommendInfoVo);
       this.$nextTick(() => {
-        this.detail.list.splice(index, 1);
+        this.detail.productRecommendInfoVo.splice(index, 1);
       });
     },
     Save: function () {
-      let that = this;
-      this.detail.status = this.status;
-      this.detail.type = Number(this.detail.type);
-      if (this.detail.id) {
-        edit(this.detail).then(() => {
+      let that = this;   
+      let arr = [];
+      this.detail.productRecommendInfoVo.map(i=>{
+        arr.push(i.id);
+      })
+      let par = {
+        recommendType:this.detail.recommendType,
+        appointProductId:arr.toString()
+      }
+      edit(par).then(() => {
           Tip();
+          that.Init();
         });
+        return false;
+      if (this.detail.id) {
+        
       } else {
         delete this.detail.id;
         add(this.detail).then(() => {
@@ -434,57 +516,100 @@ h1 {
     }
   }
 }
-.columns {
-    display: flex;
-    margin-bottom: 12px;
+.tab {
+  position: relative;
+  &::after {
+    content: "";
+    left: -12px;
+    right: -12px;
+    display: block;
+    position: absolute;
+    z-index: 1;
+    border-bottom: 1px solid #eee;
   }
+  .fr {
+    float: right;
+    margin-top: 10px;
+  }
+  .active {
+    color: #1a1d2c !important;
+    border-bottom: 4px solid #f49342 !important;
+  }
+  .tab-item {
+    display: inline-block;
+    padding: 0 10px;
+    height: 50px;
+    font-size: 14px;
+    line-height: 50px;
+    border-bottom: 4px solid #fcfdff;
+    color: #5e7185;
+    cursor: pointer;
+  }
+}
+.image {
+  border-radius: 4px;
+  width: 60px;
+  height: 60px;
+  display: inline-block;
+  border: 1px solid #dadde4;
+  background-color: #f7f8fd;
+  background-origin: content-box;
+  background-position: 50% 50%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+.columns {
+  display: flex;
+  margin-bottom: 12px;
+}
 .discountTargetList {
+  width: 100%;
+  padding: 0 12px;
+  line-height: 23px;
+  margin: 2px 0;
+  position: relative;
+  box-sizing: border-box;
+  table {
     width: 100%;
-    padding: 0 12px;
-    line-height: 23px;
-    margin: 2px 0;
     position: relative;
-    box-sizing: border-box;
-    table {
-      width: 100%;
-      position: relative;
-      tr {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: 1px solid #ececec;
-        .img {
-          width: 60px;
-        }
-        .text {
-          padding-left: 12px;
-          flex: 1;
-        }
-        .option {
-          width: 40px;
-          text-align: center;
-          color: #c1c2cc;
-        }
-        i:hover{
-          cursor: pointer;
-        }
-        td {
-          padding: 10px 0;
-        }
-        &:last-child {
-          border: none;
-        }
+    tr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #ececec;
+      .img {
+        width: 60px;
+      }
+      .text {
+        padding-left: 12px;
+        flex: 1;
+      }
+      .option {
+        width: 40px;
+        text-align: center;
+        color: #c1c2cc;
+      }
+      i:hover {
+        cursor: pointer;
+      }
+      td {
+        padding: 10px 0;
+      }
+      &:last-child {
+        border: none;
       }
     }
-    &::before {
-      content: "";
-      left: -12px;
-      right: -12px;
-      display: block;
-      position: absolute;
-      border-top: 1px solid #eee;
-    }
   }
+  &::before {
+    content: "";
+    left: -12px;
+    right: -12px;
+    display: block;
+    position: absolute;
+    border-top: 1px solid #eee;
+  }
+}
 // .off-the-shelf {
 //   color: rgb(202, 203, 214);
 //   border: 1px solid rgb(202, 203, 214);

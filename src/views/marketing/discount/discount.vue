@@ -147,10 +147,13 @@ export default {
       selectItem.map(i=>{
         par.push(i.id);
       })
-      del(par).then(res=>{
-        this.$message.success('删除成功');
-        this.isRefresh += 1;
+      let that= this;
+      this.$DelTip(function(){
+        del(par).then(res=>{
+        that.$message.success('删除成功');
+        that.isRefresh += 1;
       })
+      }) 
     }
   },
 };

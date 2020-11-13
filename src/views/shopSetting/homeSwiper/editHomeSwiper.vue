@@ -31,7 +31,7 @@
             <h3 class="title">轮播图图片</h3>
             <div class="content">
               <el-upload
-                action="https://admin2.xqkj.top/api/upload"
+                :action="url+'/api/upload'"
                 :headers="{
                   Authorization: token,
                 }"
@@ -76,11 +76,12 @@
     </div>
   </div>
 </template> 
-<script>
+<script> 
 import { add,edit } from "@/api/yxSystemGroupData";
 export default {
   data() {
     return {
+      url:localStorage.getItem('uploadUrl'),
       token: "",
       categotyList: [], // 轮播图列表
       upLoadHeaders: {}, // 上传头部字段

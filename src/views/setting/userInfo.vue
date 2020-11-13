@@ -20,8 +20,8 @@
               >（设置店铺的联系方式，平台和顾客将通过此信息与你联系）</span>
             </h3>
             <div class="content" style="padding-top:17px">
-              <el-form :model="formData" :rules="rules" @validate="ValidateFrom">
-                <el-form-item prop="shopName">
+              <el-form :model="formData" :rules="rules" @validate="ValidateFrom" >
+                <el-form-item prop="name" :rules="{required:true, message: '请输入店铺名称', trigger: 'change' }">
                   <label slot="label">店铺名称</label>
                   <el-input v-model="formData.name" placeholder="请输入店铺名称"></el-input>
                 </el-form-item>
@@ -31,7 +31,7 @@
                     <span class="des">（接收系统通知的邮箱）</span>
                   </label>
                   <el-input v-model="formData.accountEmail"  placeholder="请输入邮箱"></el-input>
-                </el-form-item>
+                </el-form-item> 
                 <el-form-item prop="KeFuEmail" >
                   <label slot="label">
                     客服邮箱
@@ -43,6 +43,42 @@
                     >如何创建主域名邮箱？</a>
                   </label>
                   <el-input v-model="formData.contactEmail" placeholder="请输入邮箱"></el-input>
+                </el-form-item>
+                <el-form-item prop="phone">
+                  <label slot="label">
+                    联系电话 
+                  </label>
+                  <el-input v-model="formData.phone"  placeholder="请输入联系电话"></el-input>
+                </el-form-item>
+                <el-form-item prop="detailedAddress">
+                  <label slot="label">
+                    店铺地址 
+                  </label>
+                  <el-input v-model="formData.detailedAddress"  placeholder="请输入店铺地址"></el-input>
+                </el-form-item>
+                <el-form-item prop="logo">
+                  <label slot="label">
+                    店铺logo
+                  </label> 
+              <el-upload
+                :action="url+'/api/upload'"
+                :headers="{
+                  Authorization: token,
+                }"
+                list-type="picture-card"
+                :on-preview="PictureCardPreview"
+                :on-remove="RemoveImg"
+                :on-change="ChangeImg"
+                :on-success="UploadSuccess"
+                :limit="1"
+                :file-list="imageUrl"
+                :class="showUpload ? 'hide' : ''"
+              >
+                <i class="el-icon-plus"></i>
+              </el-upload>
+              <el-dialog title="查看图片" :visible.sync="dialogVisible">
+                <img width="100%" :src="imageUrl" alt />
+              </el-dialog> 
                 </el-form-item>
               </el-form>
             </div>
@@ -63,7 +99,7 @@
     </div>
   </div>
 </template> 
-<script>
+<script> 
 import {getShopById,edit} from '@/api/yxSystemStore'
 export default {
   data() {
@@ -77,20 +113,23 @@ export default {
       } else {
         callback();
       }
-    };
-    var shopName = (rule, value, callback) => {
-      if (!value) {
-        return callback(new Error("店铺名为必填项"));
-			} 
-    };
+    }; 
     return {
+      url:localStorage.getItem('uploadUrl'),
       formData: {},
       rules: {
-        name: [{ validator: shopName, trigger: "blur" }],
+        name: [{required:true, message: '请填写店铺地址',trigger: "blur"}],
 				accountEmail: [{ validator: checkEmail, trigger: "blur" }],
-				contactEmail: [{ validator: checkEmail, trigger: "blur" }],
+        contactEmail: [{ validator: checkEmail, trigger: "blur" }],
+        phone:[{pattern: /^[1][3456789]\d{9}$/, required:true, message: '请输入正确的手机号码', trigger: 'blur' }], 
+        logo:[{required:true, message: '请上传门店logo'}],
+        detailedAddress:[{required:true, message: '请填写店铺地址', trigger: 'blur'}],
       },
       pass:false,
+      dialogVisible: false, // 上传图片是否显示
+      imageUrl: [], // 图片路径
+      showUpload: false, // 是否显示上传按钮 
+      token:localStorage.getItem('token')
     };
   }, 
   created(){
@@ -105,6 +144,19 @@ export default {
       console.log(boolean, item);
       this.pass= true;
     },
+    PictureCardPreview(file) {
+      this.imageUrl = file.url;
+      this.dialogVisible = true;
+    },
+    ChangeImg(file, fileList) {
+      this.showUpload = fileList.length >= 1;
+    },
+    UploadSuccess: function (res, file) { 
+      this.imageUrl = [{url:res.link}];
+    },
+    RemoveImg: function (e) {
+      this.showUpload = false;
+    },
     Save:function(){
       if(this.pass){
         edit(this.formData).then(res=>{ 
@@ -113,7 +165,7 @@ export default {
       })
       } else {
         this.$message.error('请完善表格数据')
-      }
+      }  
     }
   },
   updated() {
@@ -216,3 +268,14 @@ h1 {
   background: #fff;
 }
 </style>  
+<style>
+.hide .el-upload--picture-card {
+  display: none !important;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+</style>

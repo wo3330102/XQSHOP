@@ -44,7 +44,7 @@
             <h3 class="title">分类图片</h3>
             <div class="content">
               <el-upload
-                action="https://admin2.xqkj.top/api/upload"
+                :action="url+'/api/upload'"
                 :headers="{
                   Authorization: token,
                 }"
@@ -293,7 +293,7 @@
     </el-dialog>
   </div>
 </template> 
-<script>
+<script> 
 import { edit, getCates } from "@/api/yxStoreCategory";
 import tinymceEditor from "@/components/tinymce-editor";
 // import Treeselect from '@riophae/vue-treeselect'
@@ -369,6 +369,7 @@ export default {
       callback();
     };
     return {
+      url:localStorage.getItem('uploadUrl'),
       token: "",
       form: {}, // 富文本内容 
       categotyList: [], // 分类列表

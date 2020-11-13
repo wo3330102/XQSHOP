@@ -542,7 +542,7 @@ export default {
     },
     // 批量操作
     BatchOption: function (index, selectItem) {
-      console.log("批量操作");
+      let that= this;
       let par = [];
       selectItem.map((i) => {
         let obj = {};
@@ -560,10 +560,12 @@ export default {
           });
           break;
         case 1:
-          del(par).then((res) => {
-            this.$message.success("操作成功");
-            this.isRefresh += 1;
+          this.$DelTip(function(){
+            del(par).then((res) => {
+            that.$message.success("操作成功");
+            that.isRefresh += 1;
           });
+          })
           break;
       }
     },
@@ -589,9 +591,10 @@ export default {
     },
     // 单个评论操作
     Option: function (detail, status) {
-      this.itemDetail = detail;  
+      let that = this;
+      this.itemDetail = detail;
       if (this.requestUrl == "/api/yxStoreProductReplyAll") {
-        let type = status; 
+        let type = status;
         switch (type) {
           case "important":
             // this.showDialog = true;
@@ -599,11 +602,11 @@ export default {
           case "review":
             // 跳转到预览链接
             break;
-          case "status": 
+          case "status":
             let par = {
-              isShowReply:detail.isShowReply == 1?1:0,
-              productId:detail.id,
-            }
+              isShowReply: detail.isShowReply == 1 ? 1 : 0,
+              productId: detail.id,
+            };
             editMainStatus(par).then((res) => {
               this.$message.success("操作成功");
               this.isRefresh += 1;
@@ -613,9 +616,9 @@ export default {
       } else {
         let type = status;
         let par = {
-        productId: detail.productId,
-        replyId: detail.id,
-      };
+          productId: detail.productId,
+          replyId: detail.id,
+        };
         switch (type) {
           case "pass":
             reviewComment([par]).then((res) => {
@@ -624,11 +627,13 @@ export default {
             });
             break;
           case "del":
-            del([par]).then((res) => {
-              this.$message.success("操作成功");
-              this.isRefresh += 1;
+            this.$DelTip(function () {
+              del([par]).then((res) => {
+                this.$message.success("操作成功");
+                  this.isRefresh += 1;
+              });
             });
-            break; 
+            break;
         }
       }
     },

@@ -136,6 +136,10 @@ const routes = [{
       path: '/recommend',
       name: 'Recommend',
       component: () => import( /* webpackChunkName: "about" */ '../views/appHome/recommend/recommend.vue'),
+    }, {
+      path: '/recommendOption',
+      name: 'RecommendOption',
+      component: () => import( /* webpackChunkName: "about" */ '../views/appHome/recommend/recommendOption.vue'),
     }]
   }, {
     path: 'shopSetting',

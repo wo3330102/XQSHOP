@@ -96,6 +96,7 @@ export default {
     },
     SelectOption:function(index,item){
       console.log(e,i)
+      
     }
   },
 };

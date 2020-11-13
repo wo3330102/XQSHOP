@@ -108,6 +108,7 @@
         :requestParams="requestParams"
         :optionList="['删除']" 
         :tableHeader="tableHeader"
+        :isRefresh="isRefresh"
         @rowClick="toDetail"
         @BatchOption="BatchOption" 
         ></table-tem>
@@ -202,6 +203,7 @@ export default {
       minOrder: "",
       maxOrder: "",
       tableData: [],
+      isRefresh:0,
       tableHeader: [
         {
           width: 263,
@@ -253,8 +255,16 @@ export default {
     },
     // 批量操作
     BatchOption:function(e,selectItem){
+      let that = this;
+      let par = [];
       selectItem.map(i=>{
-        
+        par.push(i.uid);
+      })
+      this.$DelTip(function(){
+        del(par).then(()=>{
+          that.isRefresh += 1;
+          that.$message.success('删除成功')
+        })
       })
     },
     Screen:function(){ 

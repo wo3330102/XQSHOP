@@ -165,6 +165,7 @@ export default {
     },
     // 批量操作
     BatchOption:function(e,selectItem){
+      let that = this;
       let index = e;
       let idArr = [];
       selectItem.map(i=>{
@@ -199,10 +200,11 @@ export default {
           break;
         case 2:
           par = idArr;
-          del(par).then(res=>{
-            this.$message.success('删除成功')
-            console.log(res);
-            this.isRefresh += 1;
+          this.$DelTip(function(){
+            del(par).then(res=>{
+            that.$message.success('删除成功') 
+            that.isRefresh += 1;
+          })
           })
           break;
         default:

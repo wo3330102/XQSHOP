@@ -40,7 +40,7 @@
             <h3 class="title">分类图片</h3>
             <div class="content">
               <el-upload
-                action="https://admin2.xqkj.top/api/upload"
+                :action="url+'/api/upload'"
                 :headers="{
                   Authorization: token,
                 }"
@@ -289,6 +289,7 @@
   </div>
 </template> 
 <script>
+
 import { add, getCates } from "@/api/yxStoreCategory";
 import tinymceEditor from "@/components/tinymce-editor";
 export default {
@@ -361,6 +362,7 @@ export default {
       callback();
     };
     return {
+      url:localStorage.getItem('uploadUrl'),
       token: "",
       form: {}, // 富文本内容
       pid:'', 

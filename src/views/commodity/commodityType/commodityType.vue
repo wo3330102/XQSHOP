@@ -12,56 +12,69 @@
       <div class="conditions">
         <div class="search-box">
           <el-input v-model="searchVal" placeholder="搜索分类名称 ">
-            <el-button slot="append" @click="requestParams.title = searchVal">搜索</el-button>
+            <el-button slot="append" @click="requestParams.title = searchVal"
+              >搜索</el-button
+            >
           </el-input>
         </div>
       </div>
       <table-tem
-        :show-img="true" 
-        :optionList="['删除']" 
+        :show-img="true"
+        :optionList="['删除']"
         :requestUrl="'api/yxStoreTag'"
         :requestParams="requestParams"
-        :tableHeader="tableHeader" 
+        :tableHeader="tableHeader"
         :isRefresh="isRefresh"
         @rowClick="RowClick"
-        @BatchOption="Del" 
+        @BatchOption="Del"
       >
-        <template slot="image" slot-scope="params" >  
-          <span class="small-img" :style="{ backgroundImage: 'url(' + params.params.pic + ')' }"></span>
+        <template slot="image" slot-scope="params">
+          <span
+            class="small-img"
+            :style="{ backgroundImage: 'url(' + params.params.pic + ')' }"
+          ></span>
         </template>
         <template slot="option" slot-scope="params">
-          <span @click.stop="(e)=>{params}" class="textBtn">预览</span>
+          <span
+            @click.stop="
+              (e) => {
+                params;
+              }
+            "
+            class="textBtn"
+            >预览</span
+          >
         </template>
-      </table-tem> 
+      </table-tem>
     </div>
   </div>
 </template>
-<script> 
-import {del} from '@/api/yxStoreCategory'
-import tableTem from '@/components/tableTem'
-export default { 
-  components:{
-    tableTem
+<script>
+import { del } from "@/api/yxStoreCategory";
+import tableTem from "@/components/tableTem";
+export default {
+  components: {
+    tableTem,
   },
   data() {
     return {
-      isActive:false,
-      optionList:['删除'],
+      isActive: false,
+      optionList: ["删除"],
       searchVal: "",
       tableHeader: [
         {
           prop: "pic",
-          label:'',
+          label: "",
         },
         {
           prop: "title",
-          label: "分类名称", 
+          label: "分类名称",
           width: 303,
-        }, 
+        },
         {
           prop: "categoryType",
           label: "分类类型",
-          align:'center',
+          align: "center",
           width: 240,
         },
         {
@@ -69,50 +82,52 @@ export default {
           label: "商品数量",
           sortable: true,
           width: 120,
-          align:'center'
+          align: "center",
         },
         {
           prop: "option",
-          label: "操作", 
+          label: "操作",
           width: 303,
-          align:'right'
+          align: "right",
         },
       ],
       requestParams: {
         page: 0,
         size: 30,
-        sort: "sort,desc", 
-        title:'',
+        sort: "sort,desc",
+        title: "",
       },
-      isRefresh:0, 
-      loading:true, 
+      isRefresh: 0,
+      loading: true,
     };
-  }, 
+  },
   methods: {
     AddCategory: function () {
       this.$router.push("/addCategory");
-    }, 
-    RowClick: function (e) { 
+    },
+    RowClick: function (e) {
       this.$router.push("/editCategory");
-      localStorage.setItem('categoryDetail',JSON.stringify(e))
-    }, 
-    Del:function(e,selectItem){  
-      let par = []; 
-      for(var i in selectItem){
-        if(i.count >0){
-          this.$message.error('所选分类下含有商品，无法删除');
+      localStorage.setItem("categoryDetail", JSON.stringify(e));
+    },
+    Del: function (e, selectItem) {
+      let that = this;
+      let par = [];
+      for (var i in selectItem) {
+        if (i.count > 0) {
+          this.$message.error("所选分类下含有商品，无法删除");
           return false;
         }
-        par.push(selectItem[i].id) 
-      } 
-      if(par.length>0){
-        del(par).then(res=>{ 
-        this.$message.success('删除成功'); 
-        this.isRefresh += 1;
-      })
+        par.push(selectItem[i].id);
       }
-      
-    }
+      if (par.length > 0) {
+        this.$DelTip(function(){
+          del(par).then((res) => {
+          that.$message.success("删除成功");
+          that.isRefresh += 1;
+        });
+        })
+      }
+    },
   },
 };
 </script>
@@ -163,7 +178,7 @@ export default {
     display: flex;
     justify-content: space-around;
     border-bottom: 1px solid #f1f1f6;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
     .search-box {
       display: flex;
       flex: 1;
@@ -181,7 +196,7 @@ export default {
     padding: 14px 0;
     text-align: center;
   }
-}  
+}
 </style>
 <style lang="scss">
 .show {
@@ -252,7 +267,7 @@ export default {
   font-weight: 400;
   margin-left: 10px;
   text-decoration: underline;
-} 
+}
 // 调整表格头部选框位置
 /deep/ .el-checkbox:last-of-type {
   margin-left: 13px;

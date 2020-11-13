@@ -235,7 +235,7 @@
         </el-form-item> 
         <el-form-item label="图片">
           <el-upload
-            action="https://admin2.xqkj.top/api/upload"
+            :action="url+'/api/upload'"
             :headers="{
               Authorization: token,
             }"
@@ -362,7 +362,7 @@
             </el-form-item>
             <el-form-item label="头像" style="margin: 0 0 0 30px">
               <el-upload
-                action="https://admin2.xqkj.top/api/upload"
+                :action="url+'/api/upload'"
                 :headers="{
                   Authorization: token,
                 }"
@@ -384,7 +384,7 @@
             </el-form-item>
             <el-form-item label="图片" style="margin: 0 0 0 30px">
               <el-upload
-                action="https://admin2.xqkj.top/api/upload"
+                :action="url+'/api/upload'"
                 :headers="{
                   Authorization: token,
                 }"
@@ -424,7 +424,7 @@
     </el-dialog>
   </div>
 </template> 
-<script>
+<script> 
 import tableTem from "@/components/tableTem";
 import {
   getCommentListById,
@@ -442,6 +442,7 @@ export default {
   },
   data() {
     return {
+      url:localStorage.getItem('uploadUrl'),
       id: "",
       detail: {},
       command: 0,
@@ -651,6 +652,7 @@ export default {
     },
     // 批量修改评论状态
     BatchOption: function (e, selectItem) {
+      let that = this;
       let arr = [];
       switch (e) {
         case 0:
@@ -679,10 +681,12 @@ export default {
             obj.replyId = v.id;
             arr.push(obj);
           });
-          del(arr).then((res) => {
-            this.$message.success("删除成功");
-            this.isRefresh += 1;
+          this.$DelTip(function(){
+            del(arr).then((res) => {
+            that.$message.success("删除成功");
+            that.isRefresh += 1;
           });
+          })
           break;
       }
     },
@@ -698,6 +702,7 @@ export default {
     },
     // 对单个评论的操作
     Option: function (item, par) {
+      let that = this;
       let option = par;
       switch (option) {
         case "edit":
@@ -727,10 +732,12 @@ export default {
             productId: this.id,
             replyId: item.id,
           };
-          del([delpar]).then((res) => {
-            this.$message.success("删除成功");
-            this.isRefresh += 1;
+          this.$DelTip(function(){
+            del([delpar]).then((res) => {
+            that.$message.success("删除成功");
+            that.isRefresh += 1;
           });
+          })
           break;
         case "top":
           let par = [item.id];

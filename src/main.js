@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import ElementUI from 'element-ui';
+import ElementUI, { MessageBox } from 'element-ui';
 import App from './App.vue'
 import router from './router'
 import store from './store'
@@ -8,9 +8,8 @@ import './element-variables.scss';
 Vue.use(ElementUI)
 Vue.prototype.$ELEMENT = {
   size: 'medium'
-};
-
-
+}; 
+localStorage.setItem('uploadUrl',process.env.VUE_APP_BASE_API)
 // Vue.prototype.$msgbox = MessageBox;
 // Vue.prototype.$alert = MessageBox.alert;
 // Vue.prototype.$confirm = MessageBox.confirm;
@@ -67,6 +66,18 @@ Vue.prototype.$IsNaN = function (e) {
 // 全局跳转
 Vue.prototype.$NavgitorTo = function (path) {
   this.$router.push(path)
+}
+// 删除操作的提示
+Vue.prototype.$DelTip = function(cb){ 
+  MessageBox.confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    typeof cb == 'function' && cb();
+  }).catch(() => { 
+    return false;
+  });
 }
 
 new Vue({

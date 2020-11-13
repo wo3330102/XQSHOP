@@ -59,12 +59,12 @@
           </el-input>
         </div>
       </div>
-      <table-tem  
+      <table-tem
         :option-list="[active == 0 ? '下架' : '上架', '删除']"
         :requestUrl="'api/yxStoreProduct'"
         :requestParams="requestParams"
-        :tableHeader="tableHeader" 
-        :isRefresh="isRefresh" 
+        :tableHeader="tableHeader"
+        :isRefresh="isRefresh"
         @rowClick="toDetail"
         @BatchOption="BatchOption"
       >
@@ -75,9 +75,17 @@
           ></span>
         </template>
         <template slot="option" slot-scope="params">
-          <span @click.stop="(e)=>{params}" class="textBtn">预览</span>
+          <span
+            @click.stop="
+              (e) => {
+                params;
+              }
+            "
+            class="textBtn"
+            >预览</span
+          >
         </template>
-      </table-tem> 
+      </table-tem>
     </div>
     <!-- 导入 -->
     <el-dialog title="使用CSV文件导入商品" :visible.sync="showImport">
@@ -147,9 +155,9 @@ export default {
         size: 30,
         sort: "id,desc",
         isShow: 1,
-        isDel: 0, 
+        isDel: 0,
       },
-      isRefresh:0,
+      isRefresh: 0,
       nav: [
         {
           id: 1,
@@ -196,7 +204,7 @@ export default {
       currentPage: 1,
       showExport: false,
       showImport: false,
-      checkImport: true, 
+      checkImport: true,
     };
   },
   created() {
@@ -205,7 +213,7 @@ export default {
       size: 99,
       page: 0,
     };
-    getCates(par).then((res) => { 
+    getCates(par).then((res) => {
       this.categoryList = res.content;
     });
   },
@@ -217,15 +225,15 @@ export default {
     },
     // 搜索
     Search: function () {
-      let searchVal = this.searchVal; 
-      let par = { 
-          storeName: searchVal, 
-          ...this.requestParams,
-        };
-        this.requestParams = par;
+      let searchVal = this.searchVal;
+      let par = {
+        storeName: searchVal,
+        ...this.requestParams,
+      };
+      this.requestParams = par;
     },
     // 批量操作
-    BatchOption: function (e,selectItem) {
+    BatchOption: function (e, selectItem) {
       console.log(e);
       let that = this;
       // 0为上下架  1为删除
@@ -249,23 +257,25 @@ export default {
         }
         onsaleAll(par).then(() => {
           that.$message.success("操作成功");
-          that.isRefresh += 1; 
+          that.isRefresh += 1;
         });
       } else {
         let arr = [];
         selectItem.map((i) => {
           arr.push(i.id);
         });
-        delMany(arr).then(() => {
-          that.$message.success("操作成功");
-          that.isRefresh += 1; 
+        this.$DelTip(function () {
+          delMany(arr).then(() => {
+            that.$message.success("操作成功");
+            that.isRefresh += 1;
+          });
         });
       }
     },
     ToAddShop: function () {
       this.$router.push("/commodity/edit");
     },
-    toDetail: function (e) { 
+    toDetail: function (e) {
       this.$router.push({ path: "/commodity/edit", query: { id: e.id } });
     },
   },
@@ -314,11 +324,11 @@ export default {
     display: flex;
     justify-content: space-around;
     border-bottom: 1px solid #f1f1f6;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
     .search-box {
       display: flex;
       flex: 1;
-    } 
+    }
   }
 }
 .download-tpl-link-new {
@@ -337,6 +347,6 @@ export default {
   font-weight: 400;
   margin-left: 10px;
   text-decoration: underline;
-}  
+}
 </style>
 

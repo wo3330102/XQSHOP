@@ -5,14 +5,13 @@ import {
   Message
 } from 'element-ui'
 import router from '../router/index'
-// import { getToken } from '@/utils/auth' 
-
+// import { getToken } from '@/utils/auth'  
 axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 // 创建axios实例
 const service = axios.create({
   // axios中请求配置有baseURL选项，表示请求URL公共部分
-  // baseURL: 'http://192.168.8.158:8001',
-  baseURL: 'https://api.xqshopify.com',
+  baseURL: process.env.NODE_ENV === 'production' ? process.env.VUE_APP_BASE_API:'http://192.168.8.158:8001',
+  // baseURL: 'https://api.xqshopify.com',
   // 超时
   timeout: 1000000
 })
@@ -20,8 +19,7 @@ const service = axios.create({
 service.interceptors.request.use(config => {
   // 是否需要设置 token 
   config.headers['Authorization'] = getToken() // 让每个请求携带自定义token 请根据实际情况自行修改
-  const storeId = localStorage.getItem('storeId')
-
+  const storeId = localStorage.getItem('storeId') 
   if ((config.method === 'post' || config.method === 'put') && config.url.indexOf('api/yxStoreProductReply')<0 && config.url.indexOf('api/yxStorePromotions/mod')<0) {
     config.data = {
       storeId: storeId,
@@ -32,16 +30,14 @@ service.interceptors.request.use(config => {
       storeId: storeId,
       ...config.params
     }
-  }
-
+  } 
   if(config.url.indexOf('onStatus') >-1){  
     if (config.method === 'post' || config.method === 'put') {
       delete config.data.storeId
     } else if (config.method === 'get') {
       delete config.params.storeId 
     }
-  }
-
+  } 
   return config
 }, error => {
   console.log(error)

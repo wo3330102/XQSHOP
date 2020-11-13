@@ -679,6 +679,7 @@ export default {
   methods: {
     // 活动操作
     Option: function (e) {
+       let that = this;
       let storeId = localStorage.getItem("storeId");
       switch (e) {
         case 1:
@@ -696,10 +697,12 @@ export default {
         case 2:
           // 删除
           let pars = [this.id];
-          del(pars).then(() => {
-            this.$message.success("删除成功");
-            this.$router.push("/activity");
+          this.$DelTip(function(){
+            del(pars).then(() => {
+            that.$message.success("删除成功");
+            that.$router.push("/activity");
           });
+          })
           break;
       }
     },
