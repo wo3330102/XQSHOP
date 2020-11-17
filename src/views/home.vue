@@ -93,7 +93,7 @@
       </div>
       <div class="warp-rigth">
         <div class="header">
-          <el-select
+          <!-- <el-select
             v-model="storeId"
             @change="ChangeShop"
             placeholder="请选择店铺"
@@ -105,7 +105,7 @@
               :label="item.name"
               :value="item.id"
             ></el-option>
-          </el-select>
+          </el-select> -->
           <el-dropdown class="notice">
             <span class="el-dropdown-link">
               <i class="el-icon-message-solid"></i>
