@@ -184,6 +184,11 @@ export default {
       this.isActive = false;
       this.getData();
     },
+    selectItem:function(val){
+      if(val.length === 0){
+        this.isActive = false;
+      }
+    }
   },
   methods: {
     // 获取数据
@@ -217,6 +222,7 @@ export default {
     // 选择单条数据
     SelectionChange: function (e, row) {
       this.selectItem = e;  
+      this.isActive = true;
     },
     // 批量操作
     DispachSelect: function (e) {
