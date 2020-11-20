@@ -1,40 +1,37 @@
 <template>
   <div>
     <transition name="fade" mode="out-in">
-            <router-view 
-              v-if="isRouterAlive"
-            ></router-view>
-          </transition>
+      <router-view v-if="isRouterAlive"></router-view>
+    </transition>
   </div>
 </template>
 <script>
 export default {
   name: "Main",
   watch: {
-    "$store.state.url"(val) { 
+    "$store.state.url"(val) {
       this.reload();
     },
     "$store.state.reflash"(val) {
-      if(val){
-        this.$store.commit("isRefresh", false); 
+      if (val) {
+        this.$store.commit("isRefresh", false);
         this.reload();
       }
     },
   },
   data() {
     return {
-      isRouterAlive:true,
-    }
+      isRouterAlive: true,
+    };
   },
-  methods:{
-    reload() {
-      console.log(123)
+  methods: {
+    reload() { 
       this.isRouterAlive = false;
       this.$nextTick(function () {
         this.isRouterAlive = true;
       });
     },
-  }
+  },
 };
 </script>
 <style>

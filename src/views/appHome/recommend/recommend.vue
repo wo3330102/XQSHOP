@@ -202,10 +202,12 @@
         <el-select
           v-model="requestParamsTable.tagId"
           placeholder="请选择分类"
+          clearable
           style="width: 200px; margin-right: 10px"
           @change="
             () => {
               table = [];
+              selectItem = [];
               initData();
             }
           "
@@ -221,6 +223,7 @@
           style="width: 380px"
           v-model="shopContent"
           placeholder="请输入内容"
+          @change="Search"
         >
           <el-button slot="append" @click="Search">查询</el-button>
         </el-input>
@@ -366,8 +369,8 @@ export default {
 
     let time = new Date().toLocaleDateString();
     this.date = [
-      '2020-10-11 00:00:00',
-      // time.replace(/\//g, "-") + " 00:00:00",
+      // '2020-10-11 00:00:00',
+      time.replace(/\//g, "-") + " 00:00:00",
       time.replace(/\//g, "-") + " 23:59:59",
     ];
   },
@@ -389,12 +392,23 @@ export default {
         this.data.push(res.browseNumList);
         this.data.push(res.toCartNumList);
         this.data.push(res.buyNumList);
+        console.log(this.active)
+        switch (this.active){
+          case 0:
+            this.total = res.browseNum;
+            break;
+          case 1:
+            this.total = res.toCartNum;
+            break;
+          case 2:
+            this.total = res.buyNum;
+            break;
+        }
         // this.total = res.
       });
     },
     // 分页选择
-    CurrentChange: function (e) {
-      
+    CurrentChange: function (e) { 
       this.currentPage = e;
       this.requestParams.page = e - 1;
       this.GetList();
@@ -402,50 +416,56 @@ export default {
     // 显示对话框
     ShowDiglog: function () {
       this.shopDialog = true;
-      this.table = [];
+      this.table = []; 
+      this.requestParamsTable={
+        page: 0,
+        size: 30,
+        tagId: "",
+      },
       this.initData();
     },
     // 加载表单数据
-    initData: function () {
+    initData: function () { 
       get(this.requestParamsTable).then((res) => {
         let arr = this.table.concat(res.content);
         if (arr.length <= res.totalElements) {
           this.table = arr;
-        }
-        this.tableTotal = res.totalElements;
+        } 
+        // this.tableTotal = res.totalElements; 
       });
     }, 
     // 搜索
     Search: function () {
       this.requestParamsTable.storeName = this.shopContent;
       this.table = [];
+      this.selectItem = [];
       this.initData();
     },
     // 加载更多
     load: function (res) {
       this.requestParamsTable.page += 1;
       this.initData();
-    }, 
+    },
     // 确认选中
     CheckSelectItem: function () {
       this.shopDialog = false;
-      let arr = [];
-      this.selectItem.map((i) => {
-        let obj = {
-          id: i.id,
-          image: i.image,
-          title: i.storeName,
-        };
-        arr.push(obj);
-      });
+      // let arr = [];
+      // this.selectItem.map((i) => {
+      //   let obj = {
+      //     id: i.id,
+      //     image: i.image,
+      //     title: i.storeName,
+      //   };
+      //   arr.push(obj);
+      // });
       if (
         this.detail.productRecommendInfoVo &&
         this.detail.productRecommendInfoVo.length > 0
       ) {
-        arr.map((i) => {
+        this.selectItem.map((i) => {
           let bool = true;
           this.detail.productRecommendInfoVo.map((j) => {
-            if (JSON.stringify(i) == JSON.stringify(j)) {
+            if (i.id == j.id) {
               bool = false;
             }
           });
@@ -454,7 +474,7 @@ export default {
           }
         });
       } else {
-        this.detail.productRecommendInfoVo = arr;
+        this.detail.productRecommendInfoVo = this.selectItem;
       }
     },
     // 删除选中商品
@@ -470,27 +490,21 @@ export default {
       this.detail.productRecommendInfoVo.map((i) => {
         arr.push(i.id);
       });
+      if(this.detail.recommendType == 1){
+        if(arr.length<1){
+          this.$message.error('请选择指定商品');
+          return false;
+        }
+      }
       let par = {
         recommendType: this.detail.recommendType,
         appointProductId: arr.toString(),
       };
       edit(par).then(() => {
-        Tip();
-        that.Init();
-      });
-      return false;
-      if (this.detail.id) {
-      } else {
-        delete this.detail.id;
-        add(this.detail).then(() => {
-          Tip();
-        });
-      }
-      function Tip() {
         that.$message.success("修改成功");
-        that.Init();
-      }
-      // this.$router.push('/appHome')
+        that.Init(); 
+      });  
+      // this.$router.push('/appHome')  
     },
   },
 };

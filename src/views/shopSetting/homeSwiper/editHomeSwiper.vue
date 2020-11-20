@@ -160,7 +160,7 @@ export default {
         add(par).then((res) => {
           this.$message.success("新增成功");
           setTimeout(function () {
-            that.$router.push("/shopSetting/homeSwiper");
+            that.$router.push("/homeSwiper");
           }, 200);
         });
       }

@@ -5,7 +5,7 @@ Vue.use(VueRouter)
 const routes = [{
   path: '/',
   name: '首页',
-  component: () => import( /* webpackChunkName: "home" */ '../views/home.vue'), 
+  component: () => import( /* webpackChunkName: "home" */ '../views/home.vue'),
   children: [{
     path: '/',
     name: 'Index',
@@ -115,8 +115,8 @@ const routes = [{
   }, {
     path: 'appHome',
     name: '应用管理',
-    component: () => import( /* webpackChunkName: "home" */ '../views/Main.vue'), 
-    children:[{
+    component: () => import( /* webpackChunkName: "home" */ '../views/Main.vue'),
+    children: [{
       path: '/appHome',
       name: 'AppHome',
       component: () => import( /* webpackChunkName: "about" */ '../views/appHome/appHome.vue'),
@@ -190,8 +190,8 @@ const routes = [{
   }, {
     path: 'setting',
     name: '设置',
-    component: () => import( /* webpackChunkName: "home" */ '../views/Main.vue'), 
-    redirect:'/setting',
+    component: () => import( /* webpackChunkName: "home" */ '../views/Main.vue'),
+    redirect: '/setting',
     children: [{
       path: '/setting',
       name: '设置',
@@ -244,9 +244,15 @@ const routes = [{
       path: '/policyClauses',
       name: 'PolicyClauses',
       component: () => import( /* webpackChunkName: "about" */ '../views/setting/policyClauses.vue'),
-    }, ]
-  }]
-},{
+    }]
+  },
+  //  {
+  //   path: '/test',
+  //   name: 'Test',
+  //   component: () => import( /* webpackChunkName: "about" */ '../views/test.vue'),
+  // }
+]
+}, {
   path: '/login',
   name: 'Login',
   component: () => import( /* webpackChunkName: "about" */ '../views/login.vue'),
@@ -263,18 +269,18 @@ VueRouter.prototype.push = function push(location) {
   return originalPush.call(this, location).catch(err => err)
 }
 
-router.beforeEach((to, from, next) => {  
-  let token = localStorage.getItem('token'); 
+router.beforeEach((to, from, next) => {
+  let token = localStorage.getItem('token');
   // 解决死循环问题（当跳转页面为登入页面时，结束token判断）
-  if(Object.is(to.name,'Login')) {
+  if (Object.is(to.name, 'Login')) {
     next();
     return
   }
   // 判断当前是否含有token
-  if(token){ 
+  if (token) {
     localStorage.setItem('router-path', to.path)
     next();
-  } else { 
+  } else {
     next('/login') // 否则全部重定向到登录页 
   }
 })

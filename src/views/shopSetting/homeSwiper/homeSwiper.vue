@@ -2,7 +2,7 @@
   <div class="container">
     <h1 class="title">
       <span>首页轮播图</span>
-      <el-button type="primary" @click="$NavgitorTo('/shopSetting/homeSwiper/editHomeSwiper')">新增</el-button>
+      <el-button type="primary" @click="$NavgitorTo('/editHomeSwiper')">新增</el-button>
     </h1>
     <div class="content">
       <!-- <div class="conditions"> 

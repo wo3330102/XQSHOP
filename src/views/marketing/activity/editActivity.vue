@@ -849,11 +849,11 @@ export default {
           this.$message.error("请填写生效条件金额，金额必须大于0");
           return false;
         }
-      }
+      } 
       if (this.detail.list && this.detail.list.length > 0) {
         switch (this.detail.applyObject) {
           // 商品分类
-          case 1:
+          case 1: 
             this.detail.tagIds = JSON.stringify([...this.detail.list]);
             break;
           // 商品
@@ -862,8 +862,13 @@ export default {
             break;
         }
       } else {
+        
         this.detail.prodIds = "";
         this.detail.tagIds = "";
+        if(this.detail.applyObject == 1 || this.detail.applyObject == 2){
+          this.$message.warning('请选择适用对象')
+          return false
+        }
       }
       let par = { ...this.detail }; 
       delete par.list;

@@ -255,7 +255,7 @@ export default {
     },
   },
 };
-</script>
+</script> 
 <style lang="scss" scoped>
 .logo-wrap {
   display: flex;

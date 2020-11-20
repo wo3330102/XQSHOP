@@ -34,7 +34,7 @@
                     placeholder="请输入店铺名称"
                   ></el-input>
                 </el-form-item>
-                <el-form-item prop="userEmail">
+                <!-- <el-form-item prop="userEmail">
                   <label slot="label">
                     账户邮箱
                     <span class="des">（接收系统通知的邮箱）</span>
@@ -43,7 +43,7 @@
                     v-model="formData.accountEmail"
                     placeholder="请输入邮箱"
                   ></el-input>
-                </el-form-item>
+                </el-form-item> -->
                 <el-form-item prop="KeFuEmail">
                   <label slot="label">
                     客服邮箱

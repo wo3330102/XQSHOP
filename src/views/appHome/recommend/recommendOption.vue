@@ -66,8 +66,8 @@
             </h3>
             <div style="margin-bottom: 20px">
               <el-radio-group v-model="detail.addButton">
-                <el-radio :label="0">显示</el-radio>
-                <el-radio :label="1">不显示</el-radio> 
+                <el-radio :label="0">不显示</el-radio>
+                <el-radio :label="1">显示</el-radio> 
               </el-radio-group>
             </div>
             <h3 class="title">
@@ -80,8 +80,8 @@
             </h3>
             <div>
               <el-radio-group v-model="detail.discountLabel">
-                <el-radio :label="0">显示</el-radio>
-                <el-radio :label="1">不显示</el-radio> 
+                <el-radio :label="0">不显示</el-radio>
+                <el-radio :label="1">显示</el-radio> 
               </el-radio-group>
             </div>
           </div>
@@ -249,7 +249,8 @@ export default {
     })
     getConfig().then(res=>{
         console.log(res);
-        res.noRecommendId = res.productRecommendInfoVo
+        res.noRecommendId = res.productRecommendInfoVo 
+        res.showNum = res.showNum === 0?6:res.showNum
         this.detail = res;
       })
   },
@@ -258,6 +259,12 @@ export default {
     ShowDiglog: function () {
       this.shopDialog = true;
       this.table = [];
+      this.selectItem = [];
+      this.requestParams={
+        page: 0,
+        size: 30,
+        tagId: "",
+      },
       this.initData();
     },
     // 加载表单数据
