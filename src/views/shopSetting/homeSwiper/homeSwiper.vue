@@ -16,10 +16,10 @@
         :requestParams="requestParams"
         :requestUrl="'api/yxSystemGroupData'"
         :tableHeader="tableHeader"
-        :optionList="['删除']"
-        @SelectionChange="(e)=>{selectItem = e}" 
+        :optionList="['删除']" 
         @BatchOption="SelectOption"
         @rowClick="RowClick"
+        :isRefresh="isRefresh"
       > 
         <el-table-column
           v-for="(item, index) in tableHeader"
@@ -47,6 +47,7 @@
 <script>
 import exportFunction from "@/components/exportFunction";
 import tableTem from "@/components/tableTem";
+import {del} from "@/api/yxSystemGroupData"
 export default {
   components: {
     exportFunction,
@@ -82,6 +83,7 @@ export default {
       ],
       currentPage: 1,
       showExport: false,
+      isRefresh:0,
     };
   },
   methods: {  
@@ -94,8 +96,14 @@ export default {
         }
       })
     },
-    SelectOption:function(index,item){
-      console.log(e,i)
+    SelectOption:function(index,item){ 
+      let that = this;
+      item.map(i=>{
+        del(i.id).then(res=>{
+          that.$message.success('删除成功')
+          that.isRefresh += 1; 
+        })
+      })
       
     }
   },
