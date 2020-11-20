@@ -180,6 +180,8 @@ export default {
       this.data = val;
     },
     isRefresh: function (val) {
+      this.selectItem = [];
+      this.isActive = false;
       this.getData();
     },
   },
