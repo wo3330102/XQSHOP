@@ -150,7 +150,7 @@
 </template>
 <script>
 import { getInfo } from "@/api/login";
-import { getShop } from "@/api/yxSystemStore"; 
+import { getShop,getShopId } from "@/api/yxSystemStore"; 
 export default {
   name: "home",
   data() {
@@ -177,6 +177,7 @@ export default {
         this.reload();
       }
     },
+
   },
   created() {
     // 获取用户信息
@@ -190,19 +191,27 @@ export default {
       });
     // 获取店铺
     const storeId = localStorage.getItem("storeId");
-    getShop().then((res) => {
-      this.storeList = res.content;
-      if (storeId) {
-        for (var i in res.content) {
-          if (res.content[i].id == storeId) {
-            this.storeId = res.content[i].name;
-          }
-        }
-      } else {
-        localStorage.setItem("storeId", res.content[0].id);
-        this.storeId = res.content[0].name;
-      }
-    });
+    // getShop().then((res) => {
+    //   this.storeList = res.content;
+    //   if (storeId) {
+    //     for (var i in res.content) {
+    //       if (res.content[i].id == storeId) {
+    //         this.storeId = res.content[i].name;
+    //       }
+    //     }
+    //   } else {
+    //     localStorage.setItem("storeId", res.content[0].id);
+    //     this.storeId = res.content[0].name;
+    //   }
+    // });
+    getShopId().then(res=>{
+      this.storeId = res.storeID
+      localStorage.setItem("storeId", res.storeID);
+    }).catch(res=>{
+      localStorage.clear();
+      this.$router.push('/login')
+
+    })
     // 设置当前路由
     let path = localStorage.getItem("router-path");
     if (path) {

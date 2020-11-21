@@ -22,14 +22,14 @@
               :rules="[
                 {
                   required: true,
-                  message: '请输入您的邮箱地址',
+                  message: '请输入您的账号',
                   trigger: 'blur',
                 },
               ]"
             >
               <el-input
                 v-model="loginData.email"
-                placeholder="请输入您的邮箱地址"
+                placeholder="请输入您的账号"
                 style="width: 366px"
               ></el-input>
             </el-form-item>

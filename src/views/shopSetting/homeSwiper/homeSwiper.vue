@@ -103,8 +103,7 @@ export default {
           that.$message.success('删除成功')
           that.isRefresh += 1; 
         })
-      })
-      
+      }) 
     }
   },
 };

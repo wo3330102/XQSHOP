@@ -168,8 +168,7 @@ export default {
   },
   watch: {
     requestParams: {
-      handler: function (val) {
-        // console.log("组件值：", JSON.stringify(val));
+      handler: function (val) { 
         this.params = { ...val };
         this.getData();
       },

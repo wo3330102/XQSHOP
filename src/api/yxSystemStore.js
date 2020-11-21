@@ -8,12 +8,20 @@ export function add(data) {
   })
 }
 
-export function getShop() {
+// export function getShop() {
+//   return request({
+//     url: 'api/yxSystemStore',
+//     method: 'get'
+//   })
+// }
+
+export function getShopId() {
   return request({
-    url: 'api/yxSystemStore',
+    url: 'api/yxSystemStore/storeId',
     method: 'get'
   })
 }
+
 
 export function getShopById(id) {
   return request({
@@ -61,4 +69,5 @@ export function changeTem(data){
   })
 }
 
-export default { getL, add, edit, del, getShop, getAll }
+export default { getL, add, edit, del, getShopId, getAll }
+// getShop,

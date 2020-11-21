@@ -246,11 +246,11 @@ const routes = [{
       component: () => import( /* webpackChunkName: "about" */ '../views/setting/policyClauses.vue'),
     }]
   },
-  //  {
-  //   path: '/test',
-  //   name: 'Test',
-  //   component: () => import( /* webpackChunkName: "about" */ '../views/test.vue'),
-  // }
+   {
+    path: '/test',
+    name: 'Test',
+    component: () => import( /* webpackChunkName: "about" */ '../views/test.vue'),
+  }
 ]
 }, {
   path: '/login',

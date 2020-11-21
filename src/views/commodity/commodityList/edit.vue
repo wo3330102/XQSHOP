@@ -371,11 +371,11 @@
             <div class="jh-seo-preview">
               <p class="seo-title" v-html="detail.seoTitle"></p>
               <p
-                class="seo-link mt8"
+                class="seo-link mt8" 
                 v-html="
-                  detail.linkUrl.lastIndexOf('/') == detail.linkUrl.length - 1
+                  detail.linkUrl?detail.linkUrl.lastIndexOf('/') == detail.linkUrl.length - 1
                     ? detail.linkUrl + detail.seoLink
-                    : detail.linkUrl + '/' + detail.seoLink
+                    : detail.linkUrl + '/' + detail.seoLink:''
                 "
               ></p>
               <p class="seo-desc mt8" v-html="detail.seo_info"></p>
@@ -413,9 +413,9 @@
               <div>
                 <el-input v-model="detail.seoLink" placeholder="请输入SEO链接">
                   <template slot="prepend">{{
-                    detail.linkUrl.lastIndexOf("/") == detail.linkUrl.length - 1
+                    detail.linkUrl?detail.linkUrl.lastIndexOf("/") == detail.linkUrl.length - 1
                       ? detail.linkUrl
-                      : detail.linkUrl + "/"
+                      : detail.linkUrl + "/":''
                   }}</template>
                 </el-input>
               </div>
@@ -557,7 +557,10 @@ export default {
       specifications: "", // 规格设置
       detail: {
         store_name: "",
-        description: "",
+        description: "", 
+        linkUrl:'',
+        seoTitle:'',
+        seo_info:'',
       },
       // 表格变量
       isActive: false, // 批量操作按钮是否可以点击
@@ -633,9 +636,11 @@ export default {
       };
       getInfo(par).then((res) => {
         if (that.id === 0) {
-          this.detail = { ...res.productInfo };
-          this.temp_id = "";
+          console.log(1)
+          // this.detail = { ...res.productInfo };
+          this.temp_id = ""; 
         } else {
+          console.log(2)
           that.detail = { ...res.productInfo };
           that.tagIds = res.tagList;
           if (res.productInfo.classIds) {

@@ -71,7 +71,7 @@ export default {
       get(par).then((res) => {
         console.log(res);
         this.tableData = res.content;
-      });
+      })
     },
     ToDetail: function (row) {
       console.log(row);
@@ -85,16 +85,16 @@ export default {
     },
     ChangeStatus: function (index) {
       let obj = this.tableData;
-      let storeId = localStorage.getItem("storeId");
-      console.log(index)
-      console.log(this.tableData[index].status)
+      let storeId = localStorage.getItem("storeId"); 
       let par = {
         status: obj[index].status === 1?1:0,
         id: obj[index].id,
         storeId: storeId,
       };
       changeMenuBarStatus(par).then((res) => {
-        this.init();
+        
+      }).catch(res=>{
+        this.init(); 
       });
     }, 
   },
@@ -148,5 +148,4 @@ export default {
     text-align: center;
   }
 }  
-</style>
-
+</style> 
