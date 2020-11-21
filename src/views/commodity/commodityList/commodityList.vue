@@ -76,14 +76,10 @@
         </template>
         <template slot="option" slot-scope="params">
           <span
-            @click.stop="
-              (e) => {
-                params;
-              }
-            "
+            @click.stop="Preview(params)"
             class="textBtn"
             >预览</span
-          >
+          > 
         </template>
       </table-tem>
     </div>
@@ -278,6 +274,10 @@ export default {
     toDetail: function (e) {
       this.$router.push({ path: "/commodity/edit", query: { id: e.id } });
     },
+    Preview:function(params){
+      let url = 'https://' + localStorage.getItem('storeUrl') + '/product-detalis.html?id=' +  params.params.id
+      window.open(url, '_blank') 
+    }
   },
 };
 </script>

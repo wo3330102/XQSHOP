@@ -207,6 +207,7 @@ export default {
     getShopId().then(res=>{
       this.storeId = res.storeID
       localStorage.setItem("storeId", res.storeID);
+      localStorage.setItem("storeUrl",res.storeUrl);
     }).catch(res=>{
       localStorage.clear();
       this.$router.push('/login')

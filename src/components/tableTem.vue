@@ -75,7 +75,7 @@
                 </p>
               </template>
               <template v-else-if="item.prop == 'option'">
-                <slot name="option"></slot>
+                <slot name="option" :params="scope.row"></slot>
               </template>
               <span v-else-if="item.prop == 'createTime'">
                 {{
