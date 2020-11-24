@@ -42,7 +42,7 @@
             <span class="text-span">售价</span>
             <el-input
               class="box-item-entry" 
-              v-model.number="attr.price"
+              v-model="attr.price"
               maxlength="8"
               size="medium"
               placeholder="请输入商品现价"
@@ -120,7 +120,7 @@
             <span class="text-span">原价</span>
             <el-input
               class="box-item-entry" 
-              v-model.number="attr.ot_price"
+              v-model="attr.ot_price"
               maxlength="8"
               size="medium"
               placeholder="请输入商品原价"
@@ -133,7 +133,7 @@
             <span class="text-span">商品重量</span>
             <el-input
               class="box-item-entry" 
-              v-model.number="attr.weight"
+              v-model="attr.weight"
               maxlength="8"
               @blur="attr.weight = $IsNaN(attr.weight)"
               size="medium"

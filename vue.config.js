@@ -5,5 +5,5 @@ module.exports = {
         config.plugins.delete('prefetch');
         // 移除 preload 插件
         config.plugins.delete('preload');
-    },
+    }, 
 }

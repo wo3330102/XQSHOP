@@ -1,49 +1,29 @@
 <template>
   <div class="">
     <el-select
-        v-model="list[0].value"
-        placeholder="选择关系"
-        @visible-change="BeforeChange"
-        clearable
+      v-model="list.value"
+      placeholder="选择关系" 
+      clearable
+      @visible-change="BeforeOpen"
+      popper-class="xuanxiang"
+    >
+      <el-option
+        v-for="(v, i) in option"
+        :key="i"
+        :label="v.label"
+        :value="v.id"
+        v-show="v.show"
       >
-        <el-option
-          v-for="(v, i) in option"
-          :key="i"
-          :label="v.label"
-          :value="v.id"
-          v-show="v.show"
-        ></el-option>
-      </el-select>
-      <el-select
-        v-model="list[1].value"
-        placeholder="选择关系"
-        @visible-change="BeforeChange"
-        clearable
-      >
-        <el-option
-          v-for="(v, i) in option"
-          :key="i"
-          :label="v.label"
-          :value="v.id"
-          v-show="v.show"
-        ></el-option>
-      </el-select>
-      <el-select
-        v-model="list[2].value"
-        placeholder="选择关系"
-        @visible-change="BeforeChange"
-        clearable
-      >
-        <el-option
-          v-for="(v, i) in option"
-          :key="i"
-          :label="v.label"
-          :value="v.id"
-          v-show="v.show"
-        ></el-option>
-      </el-select>
+        <span style="float: left;width:100%" @mouseenter="SelectFun(v)" @mouseleave="show = false">{{v.label}}</span>
+      </el-option>
+      <div class="warp" v-show="show" >
+        <div>
+          <p>当前选中：<span>{{hoverItem.label}}</span></p> 
+        </div>
+      </div>
+    </el-select>
   </div>
-</template>
+</template> 
 
 <script>
 export default {
@@ -70,63 +50,68 @@ export default {
           label: "姐妹",
           show: true,
         },
+        {
+          id: 5,
+          label: "姐妹",
+          show: true,
+        },
+        {
+          id: 6,
+          label: "姐妹",
+          show: true,
+        },
+        {
+          id: 7,
+          label: "姐妹",
+          show: true,
+        },
+        {
+          id: 8,
+          label: "姐妹",
+          show: true,
+        },
+        {
+          id: 9,
+          label: "姐妹",
+          show: true,
+        },
       ],
-      list: [
-        {
-          id: 1,
-          value: "",
-        },
-        {
-          id: 2,
-          value: "",
-        },
-        {
-          id: 3,
-          value: "",
-        },
-        {
-          id: 4,
-          value: "",
-        },
-      ],
+      list:{
+        value:'',
+      },
+      show:false,
+      hoverItem:{},
     };
   },
-  methods: {
-    BeforeChange() {
-      let arr = [];
-      this.list.map((i) => {
-        if (i.value) {
-          arr.push(i.value);
-        }
-      });
-      this.option.map((i) => {
-        i.show = true;
-      });
-      if (arr.length > 0) {
-        arr.map((j) => {
-          this.option.map((i) => {
-            if (j == i.id) {
-              i.show = false;
-            }
-          });
-        });
-      }
-      this.Save();
+  methods: { 
+    SelectFun(e){ 
+      this.show = true;
+      this.hoverItem = e;
     },
-    Save() {
-      let par = {};
-      let key = "value";
-      for (let i in this.list) { 
-        if (i == '0') { 
-          par[key] = "1";
-        } else {
-          par[key + i] = "1";
-        }
-      } 
-    },
+    BeforeOpen(){
+      // this.show = true; 
+    }
   },
 };
 </script>
 
 <style lang="scss" scoped>
+.warp{
+  position: absolute;
+  top: 0;
+  right: 0px;
+  width: 180px;
+  height: 100%;
+  background: #ffffff;
+  border-radius: 10px;
+  z-index: 1;  
+} 
+</style>
+<style>
+.xuanxiang{
+  width: 500px !important;
+  /* 取消原先下拉框的阴影 */
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1); 
+  
+}
 </style>
