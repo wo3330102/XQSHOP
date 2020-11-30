@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <router-link
-      to="/shopSetting/homeSwiper"
+      to="/homeSwiper"
       style="
         color: #5e7185;
         margin-bottom: 12px;
@@ -142,7 +142,7 @@ export default {
         edit(this.detail).then((res) => {
           this.$message.success("修改成功");
           setTimeout(function () {
-            that.$router.push("/shopSetting/homeSwiper");
+            that.$router.push("/homeSwiper");
           }, 200);
         });
       } else {

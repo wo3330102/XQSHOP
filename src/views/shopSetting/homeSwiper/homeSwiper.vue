@@ -33,6 +33,9 @@
             <template v-if="item.prop == 'pic'">
               <span class="small-img" :style="{ backgroundImage: 'url(' + scope.row['map'].pic + ')' }"></span>
             </template>
+            <template v-else-if="item.prop == 'status'">
+              <span>{{scope.row.status == 0?'隐藏':'显示'}}</span>
+            </template>
             <span v-else>{{ scope.row['map'][item.prop] }}</span> 
           </template>
         </el-table-column>
