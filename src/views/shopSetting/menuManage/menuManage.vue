@@ -92,7 +92,8 @@ export default {
         storeId: storeId,
       };
       changeMenuBarStatus(par).then((res) => {
-        
+        this.init();
+        this.$message.success('修改成功')
       }).catch(res=>{
         this.init(); 
       });
