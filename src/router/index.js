@@ -2,7 +2,13 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 
 Vue.use(VueRouter)
-const routes = [{
+const routes = [
+  {
+    path: '/editShop',
+    name: 'editShop',
+    component: () => import( /* webpackChunkName: "editShop" */ '../views/shopSetting/editShop.vue'),
+  },
+  {
   path: '/',
   name: '首页',
   component: () => import( /* webpackChunkName: "home" */ '../views/home.vue'),
@@ -144,13 +150,19 @@ const routes = [{
   }, {
     path: 'shopSetting',
     name: '店铺管理',
-    redirect: '/themeShop',
+    redirect: '/decorationManage',
     component: () => import( /* webpackChunkName: "home" */ '../views/Main.vue'),
     children: [{
+      path: '/decorationManage',
+      name: 'DecorationManage',
+      component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/decorationManage.vue'),
+    },
+    {
       path: '/themeShop',
       name: 'ThemeShop',
       component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/themeShop.vue'),
-    }, {
+    },
+    {
       path: '/pageManage',
       name: 'PageManage',
       component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/pageManage/pageManage.vue'),
