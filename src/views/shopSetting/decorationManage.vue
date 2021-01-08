@@ -47,7 +47,25 @@
         <div class="operate-box">
           <div class="one-row">
             <div class="vertical-center margin-right-20">
-              <img src="../../static/icon-code.png" alt="" srcset="" />
+              <img
+                @mouseover="isHover = true"
+                @mouseleave="isHover = false"
+                class="qr-icon"
+                src="../../static/icon-code.png"
+                alt=""
+                srcset=""
+              />
+            </div>
+            <div class="qrcode-img" v-show="isHover">
+              <vue-qr
+                :logo-src="logoSrc"
+                :size="150"
+                :margin="0"
+                :auto-color="true"
+                :dot-scale="1"
+                :text="appSrc"
+              />
+              <p class="desc">扫描二维码查看移动端效果</p>
             </div>
             <div class="vertical-center">
               <el-dropdown @command="toOperate">
@@ -61,6 +79,7 @@
                     :key="item.value"
                     :label="item.label"
                     :value="item.value"
+                    :command="item.value"
                     >{{ item.label }}</el-dropdown-item
                   >
                 </el-dropdown-menu>
@@ -74,37 +93,38 @@
       </div>
     </div>
     <!-- 模版列表 -->
-    <div>
+    <!-- <div>
       <div>
         <div class="inline-block"><h1>模版列表</h1></div>
         <el-select
           class="float-right"
-          v-model="templateValue"
+          v-model="typeValue"
           placeholder="请选择"
           @change="filterTemplate"
         >
           <el-option
-            v-for="item in templateList"
+            v-for="item in typeList"
             :key="item.value"
             :label="item.label"
             :value="item.value"
           ></el-option>
         </el-select>
       </div>
-      <div class="overview">
-        <div class="item">
+      <div class="temlist">
+        <div class="item" v-for="item in templateList" :key="item.id">
           <div class="header">
             <div class="left">
-              <h3 class="sub-title">多品综合站-默认</h3>
+              <h3 class="sub-title2">{{ item.title }}</h3>
               <p class="sub-info">
-                2020/12/18 18:39:24 <span>模版ID：77759953</span>
+                {{ item.updateTime }}<span>模版ID：{{ item.id }}</span>
               </p>
             </div>
             <div class="right">
               <el-dropdown
                 split-button
                 trigger="click"
-                @click="operateTemplate"
+                @click="editTemplate(item.id)"
+                @command="changeOperateType"
               >
                 编辑
                 <el-dropdown-menu slot="dropdown">
@@ -113,6 +133,7 @@
                     :key="item.value"
                     :label="item.label"
                     :value="item.value"
+                    :command="item.value"
                     >{{ item.label }}</el-dropdown-item
                   >
                 </el-dropdown-menu>
@@ -120,11 +141,14 @@
             </div>
           </div>
           <div class="content">
-            <img class="img-1"
+            <img src="../../static/2-2.png" alt="" />
+            <img
+              class="img-1"
               src="https://cdn.xshoppy.shop/uploader/b42ddc9265a67f66e9bfd539e941b18d8b0c5381.jpg?x-oss-process=image/format,webp"
               alt=""
             />
-            <img class="img-2"
+            <img
+              class="img-2"
               src="https://cdn.xshoppy.shop/uploader/3f1e1e57a367b70ba98cbf692bed1d3c662414c8.jpg?x-oss-process=image/format,webp"
               alt=""
             />
@@ -132,67 +156,116 @@
           </div>
         </div>
       </div>
-      <!-- <el-dropdown split-button trigger="click" @click="operateTemplate">
-        更多菜单
-        <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item>黄金糕</el-dropdown-item>
-          <el-dropdown-item>狮子头</el-dropdown-item>
-        </el-dropdown-menu>
-      </el-dropdown> -->
+    </div> -->
+
+    <!-- test -->
+    <div class="infinite-list-wrapper">
+      <ul
+        class="temlist"
+        v-infinite-scroll="load"
+        infinite-scroll-disabled="disabled"
+      >
+        <li class="item" v-for="item in templateList" :key="item.id">
+          <div class="header">
+            <div class="left">
+              <h3 class="sub-title2">{{ item.name }}</h3>
+              <p class="sub-info">
+                {{ item.updateTime }}<span>模版ID：{{ item.id }}</span>
+              </p>
+            </div>
+            <div class="right">
+              <el-dropdown
+                split-button
+                trigger="click"
+                @click="editTemplate(item.id)"
+                @command="changeOperateType"
+              >
+                编辑
+                <el-dropdown-menu slot="dropdown">
+                  <el-dropdown-item
+                    v-for="item in operateList2"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                    :command="item.value"
+                    >{{ item.label }}</el-dropdown-item
+                  >
+                </el-dropdown-menu>
+              </el-dropdown>
+            </div>
+          </div>
+          <div class="content">
+            <img :src="item.pcImage" alt="" />
+          </div>
+        </li>
+      </ul>
+      <p v-if="loading" class="loading">加载中...</p>
+      <p v-if="noMore" class="no-more">--没有更多了--</p>
     </div>
+
+    <default-dialog :show.sync="showDialog">
+      <div class="dialog-content"><span><img src="../../static/i.png" alt=""></span>此操作将创建一个副本，是否继续？</div>
+    </default-dialog>
   </div>
 </template>
 <script>
-import { getStoreTemplate } from "@/api/home.js";
-import { getShopById, changeTem } from "@/api/yxSystemStore";
 
+import { getCodeURL, queryPage } from "@/api/yxStoreDecoration.js";
+import defaultDialog from "@/components/defaultDialog.vue"
+
+//在需要生成二维码的文件中引入比如qrCode.vue
+import VueQr from "vue-qr";
 export default {
   name: "DecorationManage",
+  components: {
+    VueQr,
+    defaultDialog
+  },
   data() {
     return {
       operateValue: "操作",
       operateList: [
         {
           label: "线上店铺",
-          value: "1",
-        },
-        {
-          label: "重命名",
-          value: "2",
-        },
-        {
-          label: "创建副本",
-          value: "3",
+          value: "onlineStore",
         },
         {
           label: "编辑语言",
-          value: "4",
+          value: "editLanguage",
+        },
+        {
+          label: "重命名",
+          value: "rename",
+        },
+        {
+          label: "创建副本",
+          value: "createCopy",
         },
       ],
       operateList2: [
         {
           label: "预览",
-          value: "2",
+          value: "preview",
         },
         {
           label: "发布",
-          value: "3",
+          value: "release",
         },
         {
           label: "删除",
-          value: "4",
+          value: "delete",
         },
         {
           label: "重命名",
-          value: "5",
+          value: "rename",
         },
         {
           label: "创建副本",
-          value: "6",
+          value: "createCopy",
         },
       ],
-      templateValue: "0",
-      templateList: [
+      typeValue: "0",
+      typeList: [
         {
           label: "显示全部模版",
           value: "0",
@@ -206,30 +279,146 @@ export default {
           value: "2",
         },
       ],
+      logoSrc: require("@/static/icon-code.png"),
+      appSrc: "http://www.baidu.com",
+      isHover: false,
+      templateList: [
+        /* {
+          id: 141974205,
+          name: "多品综合站-默认",
+          updateTime: "2021/01/07 15:52:14",
+          pcImage: "../../static/2-2.png",
+          isCopy: 0,
+        },
+        {
+          id: 141900339,
+          name: "多品综合站-暗红",
+          updateTime: "2021/01/07 15:52:14",
+          pcImage: "../../static/2-2.png",
+          isCopy: 0,
+        },
+        {
+          id: 141878948,
+          name: "多品综合站-暗红",
+          updateTime: "2021/01/07 15:52:14",
+          pcImage: "../../static/2-2.png",
+          isCopy: 1,
+        },
+        {
+          id: 77759953,
+          name: "多品综合站-暗红",
+          updateTime: "2021/01/07 15:52:14",
+          pcImage: "../../static/2-2.png",
+          isCopy: 1,
+        }, */
+      ],
+      count: 0,//起始页数值为0
+      loading: false,
+      totalPages: 0,//取后端返回内容的总页数
+      size: 3,// 每页条数
+      type: null, // 模板类型
+      /* list: [] //后端返回的数组 */
+      showDialog: false,
     };
   },
-  created() {},
+  computed: {
+    noMore() {
+      //当起始页数大于总页数时停止加载
+      return this.count >= this.totalPages-1;
+    },
+    disabled() {
+      return this.loading || this.noMore;
+    },
+  },
   methods: {
+    load() {
+      this.loading = true;
+      this.count += 1; //页数+1
+      this.getTemplateList();
+    },
+    getTemplateList() {
+      let that = this;
+      const storeId = localStorage.getItem('storeId');
+      let param = {
+        page: that.totalPages,
+        size: that.size,
+        type: that.type,
+        storeId: storeId,
+      }
+      /* this.templateList = this.templateList.concat(this.templateList); */
+      
+      queryPage(param).then(res => {
+        that.templateList = that.templateList.concat(res.content);
+        that.totalPages = Math.ceil(res.totalElements/that.size);
+      }).catch(error => {
+
+      })
+      /* this.templateList = this.templateList.concat(this.templateList); */
+      this.loading = false;
+    },
     toOperate(e) {
       switch (e) {
-        case "1":
-          //this.$router.push("/activity");
+        case "onlineStore":
+          // 线上店铺
           break;
-        case "2":
-          //this.$router.push("/activity");
+        case "editLanguage":
+          // 编辑语言
           break;
-        case "3":
-          //this.$router.push("/activity");
+        case "rename":
+          // 重命名
           break;
-        case "4":
-          //this.$router.push("/activity");
+        case "createCopy":
+          // 创建副本
           break;
       }
     },
     // 选择模版筛选
     filterTemplate(e) {},
-    // 操作模版
-    operateTemplate() {},
+    // 编辑模版
+    editTemplate(id) {
+      console.log("当前操作模块的内容：", id);
+    },
+    // 其他操作，比如预览，发布，删除，重命名，创建副本
+    changeOperateType(operate) {
+      console.log("操作类型：：：：", operate);
+      switch (operate) {
+        case "preview":
+          // 预览
+          break;
+        case "release":
+          // 发布
+          break;
+        case "delete":
+          // 删除
+          break;
+        case "rename":
+          // 重命名
+          break;
+        case "createCopy":
+          // 创建副本
+          this.showDialog = true;
+          console.log(this.showDialog);
+          break;
+      }
+    },
+    // 获取二维码地址
+    getQRCodeURL() {
+      /* let param = {};
+      getCodeURL(param)
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((error) => {
+          console.log(error);
+        }); */
+    },
+    /* async getQRCodeURL(text) {
+      return QRCode.toDataURL(text);
+    }, */
+  },
+  created() {
+    this.getQRCodeURL();
+    this.getTemplateList();
   },
 };
 </script>
@@ -273,6 +462,32 @@ h1 {
 .operate-box {
   margin-left: 10px;
 }
+.qr-icon {
+  cursor: pointer;
+}
+.qrcode-img {
+  position: absolute;
+  left: 0;
+  top: 50px;
+  padding: 12px;
+  background: #fff;
+  -webkit-box-shadow: 0 1px 3px 0 rgba(35, 35, 112, 0.2),
+    0 0 0 1px rgba(67, 67, 145, 0.05);
+  box-shadow: 0 1px 3px 0 rgba(35, 35, 112, 0.2),
+    0 0 0 1px rgba(67, 67, 145, 0.05);
+  border-radius: 4px;
+  z-index: 999;
+
+  .desc {
+    padding: 10px 0 0;
+    font-size: 12px;
+    font-weight: 400;
+    color: #6b6d71;
+    line-height: 14px;
+    text-align: center;
+  }
+}
+
 .img-size1 {
   width: 700px;
   border: 1px solid #ebecf3;
@@ -294,7 +509,7 @@ h1 {
   overflow: hidden;
   height: 394px;
 }
-.img-1 {
+/* .img-1 {
   border: 1px solid #ebecf3;
   border-bottom: none;
   -webkit-box-sizing: border-box;
@@ -327,7 +542,7 @@ h1 {
   bottom: 0;
   right: 0;
   z-index: 1;
-}
+} */
 .padding-20 {
   padding: 20px;
 }
@@ -365,6 +580,7 @@ h1 {
 }
 .one-row {
   display: flex;
+  position: relative;
 }
 .vertical-center {
   display: flex;
@@ -396,19 +612,41 @@ h1 {
 .float-right {
   float: right;
 }
-.item {
-  border-bottom: none;
-  padding: 10px 10px 20px 10px;
-  -webkit-box-flex: 0;
-  -ms-flex: 0 0 33.33333333%;
-  flex: 0 0 33.33333333%;
-  border-right: 1px solid #f3f3f3;
+.temlist {
+  padding: 0;
+  word-break: break-word;
   background: #fff;
-  padding: 10px;
-  -webkit-box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
   box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  background-color: #fff;
+  border-radius: 4px;
+  -webkit-box-shadow: 0 1px 3px 0 rgba(35, 35, 112, 0.2),
+    0 0 0 1px rgba(67, 67, 145, 0.05);
+  box-shadow: 0 1px 3px 0 rgba(35, 35, 112, 0.2),
+    0 0 0 1px rgba(67, 67, 145, 0.05);
+  overflow: hidden;
+  .item {
+    // border-bottom: none;
+    padding: 10px 10px 20px 10px;
+    -webkit-box-flex: 0;
+    -ms-flex: 0 0 33.33333333%;
+    flex: 0 0 33.33333333%;
+    border-right: 1px solid #f3f3f3;
+    background: #fff;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    &:nth-child(n) {
+      border-bottom: 1px solid #f3f3f3;
+    }
+    &:nth-child(3n) {
+      border-right: none;
+    }
+  }
 }
-.header {
+.item .header {
   margin: 10px 0 20px;
   display: -webkit-box;
   display: -ms-flexbox;
@@ -420,7 +658,7 @@ h1 {
   .left {
     flex: 1;
   }
-  h3 {
+  .sub-title2 {
     font-size: 14px;
     font-weight: 400;
     width: 240px;
@@ -444,5 +682,31 @@ h1 {
   padding-right: 5%;
   font-size: 0;
   overflow: hidden;
+  img {
+    width: 354px;
+  }
+}
+#decoration_qrcode {
+  display: inline-block;
+  img {
+    width: 150px;
+    height: 150px;
+    background-color: #fff; //设置白色背景色
+    padding: 6px; // 利用padding的特性，挤出白边
+  }
+}
+.loading {
+  color: #7dbcfc;
+  text-align: center;
+}
+.no-more {
+  color: #999999;
+  text-align: center;
+}
+.dialog-content {
+  span {
+    vertical-align: middle;
+    margin-right: 8px;
+  }
 }
 </style>
