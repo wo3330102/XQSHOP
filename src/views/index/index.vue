@@ -220,7 +220,7 @@ export default {
           title: "装修店铺",
           tip: "选择适合您的模板，打造个性店铺。",
           btn: "装修",
-          url: "/themeShop",
+          url: "/decorationManage",
         },
         {
           icon:

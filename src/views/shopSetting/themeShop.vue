@@ -72,6 +72,7 @@ import { getStoreTemplate } from "@/api/home.js";
 import {getShopById,changeTem} from '@/api/yxSystemStore';
 
 export default {
+  name: "ThemeShop",
   data() {
     return {
       themeList: [{

@@ -76,7 +76,7 @@
               <span>店铺管理</span>
             </template>
             <el-menu-item-group>
-              <el-menu-item index="/themeShop">店铺装修</el-menu-item>
+              <el-menu-item index="/decorationManage">店铺装修</el-menu-item>
               <el-menu-item index="/homeSwiper">首页轮播图</el-menu-item>
               <el-menu-item index="/pageManage">页面管理</el-menu-item>
               <el-menu-item index="/menuManage">菜单栏</el-menu-item>
@@ -240,8 +240,8 @@ export default {
           break;
         case "5":
           // this.$store.commit("setUrl", "/themeShop");
-          this.openUrl = '/themeShop';
-          this.$router.push("/themeShop");
+          this.openUrl = '/decorationManage';
+          this.$router.push("/decorationManage");
       }
     },
     Command: function (e) {
