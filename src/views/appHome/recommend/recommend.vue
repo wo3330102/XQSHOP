@@ -19,20 +19,17 @@
         <span
           class="sail-app-status-tag"
           :class="
-            detail.status == 1
+            detail.isOpen == 1
               ? 'sail-app-status-tag-open'
               : 'sail-app-status-tag-close'
           "
-          >{{ detail.status == 1 ? "已开启" : "未开启" }}</span
+          >{{ detail.isOpen == 1 ? "已开启" : "未开启" }}</span
         >
       </span>
       <span class="options">
         <el-button
-          @click="
-            detail.status = detail.status === 1 ? 0 : 1;
-            Save();
-          "
-          >{{ detail.status === 1 ? "关闭" : "开启" }}</el-button
+          @click="ChangeStatus()"
+          >{{ detail.isOpen === 1 ? "关闭" : "开启" }}</el-button
         >
         <el-button @click="$NavgitorTo('/recommendOption')">配置</el-button>
       </span>
@@ -266,7 +263,7 @@
 import elTableInfiniteScroll from "el-table-infinite-scroll";
 import { getCates } from "@/api/yxStoreCategory";
 import { get } from "@/api/yxStoreProduct";
-import { getlist, getInfo, edit } from "@/api/yxStoreProductRecommend";
+import { getlist, getInfo, edit, editStatus } from "@/api/yxStoreProductRecommend";
 // import { get}
 export default {
   data() {
@@ -448,16 +445,7 @@ export default {
     },
     // 确认选中
     CheckSelectItem: function () {
-      this.shopDialog = false;
-      // let arr = [];
-      // this.selectItem.map((i) => {
-      //   let obj = {
-      //     id: i.id,
-      //     image: i.image,
-      //     title: i.storeName,
-      //   };
-      //   arr.push(obj);
-      // });
+      this.shopDialog = false; 
       if (
         this.detail.productRecommendInfoVo &&
         this.detail.productRecommendInfoVo.length > 0
@@ -484,6 +472,17 @@ export default {
         this.detail.productRecommendInfoVo.splice(index, 1);
       });
     },
+    // 控制当前应用是否开启
+    ChangeStatus:function(){ 
+      let par = {
+        storeId:localStorage.getItem('storeId'), 
+      } 
+      this.detail.isOpen === 1?par.isOpen = 0:par.isOpen = 1; 
+      editStatus(par).then((res)=>{
+        this.$message.success("修改成功");
+        this.Init(); 
+      })
+    },  
     Save: function () {
       let that = this;
       let arr = [];

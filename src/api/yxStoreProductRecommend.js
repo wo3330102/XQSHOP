@@ -15,6 +15,13 @@ export function getInfo(params) {
   })
 }
 
+export function editStatus(params) {
+  return request({
+    url: 'api/yxStorePlugRecommend/openOrClose/'+params.storeId + '/' + params.isOpen,
+    method: 'get',  
+  })
+}
+
 export function edit(data) {
   return request({
     url: 'api/yxStoreProductRecommend/update_recommend_info',

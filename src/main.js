@@ -4,17 +4,11 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import 'element-ui/lib/theme-chalk/index.css';
-import './element-variables.scss';
-Vue.use(ElementUI)
+import './element-variables.scss'; 
 Vue.prototype.$ELEMENT = {
   size: 'medium'
 }; 
 localStorage.setItem('uploadUrl',process.env.VUE_APP_BASE_API)//'http://192.168.8.254:8001/admin')//)
-// Vue.prototype.$msgbox = MessageBox;
-// Vue.prototype.$alert = MessageBox.alert;
-// Vue.prototype.$confirm = MessageBox.confirm;
-// Vue.prototype.$message = Message;
-// Vue.prototype.$loading = Loading.service;
 
 // 无限滚动（下拉加载）
 import infiniteScroll from "vue-infinite-scroll";
@@ -65,7 +59,7 @@ Vue.prototype.$IsNaN = function (e) {
 }
 // 全局跳转
 Vue.prototype.$NavgitorTo = function (path) {
-  this.$router.push(path)
+  router.push(path)
 }
 // 删除操作的提示
 Vue.prototype.$DelTip = function(cb){ 
@@ -80,7 +74,7 @@ Vue.prototype.$DelTip = function(cb){
   });
 }
 
-new Vue({
+new Vue({ 
   router,
   store,
   render: h => h(App)
