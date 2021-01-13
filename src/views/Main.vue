@@ -8,6 +8,11 @@
 <script>
 export default {
   name: "Main",
+  provide () {
+    return {
+      reload: this.reload
+    }
+  },
   watch: {
     "$store.state.url"(val) {
       this.reload();
