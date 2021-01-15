@@ -74,7 +74,7 @@
                 @change="DiscountPrice"
                 v-if="detail.discountType === 0"
                 size="medium" 
-                
+                @blur="detail.discountMoney = $IsNaN(detail.discountMoney)"
                 :maxlength="discountTypeValueOfInfomation[0].maxlength"
                 :placeholder="discountTypeValueOfInfomation[0].placeholder"
                 style="flex: 1"
@@ -340,11 +340,11 @@
                 <dd>使用次数</dd>
               </dl>
               <dl>
-                <dt>${{ detail.discountTotal || 0.0 }}</dt>
+                <dt>${{ $IsNaN(detail.discountTotal) || '0.00' }}</dt>
                 <dd>优惠金额</dd>
               </dl>
               <dl>
-                <dt>${{ detail.saleTotal || 0.0 }}</dt>
+                <dt>${{ $IsNaN(detail.saleTotal) || '0.00' }}</dt>
                 <dd>销售总额</dd>
               </dl>
             </div>
@@ -662,6 +662,9 @@ export default {
       } else {
         this.isAutoApplyOffers = true;
       }
+      console.log(detail)
+      detail.discountMoney = this.$IsNaN(detail.discountMoney)
+      detail.effectMoney = this.$IsNaN(detail.effectMoney)
       this.detail = detail;
       this.disabled = true;
     }

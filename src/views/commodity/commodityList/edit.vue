@@ -635,33 +635,20 @@ export default {
         storeId,
       };
       getInfo(par).then((res) => {
-        if (that.id === 0) {
-          console.log(1)
-          // this.detail = { ...res.productInfo };
+        if (that.id === 0) { 
           this.temp_id = ""; 
-        } else {
-          console.log(2)
+        } else { 
           that.detail = { ...res.productInfo };
           that.tagIds = res.tagList;
           if (res.productInfo.classIds) {
             that.classList = res.productInfo.classIds.split(","); 
           } 
           that.attr = res.productInfo.attr;
-          if (res.productInfo.attr.weight === 0) {
-            that.attr.weight = "";
-          }
-          if (res.productInfo.attr.ot_price === 0) {
-            that.attr.ot_price = "";
-          }
-          if (res.productInfo.attr.stock === 0) {
-            that.attr.stock = "";
-          }
-          that.detail.cate_id = Number(that.detail.cate_id);
-          // that.weight = res.productInfo.attr.weight;
-          // // 判断是否有标签
-          // if (res.productInfo.classIds) {
-          //   that.classIds = res.productInfo.classIds;
-          // }
+          res.productInfo.attr.price == 0 ?that.attr.price = "":that.attr.price = this.$IsNaN(res.productInfo.attr.price) 
+          res.productInfo.attr.weight == 0 ?that.attr.weight = "":that.attr.weight = this.$IsNaN(res.productInfo.attr.weight) 
+          res.productInfo.attr.ot_price == 0? that.attr.ot_price = "":that.attr.ot_price = this.$IsNaN(res.productInfo.attr.ot_price)
+          res.productInfo.attr.stock === 0?  that.attr.stock = "":'';
+          that.detail.cate_id = Number(that.detail.cate_id); 
           // 判断是否上架
           that.detail.is_show == Number(that.isGrounding);
           // 判断是单规格还是多规格

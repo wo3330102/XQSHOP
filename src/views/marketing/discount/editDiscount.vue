@@ -168,7 +168,7 @@
                   style="width: 210px"
                   :maxlength="8"
                   :disabled="disabled" 
-                  @blur="item.consumption = $IsNaN(item.consumption)"
+                  @blur="detail.terms1 == 1?item.consumption = $IsNaN(item.consumption):''"
                 >
                   <template
                     slot="prefix"
@@ -387,7 +387,7 @@
                 {{
                   detail.terms1 === 0
                     ? item.consumption + "件"
-                    : "$" + item.consumption
+                    : "$" + $IsNaN(item.consumption)
                 }}，
                 {{ appliedObjectList[detail.applyObject].label }}
                 减免
@@ -408,12 +408,12 @@
               </dl>
               <dl>
                 <dt>
-                  ${{ detail.discountTotal ? detail.discountTotal : "0.00" }}
+                  ${{ detail.discountTotal ? $IsNaN(detail.discountTotal) : "0.00" }}
                 </dt>
                 <dd>优惠金额</dd>
               </dl>
               <dl>
-                <dt>${{ detail.saleTotal ? detail.saleTotal : "0.00" }}</dt>
+                <dt>${{ detail.saleTotal ? $IsNaN(detail.saleTotal) : "0.00" }}</dt>
                 <dd>销售总额</dd>
               </dl>
             </div>
@@ -431,7 +431,7 @@
                   {{
                     detail.terms1 === 0
                       ? item.consumption + "件"
-                      : "$" + item.consumption
+                      : "$" + $IsNaN(item.consumption)
                   }}，
                   {{ appliedObjectList[detail.applyObject].label }}
                   减免
@@ -450,14 +450,14 @@
                 <span class="title">优惠金额：</span>
                 <span class="text"
                   >${{
-                    detail.discountTotal ? detail.discountTotal : "0.00"
+                    detail.discountTotal ? $IsNaN(detail.discountTotal) : "0.00"
                   }}</span
                 >
               </p>
               <p>
                 <span class="title">销售金额：</span>
                 <span class="text"
-                  >${{ detail.saleTotal ? detail.saleTotal : "0.00" }}</span
+                  >${{ detail.saleTotal ? $IsNaN(detail.saleTotal) : "0.00" }}</span
                 >
               </p>
             </div>
@@ -807,10 +807,10 @@ export default {
         if (i.reduceDiscount) {
           par.reduction = i.reduceDiscount;
         } else {
-          par.reduction = i.reduceMoney;
+          par.reduction = this.$IsNaN(i.reduceMoney);
         }
         if (i.specMoney) {
-          par.consumption = i.specMoney;
+          par.consumption = this.$IsNaN(i.specMoney);
         } else {
           par.consumption = i.specNums;
         }
