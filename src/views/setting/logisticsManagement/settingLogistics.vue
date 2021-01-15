@@ -48,19 +48,19 @@
               </p>
               <ul
                 class="countryList"
-                :class="showAllSelectContryList ? '' : 'showPart'"
+                :class="isShowAll? '' : 'showPart'"
               >
                 <li v-for="(item, index) in selectContryList" :key="index">
                   <span class="img">
                     <img
-                      :src="item.src"
+                      :src="item.logo"
                       style="border: 1px solid rgb(244, 244, 244)"
                     />
                   </span>
                   <span class="name">
-                    {{ item.en_name }}
+                    {{ item.mergerName }}
                     <span style="margin-left: 4px; color: rgb(193, 194, 204)"
-                      >( {{ item.zh_name }} )</span
+                      >( {{ item.name }} )</span
                     >
                   </span>
                   <span class="option" @click="DelCountry(item, index)">
@@ -68,15 +68,15 @@
                   </span>
                 </li>
               </ul>
-              <div class="loadMore" v-if="selectContryList.length > 0">
-                <span class="l-more">{{
-                  showAllSelectContryList ? "收起" : "展开"
-                }}</span>
+              <div
+                class="loadMore"
+                v-show="selectContryList.length > 5"
+                @click="isShowAll = !isShowAll"
+              >
+                <span class="l-more">{{ isShowAll ? "收起" : "展开" }}</span>
                 <span
                   :class="
-                    showAllSelectContryList
-                      ? 'el-icon-caret-top'
-                      : 'el-icon-caret-bottom'
+                    isShowAll ? 'el-icon-caret-top' : 'el-icon-caret-bottom'
                   "
                 ></span>
               </div>
@@ -90,31 +90,49 @@
                 class="option"
                 @click="
                   () => {
-                    logisticsPlanType = 1;
+                    form.type = 1;
                     showLogisticsPlan = true;
                   }
                 "
                 >添加条件</span
-              >   
+              >
             </h3>
             <div class="desc">
               <p class="desc p20" v-if="moneyOflogisticsList.length == 0">
                 基于客户的订单金额来设置物流选项
               </p>
-              <div class="detail showMore">
+              <div v-else class="detail showMore">
                 <table>
-                  <theade>
+                  <thead>
                     <tr>
                       <th>物流选项名称</th>
                       <th>订单金额范围</th>
                       <th>物流费用</th>
                       <th></th>
                     </tr>
-                  </theade>
+                  </thead>
                   <tbody>
-                    <tr v-for="(item,index) in moneyOflogisticsList" :key="index">
-                      <td>{{item.title}}</td>
-                      <td>${{item.num1}} {{item.num2 == ''?'and up':'- ' + item.num2}}</td>
+                    <tr
+                      v-for="(item, index) in moneyOflogisticsList"
+                      :key="index"
+                    >
+                      <td>{{ item.title }}</td>
+                      <td>
+                        ${{ item.minUnit }}
+                        {{
+                          item.maxUnitl == "" ? "and up" : "- " + item.maxUnitl
+                        }}
+                      </td>
+                      <td>
+                        {{ item.price == 0 ? "免运费" : "$" + item.price }}
+                      </td>
+                      <td>
+                        <span
+                          class="el-icon-edit-outline"
+                          style="margin-right: 14px"
+                        ></span>
+                        <span class="el-icon-delete"></span>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -140,6 +158,42 @@
               <p class="desc p20" v-if="weightOflogisticsList.length == 0">
                 基于客户的订单商品重量来设置物流选项
               </p>
+              <div v-else class="detail showMore">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>物流选项名称</th>
+                      <th>订单金额范围</th>
+                      <th>物流费用</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="(item, index) in weightOflogisticsList"
+                      :key="index"
+                    >
+                      <td>{{ item.title }}</td>
+                      <td>
+                        ${{ item.minUnit }}
+                        {{
+                          item.maxUnitl == "" ? "and up" : "- " + item.maxUnitl
+                        }}
+                      </td>
+                      <td>
+                        {{ item.price == 0 ? "免运费" : "$" + item.price }}
+                      </td>
+                      <td>
+                        <span
+                          class="el-icon-edit-outline"
+                          style="margin-right: 14px"
+                        ></span>
+                        <span class="el-icon-delete"></span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </el-col>
@@ -157,7 +211,7 @@
       </el-row>
       <div class="pageSaveBtn">
         <el-button>取消</el-button>
-        <el-button type="primary">保存</el-button>
+        <el-button type="primary" @click="Save">保存</el-button>
       </div>
       <el-dialog
         title="添加国家/地区"
@@ -299,7 +353,13 @@
           <el-form-item>
             <h4>
               物流选项名称
-              <span>(客户在结账时将会看到这个名称)</span>
+              <span
+                >({{
+                  logisticsPlanType == 1
+                    ? "客户在结账时将会看到这个名称"
+                    : "客户在结账选择物流方式时，将会看到这个名称"
+                }})</span
+              >
               <span style="float: right">{{ form.title.length }}/100</span>
             </h4>
             <el-autocomplete
@@ -317,8 +377,8 @@
                 <el-input
                   style="flex: 1"
                   placeholder="0.00"
-                  v-model="form.num1"
-                  @blur="DiscountPrice('num1')"
+                  v-model="form.minUnit"
+                  @blur="DiscountPrice('minUnit')"
                 >
                   <template slot="prepend"
                     >最低{{
@@ -335,8 +395,8 @@
                 <el-input
                   style="flex: 1"
                   placeholder="不限制"
-                  v-model="form.num2"
-                  @blur="DiscountPrice('num2')"
+                  v-model="form.maxUnitl"
+                  @blur="DiscountPrice('maxUnitl')"
                 >
                   <template slot="prepend"
                     >最高{{
@@ -381,7 +441,7 @@
   </div>
 </template> 
 <script>
-import { getCitys } from "@/api/logistics";
+import { getCitys, save } from "@/api/logistics";
 export default {
   data() {
     return {
@@ -400,10 +460,13 @@ export default {
       logisticsPlanType: 1, // 物流方案类型  1为订单金额  2为商品重量
       form: {
         title: "",
-        num1: "",
-        num2: "",
+        minUnit: "",
+        maxUnitl: "",
         price: "",
+        isFree: 0,
+        type: 1,
       },
+      isShowAll: false,
     };
   },
   created() {
@@ -464,6 +527,7 @@ export default {
         }
         country.isCheck = true;
       } else {
+        console.log(plate);
         plate.childrenList.splice(plate.childrenList.indexOf(country), 1);
         plate.isCheck = false;
         country.childrenList = [];
@@ -507,34 +571,38 @@ export default {
       this.selectContryList = [];
       this.countryList.map((item) => {
         if (item.isCheck) {
-          this.selectContryList = this.selectContryList.concat(item.children);
-          console.log(this.selectContryList);
+          this.selectContryList = this.selectContryList.concat(item.contries);
         } else if (item.childrenList.length > 0) {
           this.selectContryList = this.selectContryList.concat(
             item.childrenList
           );
         }
-      });
+      }); 
       this.showCountry = false;
     },
     // 删除配送国家
     DelCountry: function (item, index) {
-      this.countryList.map((v) => {
-        console.log(v);
+      this.countryList.map((v) => { 
         if (v.isCheck) {
           if (v.id == item.id) {
             v.isCheck = false;
-          } else {
-            console.log(this.countryList);
-            v.childrenList.map((val, inx) => {
-              console.log(val.id, item.id);
+          } else { 
+            v.childrenList.map((val, inx) => { 
               if (val.id == item.id) {
                 v.childrenList.splice(v.childrenList.indexOf(val), 1);
               }
             });
           }
-        } else if (v.childrenList.length > 0) {
-          console.log(111);
+        } else if (v.childrenList.length > 0) { 
+          console.log(v);
+          console.log(item);
+          v.childrenList.map((val,inx)=>{
+            if(val.city_id == item.city_id){
+              val.isCheck = false;
+              val.childrenList = [];
+              v.childrenList.splice(v.childrenList.indexOf(val), 1);
+            }
+          }) 
         }
       });
       this.selectContryList.splice(index, 1);
@@ -542,19 +610,81 @@ export default {
     // 关闭物流方案对话框
     CloseLogisticsPlan: function (e) {
       if (e == "pass") {
+        this.form.isFree = this.form.price == 0 ? 1 : 0;
         if (this.logisticsPlanType == 1) {
-          this.moneyOflogisticsList.push(this.form);
+          this.form.type = 1;
+          this.moneyOflogisticsList.push({ ...this.form });
         } else {
-          this.weightOflogisticsList.push(this.form);
+          this.form.type = 2;
+          this.weightOflogisticsList.push({ ...this.form });
+          console.log(this.weightOflogisticsList);
         }
       }
       this.form = {
         title: "",
-        num1: "",
-        num2: "",
+        minUnit: "",
+        maxUnitl: "",
         price: "",
+        isFree: 0,
+        type: 1,
       };
       this.showLogisticsPlan = false;
+    },
+    // 保存物流方案
+    Save: function () {
+      let freeInfo = this.moneyOflogisticsList.concat(
+        this.weightOflogisticsList
+      );
+      let arr = [];
+      this.countryList.map((item) => {
+        // 判断当前大洲下是否有选择数据
+        if (item.childrenList.length > 0) {
+          let arr1 = [];
+          console.log(1);
+          item.childrenList.map((country) => {
+            // 判断当前国家下是否有城市选择
+            let arr2 = [],
+              obj = {};
+            if (country.childrenList.length > 0) {
+              country.childrenList.map((city) => {
+                country.children.map((val) => {
+                  if (val.id == city) {
+                    arr2.push({
+                      city_id: val.city_id,
+                      provincesName: val.name,
+                    });
+                  }
+                });
+              });
+              obj = {
+                provincess: arr2,
+                city_id: country.city_id,
+                name: country.name,
+              };
+            } else if (country.isCheck) {
+              obj = {
+                provincess: [],
+                city_id: country.city_id,
+                name: country.name,
+              };
+            }
+            arr1.push(obj2);
+          });
+          arr.push({
+            city_id: item.cityId,
+            countriess: arr1,
+            regionPlate: item.name,
+          });
+        }
+      });
+      let data = {
+        freeInfo: freeInfo,
+        name: this.logisticsName,
+        regionInfo: arr,
+      };
+      save(data).then((res) => {
+        console.log(res);
+      });
     },
     // 设置辅助输入列表(用法参照elementUI)
     QuerySearch: function (queryString, cb) {
@@ -729,6 +859,58 @@ h1 {
 .detail {
   transition: all 1s ease;
   height: auto;
+  table {
+    box-sizing: border-box;
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    color: #1a1d2c;
+    thead {
+      th {
+        text-align: left;
+        border-bottom: 1px solid #dcdfe6;
+      }
+    }
+    tbody {
+      tr {
+        padding: 0 10px;
+        color: #697c90;
+        border-bottom: 1px solid #f4f4f4;
+        td {
+          &:last-child {
+            border-bottom: none;
+            padding-right: 21px;
+            text-align: right;
+            span {
+              font-size: 16px;
+              cursor: pointer;
+            }
+          }
+        }
+      }
+    }
+    td,
+    th {
+      padding: 12px 12px 12px 20px;
+      &:nth-child(3) {
+        text-align: right;
+      }
+    }
+  }
+  .loadMore {
+    padding: 0 20px;
+    text-align: center;
+    height: 44px;
+    line-height: 44px;
+    border-top: 1px solid #dcdfe6; 
+    background: #ffffff;
+    .l-more {
+      line-height: 44px;
+      color: #909399;
+      cursor: pointer;
+      font-size: 14px;
+    }
+  }
 }
 .search-country {
   width: 100%;
@@ -741,7 +923,7 @@ h1 {
     list-style: none;
     transition: all 1s ease;
     height: auto;
-    padding-left: 20px;
+    padding-left: 20px; 
     li {
       height: 40px;
       line-height: 40px;

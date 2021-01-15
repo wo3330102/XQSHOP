@@ -1,132 +1,185 @@
 <template>
   <div class="container">
     <router-link
-      to="/setting"
-      style="color: #5e7185;margin-bottom:12px;display:inline-block;height:20px;line-height:20px"
+      to="/logisticsManagement"
+      style="
+        color: #5e7185;
+        margin-bottom: 12px;
+        display: inline-block;
+        height: 20px;
+        line-height: 20px;
+      "
     >
       <i class="el-icon-arrow-left"></i>
       <span>物流管理</span>
     </router-link>
     <h1 class="title">
-      <span>
-        {{info.status == 1?'通用物流':'自定义物流'}}
-        <i
-          class="el-icon-video-camera-solid"
-          @click="showVideo = true"
-          style="margin-left:7px;cursor:pointer;"
-        ></i>
-      </span>
+      <span> 通用物流 </span>
     </h1>
     <div>
       <el-row>
         <el-col :span="16">
-          <!-- 活动名称 -->
-          <div class="box">
-            <h3 class="title">
-              物流配送方案 
-            </h3>
-            <div class="content" style="text-align: center;">
-              <template v-if="logisticsList == 0">
-                <h4 class="title" style="    font-weight: normal;">暂未设置物流配送方案</h4>
-                <p class="des">没有可选物流配送方案，客户无法完成订单支付</p>
-                <el-button type="primary" style="margin-bottom: 80px;" @click="$NavgitorTo('/settingLogistics')">设置物流</el-button>
-              </template>
+          <div class="box p0">
+            <div class="product-title-box p20">
+              <p class="product-title">
+                全部商品
+                <span class="light-title">
+                  (不包含在自定义物流方案中的商品，新添加的商品将自动加入到通用物流中)
+                </span>
+              </p>
+              <p class="product-sub-title">
+                若要针对特定的商品添加自定义物流方案，请在
+                <span class="textBtn not-pd">物流管理</span>
+                中创建自定义物流
+              </p>
             </div>
+            <div class="product-container">
+              <table class="product-table">
+                <tbody>
+                  <tr v-for="(item, index) in commodityList" :key="item.id">
+                    <td style="min-width: 44px">{{ index + 1 }}</td>
+                    <td>
+                      <span
+                        class="small-img"
+                        :style="{ backgroundImage: 'url(' + item.image + ')' }"
+                      ></span>
+                    </td>
+                    <td>
+                      <span class="desc">{{ item.tagName }}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="pagination">
+                <el-pagination
+                  @current-change="CurrentChange"
+                  :current-page.sync="currentPage"
+                  background
+                  :page-size="requestParams.size"
+                  layout="total, prev, pager, next"
+                  :total="total"
+                ></el-pagination>
+              </div>
+            </div>
+          </div>
+          <div class="logistics-programme">
+            <p class="logistics-programme-title">物流方案</p>
+            <span class="fr textBtn no-pd">添加物流方案</span>
+          </div>
+          <div
+            class="box list p0"
+            v-for="(item, index) in logisticsPlan"
+            :key="index"
+          >
+            <h3 class="title ptrl-20">
+              全球
+              <span class="option" style="margin-left: 10px">删除</span>
+              <span class="option" @click="EditPlan">编辑</span>
+            </h3>
+            <p class="desc">{{ item.countries_list }}</p>
+            <table class="express-list">
+              <tr v-for="(plan, index) in item.expresses" :key="index">
+                <td>
+                  <p>{{ plan.title }}</p>
+                  <p>
+                    <template v-if="plan.type == 1">
+                      下单金额：${{ plan.minUnit }}
+                      {{ plan.maxUnit ? "- $" + plan.maxUnit : "and up" }}
+                    </template>
+                    <template v-else>
+                      下单重量：{{ plan.minUnit }}g
+                      {{ plan.maxUnit ? "- " + plan.maxUnit + "g" : "and up" }}
+                    </template>
+                  </p>
+                </td>
+                <td>
+                  {{ Boolean(plan.isFree) ? "免运费" : "$" + plan.price}}
+                </td>
+              </tr>
+            </table>
           </div>
         </el-col>
         <el-col :span="8">
           <div class="box-right">
             <p class="infoTip">温馨提示</p>
-            <p class="infoContent">1.设置店铺可支持的物流配送地区，以及在订单结账页中，提供可供客户选择的物流配送方案。</p>
-            <p class="infoContent" style="margin-top: 14px;">2.没有设置物流配送的国家或地区，客户下单时将无法选择这些国家或地区。</p>
-            <!-- <p class="infoContent">2、完成第一单支付交易后，则不可修改币种。</p>
-            <p class="infoContent">1、设置店铺的联系方式，平台和顾客将通过此信息与你联系。</p>-->
+            <p class="infoContent">
+              1.设置店铺可支持的物流配送地区，以及在订单结账页中，提供可供客户选择的物流配送方案。
+            </p>
+            <p class="infoContent" style="margin-top: 14px">
+              2.没有设置物流配送的国家或地区，客户下单时将无法选择这些国家或地区。
+            </p>
           </div>
         </el-col>
       </el-row>
     </div>
-    <el-dialog :visible.sync="showVideo" center>
-      <video-player
-        class="video-player vjs-custom-skin"
-        ref="videoPlayer"
-        :playsinline="showVideo"
-        :options="playerOptions"
-        v-if="showVideo"
-      ></video-player>
-    </el-dialog>
   </div>
 </template> 
 <script>
-import { videoPlayer } from "vue-video-player";
-import "video.js/dist/video-js.css";
+import { get } from "@/api/yxStoreProduct";
 export default {
-  components: {
-    videoPlayer,
-  },
   data() {
-    var checkEmail = (rule, value, callback) => {
-      if (!value) {
-        return callback(new Error("邮箱不能为空"));
-      }
-      let reg = /^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
-      if (!reg.test(value)) {
-        callback(new Error("请输入正确的邮箱"));
-      } else {
-        callback();
-      }
-    };
-    var shopName = (rule, value, callback) => {
-      if (!value) {
-        return callback(new Error("店铺名为必填项"));
-      }
-    };
     return {
-      showVideo: false,
-      formData: {
-        shopName: "",
-        userEmail: "",
-        KeFuEmail: "",
+      status: 1,
+      requestParams: {
+        page: 0,
+        size: 6,
       },
-      rules: {
-        shopName: [{ validator: shopName, trigger: "blur" }],
-        userEmail: [{ validator: checkEmail, trigger: "blur" }],
-        KeFuEmail: [{ validator: checkEmail, trigger: "blur" }],
-      },
-      playerOptions: {
-        playbackRates: [0.5, 1.0, 1.5, 2.0, 3.0], // 可选的播放速度
-        autoplay: true, // 如果为true,浏览器准备好时开始回放。
-        muted: false, // 默认情况下将会消除任何音频。
-        loop: false, // 是否视频一结束就重新开始。
-        preload: "auto", // 建议浏览器在<video>加载元素后是否应该开始下载视频数据。auto浏览器选择最佳行为,立即开始加载视频（如果浏览器支持）
-        language: "zh-CN",
-        aspectRatio: "16:9", // 将播放器置于流畅模式，并在计算播放器的动态大小时使用该值。值应该代表一个比例 - 用冒号分隔的两个数字（例如"16:9"或"4:3"）
-        fluid: true, // 当true时，Video.js player将拥有流体大小。换句话说，它将按比例缩放以适应其容器。
-        sources: [
-          {
-            type: "video/mp4", // 类型
-            src:
-              "https://gss3.baidu.com/6LZ0ej3k1Qd3ote6lo7D0j9wehsv/tieba-smallvideo-transcode-cae/50463985_c1fbf4ebadf2ed65ff3b723f5f5ce28f_0_cae.mp4", // url地址
-          },
-        ],
-        poster: "", // 封面地址
-        notSupportedMessage: "此视频暂无法播放，请稍后再试", // 允许覆盖Video.js无法播放媒体源时显示的默认信息。
-        controlBar: {
-          timeDivider: true, // 当前时间和持续时间的分隔符
-          durationDisplay: true, // 显示持续时间
-          remainingTimeDisplay: false, // 是否显示剩余时间功能
-          fullscreenToggle: true, // 是否显示全屏按钮
+      total: 0,
+      currentPage: 1,
+      commodityList: [],
+      logisticsPlan: [
+        {
+          title: "全球",
+          countries_list: "全球",
+          expresses: [
+            {
+              title: "测试金额",
+              price: 1,
+              minUnit: 0.0,
+              maxUnit: 10.0,
+              isFree: 0,
+              type: 1,
+            },
+            {
+              title: "测试金额",
+              price: 0,
+              minUnit: 10.1,
+              maxUnit: "",
+              isFree: 1,
+              type: 1,
+            },
+            {
+              title: "测试重量",
+              price: 0,
+              minUnit: 10.1,
+              maxUnit: "",
+              isFree: 1,
+              type: 2,
+            },
+          ],
         },
-      },
-      logisticsList: [],
+      ],
     };
+  },
+  created() {
+    
+    get(this.requestParams).then((res) => {
+      console.log(res);
+      this.commodityList = res.content;
+      this.total = res.totalElements;
+    });
   },
   methods: {
-    ValidateFrom: function (boolean, item) {
-      console.log(boolean, item);
+    // 分页选择
+    CurrentChange: function (e) {
+      this.currentPage = e;
+      this.params.page = e - 1;
+      this.getData();
     },
-  },
-  updated() {
-    console.log("更新");
+    // 编辑当前物流
+    EditPlan:function(){
+
+    },
   },
 };
 </script>
@@ -148,6 +201,131 @@ h1 {
     padding: 0 10px;
   }
 }
+.product-title-box {
+  border-bottom: 1px solid #dcdfe6;
+  .product-title {
+    font-weight: 600;
+    color: #1a1d2c;
+  }
+  .light-title {
+    font-weight: 400;
+    font-size: 12px;
+    color: #a4a8b4;
+  }
+  .product-sub-title {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #5e7185;
+    .textBtn {
+      font-size: 12px;
+    }
+  }
+}
+.product-table {
+  width: 100%;
+  tr {
+    td {
+      padding: 12px 0;
+      border-bottom: 1px solid #f4f4f4;
+      .desc {
+        height: 44px;
+        display: -webkit-box;
+        overflow: hidden;
+        line-height: 22px;
+        max-width: 400px;
+        width: 400px;
+      }
+      &:first-child {
+        padding-left: 20px;
+      }
+      &:last-child {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+    }
+  }
+}
+.pagination {
+  padding: 14px 0;
+  text-align: center;
+}
+.logistics-programme {
+  height: 36px;
+  margin-bottom: 12px;
+  margin-top: 32px;
+  display: flex;
+  align-items: center;
+  .logistics-programme-title {
+    font-size: 18px;
+    line-height: 36px;
+    color: #1a1d2d;
+    flex: 1;
+  }
+}
+.textBtn {
+  padding: 10px 0;
+  color: #273a8a;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: 400;
+  text-decoration: underline;
+}
+.textBtn.not-pd {
+  padding: 0;
+}
+.list {
+  color: #5e7185;
+  font-size: 12px;
+  .desc {
+    border-bottom: 1px solid #dcdfe6;
+    padding: 0 20px 20px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin-top: 10px;
+  }
+}
+.express-list {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  tr {
+    border-bottom: 1px solid #dcdfe6;
+  }
+  td {
+    padding: 20px 0;
+    min-width: 0;
+    box-sizing: border-box;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    position: relative;
+    text-align: left;
+    &:first-child {
+      padding-left: 30px;
+      p {
+        &:first-child {
+          color: rgb(36, 43, 74);
+          font-size: 14px;
+          margin-bottom: 6px;
+          line-height: 20px;
+        }
+        &:last-child {
+          color: rgb(121, 125, 140);
+          font-size: 12px;
+          line-height: 20px;
+        }
+      }
+    }
+    &:last-child {
+          padding-right: 20px;
+      text-align: right;
+      color: rgb(30, 35, 57);
+      font-size: 14px;
+      line-height: 20px;
+    }
+  }
+}
 .box {
   margin-bottom: 20px;
   padding: 12px;
@@ -157,22 +335,18 @@ h1 {
   box-shadow: 0 1px 3px 0 rgba(35, 35, 112, 0.2),
     0 0 0 1px rgba(67, 67, 145, 0.05);
   overflow: hidden;
-  &>.title { 
+  & > .title {
     font-size: 14px;
     font-weight: 600;
     padding-bottom: 12px;
-  }
-  .content {
-    .title {
-      margin-top: 80px;
-    line-height: 22px;
-    height: 20px;
-    font-size: 16px;
-    }
-    .des {
-      color: #5e7185;
-      font-size: 12px;
-      margin: 12px 0 28px;
+    color: #1a1d2c;
+    .option {
+      font-size: 14px;
+      color: #273a8a;
+      float: right;
+      cursor: pointer;
+      text-decoration: underline;
+      font-weight: 400;
     }
   }
 }
@@ -206,6 +380,32 @@ h1 {
 .search-conditions {
   display: flex;
   justify-content: space-between;
+}
+.p0 {
+  padding: 0 !important;
+}
+.p20 {
+  padding: 20px !important;
+}
+.fr {
+  float: right;
+}
+.ptrl-20 {
+  padding: 20px 20px 0 !important;
+}
+.small-img {
+  display: inline-block;
+  vertical-align: middle;
+  width: 50px;
+  height: 50px;
+  border-radius: 4px;
+  border: 1px solid #dadde4;
+  background-color: #f7f8fd;
+  background-origin: content-box;
+  background-position: 50% 50%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  overflow: hidden;
 }
 /deep/.el-input-group__prepend {
   background: #fff;

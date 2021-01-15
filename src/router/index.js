@@ -214,7 +214,11 @@ const routes = [{
       path: '/settingLogistics',
       name: 'SettingLogistics',
       component: () => import( /* webpackChunkName: "about" */ '../views/setting/logisticsManagement/settingLogistics.vue'),
-    }, {
+    }, { 
+      path: '/commonLogistics',
+      name: 'CommonLogistics',
+      component: () => import( /* webpackChunkName: "about" */ '../views/setting/logisticsManagement/commonLogistics.vue'),
+    },{
       path: '/notice',
       name: 'Notice',
       component: () => import( /* webpackChunkName: "about" */ '../views/setting/notice/notice.vue'),
@@ -289,5 +293,4 @@ router.beforeEach((to, from, next) => {
   //   // next('/login') // 否则全部重定向到登录页 
   // }
 })
-
 export default router
