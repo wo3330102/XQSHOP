@@ -46,10 +46,7 @@
               <p class="desc p20" v-if="selectContryList.length == 0">
                 添加适合这个物流方案的目的国
               </p>
-              <ul
-                class="countryList"
-                :class="isShowAll? '' : 'showPart'"
-              >
+              <ul class="countryList" :class="isShowAll ? '' : 'showPart'">
                 <li v-for="(item, index) in selectContryList" :key="index">
                   <span class="img">
                     <img
@@ -377,8 +374,8 @@
                 <el-input
                   style="flex: 1"
                   placeholder="0.00"
-                  v-model="form.minUnit"
-                  @blur="DiscountPrice('minUnit')"
+                  v-model="form.minUnit" 
+                  @blur="form.minUnit = $IsNaN(form.minUnit)"
                 >
                   <template slot="prepend"
                     >最低{{
@@ -396,7 +393,7 @@
                   style="flex: 1"
                   placeholder="不限制"
                   v-model="form.maxUnitl"
-                  @blur="DiscountPrice('maxUnitl')"
+                  @blur="form.maxUnitl = $IsNaN(form.maxUnitl)"
                 >
                   <template slot="prepend"
                     >最高{{
@@ -424,7 +421,7 @@
               v-model="form.price"
               placeholder="请输入物流费用"
               maxlength="100"
-              @blur="DiscountPrice('price')"
+               @blur="form.price = $IsNaN(form.price)"
             >
               <template slot="prefix">$</template>
             </el-input>
@@ -441,10 +438,11 @@
   </div>
 </template> 
 <script>
-import { getCitys, save } from "@/api/logistics";
+import { getCitys, save, createShipping } from "@/api/logistics";
 export default {
   data() {
     return {
+      id:0,
       logisticsName: "",
       selectContryList: [], // 选中的国家/地区
       moneyOflogisticsList: [], // 物流根据金额设置运费列表
@@ -460,9 +458,9 @@ export default {
       logisticsPlanType: 1, // 物流方案类型  1为订单金额  2为商品重量
       form: {
         title: "",
-        minUnit: "",
-        maxUnitl: "",
-        price: "",
+        minUnit: 0,
+        maxUnitl: 0,
+        price: 0,
         isFree: 0,
         type: 1,
       },
@@ -470,6 +468,7 @@ export default {
     };
   },
   created() {
+    this.id = this.$route.query.id
     getCitys().then((res) => {
       res.map((item) => {
         item.childrenList = [];
@@ -577,32 +576,32 @@ export default {
             item.childrenList
           );
         }
-      }); 
+      });
       this.showCountry = false;
     },
     // 删除配送国家
     DelCountry: function (item, index) {
-      this.countryList.map((v) => { 
+      this.countryList.map((v) => {
         if (v.isCheck) {
           if (v.id == item.id) {
             v.isCheck = false;
-          } else { 
-            v.childrenList.map((val, inx) => { 
+          } else {
+            v.childrenList.map((val, inx) => {
               if (val.id == item.id) {
                 v.childrenList.splice(v.childrenList.indexOf(val), 1);
               }
             });
           }
-        } else if (v.childrenList.length > 0) { 
+        } else if (v.childrenList.length > 0) {
           console.log(v);
           console.log(item);
-          v.childrenList.map((val,inx)=>{
-            if(val.city_id == item.city_id){
+          v.childrenList.map((val, inx) => {
+            if (val.city_id == item.city_id) {
               val.isCheck = false;
               val.childrenList = [];
               v.childrenList.splice(v.childrenList.indexOf(val), 1);
             }
-          }) 
+          });
         }
       });
       this.selectContryList.splice(index, 1);
@@ -668,7 +667,7 @@ export default {
                 name: country.name,
               };
             }
-            arr1.push(obj2);
+            arr1.push(obj);
           });
           arr.push({
             city_id: item.cityId,
@@ -677,14 +676,22 @@ export default {
           });
         }
       });
-      let data = {
-        freeInfo: freeInfo,
-        name: this.logisticsName,
-        regionInfo: arr,
-      };
-      save(data).then((res) => {
-        console.log(res);
-      });
+      // 判断是否为第一次创建通用物流
+      if (this.$route.query.init) {
+        createShipping({ name: "通用", type: 0 }).then((res) => {
+          console.log(res);
+        });
+      } else {
+        let data = {
+          freeInfo: freeInfo,
+          id: Number(this.$route.query.id),
+          shippingName: this.logisticsName,
+          regionInfo: arr,
+        };
+        save(data).then((res) => {
+          console.log(res);
+        });
+      }
     },
     // 设置辅助输入列表(用法参照elementUI)
     QuerySearch: function (queryString, cb) {
@@ -902,7 +909,7 @@ h1 {
     text-align: center;
     height: 44px;
     line-height: 44px;
-    border-top: 1px solid #dcdfe6; 
+    border-top: 1px solid #dcdfe6;
     background: #ffffff;
     .l-more {
       line-height: 44px;
@@ -923,7 +930,7 @@ h1 {
     list-style: none;
     transition: all 1s ease;
     height: auto;
-    padding-left: 20px; 
+    padding-left: 20px;
     li {
       height: 40px;
       line-height: 40px;

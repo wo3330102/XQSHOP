@@ -19,11 +19,8 @@
     <div>
       <el-row>
         <el-col :span="16" class="logistics-container">
-          <!-- 活动名称 -->
-          <div
-            class="box"
-            v-if="currencyPlan.length == 0 && logisticsList.length == 0"
-          >
+          <!-- 活动名称 currencyPlan.length == 0 && logisticsList.length == 0-->
+          <div class="box" v-if="false">
             <h3 class="title">物流配送方案</h3>
             <div class="content" style="text-align: center">
               <template v-if="logisticsList == 0">
@@ -56,17 +53,12 @@
                     >
                     <span
                       class="option textBtn not-pd"
-                      @click="EditLogistics(0)"
+                      @click="EditLogistics(0, item.id)"
                       >编辑</span
                     >
                   </p>
                   <div class="logistics-box-content">
-                    <span
-                      class="logistics-name"
-                      v-for="item in currencyPlan"
-                      :key="item.id"
-                      >{{ item.name }}</span
-                    >
+                    <span class="logistics-name">{{ item.count }}</span>
                   </div>
                 </div>
               </div>
@@ -83,22 +75,24 @@
                   >创建自定义物流</span
                 >
               </div>
-              <div class="logistics-box" v-if="logisticsList.length > 0">
-                <div class="logistics-box-title">
-                  <p>
-                    {{ logisticsList.name }}
-                    <span class="sub-title"></span>
-                  </p>
+              <template v-if="logisticsList.length > 0">
+                <div
+                  class="logistics-box"
+                  v-for="item in logisticsList"
+                  :key="item.id"
+                >
+                  <div class="logistics-box-title">
+                    <p>
+                      {{ item.name }}
+                      <span class="product-num"></span>
+                      <span class="option textBtn not-pd">编辑</span>
+                    </p>
+                  </div>
+                  <div class="logistics-box-content">
+                    <span>{{ item.count }}</span>
+                  </div>
                 </div>
-                <div class="logistics-box-content">
-                  <span
-                    class="logistics-name"
-                    v-for="item in logisticsList"
-                    :key="item.id"
-                    >{{ item.name }}</span
-                  >
-                </div>
-              </div>
+              </template>
               <div
                 v-else
                 class="common-logistics-box-content customer-logistics-no-content"
@@ -121,52 +115,78 @@
         </el-col>
       </el-row>
     </div>
+    <el-dialog title="增加自定义物流" :visible.sync="showAddCustom">
+      <el-form :model="formData">
+        <el-form-item
+          label="名称"
+          prop="name"
+          :rules="{ require: true, tagget: 'blur' }"
+        >
+          <el-input
+            v-model="formData.name"
+            placeholder="自定义物流名称"
+            maxlength="100"
+          ></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer">
+        <el-button @click="showAddCustom = false">取消</el-button>
+        <el-button @click="CreateCustom">取消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template> 
 <script>
-import { getPlan } from "@/api/logistics";
+import { getPlan, createShipping } from "@/api/logistics";
 export default {
   data() {
     return {
-      showVideo: false,
       formData: {
-        shopName: "",
-        userEmail: "",
-        KeFuEmail: "",
+        name: "",
       },
       currencyPlan: [],
       logisticsList: [],
+      showAddCustom: false,
     };
   },
   created() {
-    // let par = {
-    //   page: 0,
-    //   size: 10,
-    // };
-    // getPlan(par).then((res) => {
-    //   res.content.map((v) => {
-    //     if (v.type == 0) {
-    //       this.currencyPlan.push(v);
-    //     } else {
-    //       this.logisticsList.push(v);
-    //     }
-    //   });
-    // });
+    let par = {
+      page: 0,
+      size: 10,
+    };
+    getPlan(par).then((res) => {
+      res.map((v) => {
+        if (v.type == 0) {
+          this.currencyPlan.push(v);
+        } else {
+          this.logisticsList.push(v);
+        }
+      });
+    });
   },
   methods: {
-    SettingLogistics:function(){
+    SettingLogistics: function () {
       this.$router.push({
-        path:'/settingLogistics',
-        query:{
-          type:0,
-        }
-      }) 
+        path: "/settingLogistics",
+        query: {
+          status: 0,
+          init: true,
+        },
+      });
     },
-    EditLogistics: function () {
+    CreateCustom: function () {
+      let par = { name: this.formData.name, type: 1 };
+      createShipping(par).then((res) => {
+        console.log(res);
+      });
+      this.showAddCustom = false;
+    },
+    EditLogistics: function (type, id) {
       this.$router.push({
         path: "/commonLogistics",
         query: {
-          status: "1",
+          status: type,
+          id: id,
         },
       });
     },

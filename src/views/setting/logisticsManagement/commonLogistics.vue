@@ -14,7 +14,7 @@
       <span>物流管理</span>
     </router-link>
     <h1 class="title">
-      <span> 通用物流 </span>
+      <span> {{ status == 0 ? "通用物流" : "自定义物流" }} </span>
     </h1>
     <div>
       <el-row>
@@ -64,40 +64,51 @@
           </div>
           <div class="logistics-programme">
             <p class="logistics-programme-title">物流方案</p>
-            <span class="fr textBtn no-pd">添加物流方案</span>
+            <span class="fr textBtn no-pd" @click="AddPlan">添加物流方案</span>
           </div>
-          <div
-            class="box list p0"
-            v-for="(item, index) in logisticsPlan"
-            :key="index"
-          >
-            <h3 class="title ptrl-20">
-              全球
-              <span class="option" style="margin-left: 10px">删除</span>
-              <span class="option" @click="EditPlan">编辑</span>
-            </h3>
-            <p class="desc">{{ item.countries_list }}</p>
-            <table class="express-list">
-              <tr v-for="(plan, index) in item.expresses" :key="index">
-                <td>
-                  <p>{{ plan.title }}</p>
-                  <p>
-                    <template v-if="plan.type == 1">
-                      下单金额：${{ plan.minUnit }}
-                      {{ plan.maxUnit ? "- $" + plan.maxUnit : "and up" }}
-                    </template>
-                    <template v-else>
-                      下单重量：{{ plan.minUnit }}g
-                      {{ plan.maxUnit ? "- " + plan.maxUnit + "g" : "and up" }}
-                    </template>
-                  </p>
-                </td>
-                <td>
-                  {{ Boolean(plan.isFree) ? "免运费" : "$" + plan.price}}
-                </td>
-              </tr>
-            </table>
-          </div>
+          <template v-if="logisticsList && logisticsList.length > 0">
+            <div
+              class="box list p0"
+              v-for="(item, index) in logisticsPlan"
+              :key="index"
+            >
+              <h3 class="title ptrl-20">
+                全球
+                <span class="option" style="margin-left: 10px">删除</span>
+                <span class="option" @click="EditPlan">编辑</span>
+              </h3>
+              <p class="desc">{{ item.countries_list }}</p>
+              <table class="express-list">
+                <tr v-for="(plan, index) in item.expresses" :key="index">
+                  <td>
+                    <p>{{ plan.title }}</p>
+                    <p>
+                      <template v-if="plan.type == 1">
+                        下单金额：${{ plan.minUnit }}
+                        {{ plan.maxUnit ? "- $" + plan.maxUnit : "and up" }}
+                      </template>
+                      <template v-else>
+                        下单重量：{{ plan.minUnit }}g
+                        {{
+                          plan.maxUnit ? "- " + plan.maxUnit + "g" : "and up"
+                        }}
+                      </template>
+                    </p>
+                  </td>
+                  <td>
+                    {{ Boolean(plan.isFree) ? "免运费" : "$" + plan.price }}
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </template>
+          <template v-else>
+            <div class="box p0">
+              <div class="no-content">
+                没有物流方案，请点击“添加物流方案”按钮来为特定的商品设置物流地区与价格
+              </div>
+            </div>
+          </template>
         </el-col>
         <el-col :span="8">
           <div class="box-right">
@@ -116,10 +127,12 @@
 </template> 
 <script>
 import { get } from "@/api/yxStoreProduct";
+import { getPlanDetail } from "@/api/logistics";
 export default {
   data() {
     return {
       status: 1,
+      id: 0,
       requestParams: {
         page: 0,
         size: 6,
@@ -162,11 +175,22 @@ export default {
     };
   },
   created() {
-    
-    get(this.requestParams).then((res) => {
+    this.status = this.$route.query.status;
+    this.id = this.$route.query.id;
+    //判断物流类型   0为通用物流  1为自定义物流
+    if (this.$route.query.status == 0) {
+      // 获取除自定义商品外的商品
+      get(this.requestParams).then((res) => {
+        this.commodityList = res.content;
+        this.total = res.totalElements;
+      });
+    } else {
+      // 获取自定义物流商品
+    }
+    // 获取物流方案
+    getPlanDetail(this.$route.query.id).then((res) => {
       console.log(res);
-      this.commodityList = res.content;
-      this.total = res.totalElements;
+      this.logisticsPlan = res.freeInfo;
     });
   },
   methods: {
@@ -177,9 +201,16 @@ export default {
       this.getData();
     },
     // 编辑当前物流
-    EditPlan:function(){
-
-    },
+    EditPlan: function () {},
+    // 新增物流方案
+    AddPlan:function(){
+      this.$router.push({
+        path:'/settingLogistics',
+        query:{
+          id:this.id
+        }
+      })
+    }
   },
 };
 </script>
@@ -318,13 +349,21 @@ h1 {
       }
     }
     &:last-child {
-          padding-right: 20px;
+      padding-right: 20px;
       text-align: right;
       color: rgb(30, 35, 57);
       font-size: 14px;
       line-height: 20px;
     }
   }
+}
+.no-content {
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  color: #c4c7cd;
 }
 .box {
   margin-bottom: 20px;

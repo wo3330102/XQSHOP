@@ -7,6 +7,21 @@ export function getCitys() {
   })
 }
 
+export function createShipping(data){
+  return request({
+    url:'api/yxShippingTemplates/createShipping',
+    method:'post',
+    data
+  })
+}
+
+export function getPlanDetail(id){
+  return request({
+    url:'api/yxShippingTemplates/getShippingSet/'+id,
+    method:'get', 
+  })
+} 
+
 export function save(data){
   return request({
     url:'api/yxShippingTemplates/save',

@@ -17,6 +17,7 @@
     "tinymce": "^5.0.3",
     "vue-echarts": "^5.0.0-beta.0",
     "vue-infinite-scroll": "^2.0.2",
+    "vue-qr": "^2.3.0",
     "vue-video-player": "^5.0.2",
     "webpack-bundle-analyzer": "^3.8.0"
   },
