@@ -69,23 +69,23 @@
           <template v-if="logisticsList && logisticsList.length > 0">
             <div
               class="box list p0"
-              v-for="(item, index) in logisticsPlan"
+              v-for="(item, index) in logisticsList"
               :key="index"
             >
               <h3 class="title ptrl-20">
-                全球
+                {{item.shippingName}}
                 <span class="option" style="margin-left: 10px">删除</span>
                 <span class="option" @click="EditPlan">编辑</span>
               </h3>
               <p class="desc">{{ item.countries_list }}</p>
               <table class="express-list">
-                <tr v-for="(plan, index) in item.expresses" :key="index">
+                <tr v-for="(plan, index) in item.freeInfo" :key="index">
                   <td>
                     <p>{{ plan.title }}</p>
                     <p>
                       <template v-if="plan.type == 1">
-                        下单金额：${{ plan.minUnit }}
-                        {{ plan.maxUnit ? "- $" + plan.maxUnit : "and up" }}
+                        下单金额：${{ plan.minUnit?$IsNaN(plan.minUnit):'0.00' }}
+                        {{ plan.maxUnit ? "- $" + $IsNaN(plan.maxUnit) : "and up" }}
                       </template>
                       <template v-else>
                         下单重量：{{ plan.minUnit }}g
@@ -95,8 +95,8 @@
                       </template>
                     </p>
                   </td>
-                  <td>
-                    {{ Boolean(plan.isFree) ? "免运费" : "$" + plan.price }}
+                  <td> 
+                    {{ Boolean(plan.isFree) ? "免运费" : "$" + $IsNaN(plan.price) }}
                   </td>
                 </tr>
               </table>
@@ -109,6 +109,7 @@
               </div>
             </div>
           </template>
+
         </el-col>
         <el-col :span="8">
           <div class="box-right">
@@ -122,12 +123,15 @@
           </div>
         </el-col>
       </el-row>
+      <div class="pageSaveBtn">
+        <el-button>取消</el-button>
+        <el-button type="primary" @click="Save">保存</el-button>
+      </div>
     </div>
   </div>
 </template> 
-<script>
-import { get } from "@/api/yxStoreProduct";
-import { getPlanDetail } from "@/api/logistics";
+<script> 
+import { getPlanDetail, getCommodity, getPlanList } from "@/api/logistics";
 export default {
   data() {
     return {
@@ -136,11 +140,12 @@ export default {
       requestParams: {
         page: 0,
         size: 6,
+        tempId:0,
       },
       total: 0,
       currentPage: 1,
       commodityList: [],
-      logisticsPlan: [
+      logisticsList: [
         {
           title: "全球",
           countries_list: "全球",
@@ -175,12 +180,13 @@ export default {
     };
   },
   created() {
+    this.requestParams.tempId = this.$route.query.id,
     this.status = this.$route.query.status;
     this.id = this.$route.query.id;
     //判断物流类型   0为通用物流  1为自定义物流
     if (this.$route.query.status == 0) {
       // 获取除自定义商品外的商品
-      get(this.requestParams).then((res) => {
+      getCommodity(this.requestParams).then((res) => {
         this.commodityList = res.content;
         this.total = res.totalElements;
       });
@@ -188,9 +194,21 @@ export default {
       // 获取自定义物流商品
     }
     // 获取物流方案
+    let par = {
+      tempId:this.$route.query.id
+    }
     getPlanDetail(this.$route.query.id).then((res) => {
-      console.log(res);
-      this.logisticsPlan = res.freeInfo;
+      console.log(res);  
+      res.map(item=>{
+        let arr = [];
+        item.regionInfos.map(val=>{
+          val.countriess.map(v=>{
+            arr.push(v.name)
+          })
+        })
+        item.countries_list = arr.toString()
+      }) 
+      this.logisticsList = res;
     });
   },
   methods: {
@@ -207,7 +225,7 @@ export default {
       this.$router.push({
         path:'/settingLogistics',
         query:{
-          id:this.id
+          tempId:this.id, 
         }
       })
     }
@@ -415,11 +433,7 @@ h1 {
   text-align: right;
   font-size: 0;
   margin-bottom: 40px;
-}
-.search-conditions {
-  display: flex;
-  justify-content: space-between;
-}
+} 
 .p0 {
   padding: 0 !important;
 }

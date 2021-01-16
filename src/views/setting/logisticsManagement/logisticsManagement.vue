@@ -18,9 +18,9 @@
     </h1>
     <div>
       <el-row>
-        <el-col :span="16" class="logistics-container">
+        <el-col :span="16" class="logistics-container" v-loading="loading">
           <!-- 活动名称 currencyPlan.length == 0 && logisticsList.length == 0-->
-          <div class="box" v-if="false">
+          <div class="box" v-if="currencyPlan.length == 0 && logisticsList.length == 0">
             <h3 class="title">物流配送方案</h3>
             <div class="content" style="text-align: center">
               <template v-if="logisticsList == 0">
@@ -85,7 +85,7 @@
                     <p>
                       {{ item.name }}
                       <span class="product-num"></span>
-                      <span class="option textBtn not-pd">编辑</span>
+                      <span class="option textBtn not-pd" @click="EditLogistics(1, item.id)">编辑</span>
                     </p>
                   </div>
                   <div class="logistics-box-content">
@@ -131,7 +131,7 @@
       </el-form>
       <div slot="footer">
         <el-button @click="showAddCustom = false">取消</el-button>
-        <el-button @click="CreateCustom">取消</el-button>
+        <el-button @click="CreateCustom" type="primary">确定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -147,6 +147,7 @@ export default {
       currencyPlan: [],
       logisticsList: [],
       showAddCustom: false,
+      loading:true,
     };
   },
   created() {
@@ -162,6 +163,10 @@ export default {
           this.logisticsList.push(v);
         }
       });
+      let that = this;
+      setTimeout(function(){
+        that.loading = false
+      },200)
     });
   },
   methods: {
@@ -178,6 +183,7 @@ export default {
       let par = { name: this.formData.name, type: 1 };
       createShipping(par).then((res) => {
         console.log(res);
+        this.logisticsList.push(res)
       });
       this.showAddCustom = false;
     },

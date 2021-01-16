@@ -845,18 +845,18 @@ export default {
       console.log(that.batchValue);
       let item = this.selectItem;
       let table = this.table;
-      // 1 删除; 2 修改价格; 3 修改原价; 4 修改库存; 5 修改重量
+      // 1 删除; 2 修改价格; 3 修改原价; 4 修改图片; 5 修改库存; 6 修改重量
       switch (this.optionIndex + 1) {
         case 2:
           ChangeTable("price");
           break;
         case 3:
           ChangeTable("ot_price");
-          break;
-        case 4:
+          break; 
+        case 5:
           ChangeTable("stock");
           break;
-        case 5:
+        case 6:
           ChangeTable("weight");
           break;
       }
@@ -865,7 +865,7 @@ export default {
         item.map((i) => {
           table.map((item, inx) => {
             if (item.index == i.index) {
-              item[e] = that.batchValue;
+              item[e] = e == 'stock'?that.batchValue:that.$IsNaN(that.batchValue);
             }
           });
         });

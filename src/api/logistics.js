@@ -7,6 +7,14 @@ export function getCitys() {
   })
 }
 
+export function getCommodity(params){
+  return request({
+    url: 'api/yxShippingTemplates/templatessProductList',
+    method: 'get',
+    params
+  }) 
+}
+
 export function createShipping(data){
   return request({
     url:'api/yxShippingTemplates/createShipping',
@@ -14,6 +22,14 @@ export function createShipping(data){
     data
   })
 }
+
+export function getPlanList(params){
+  return request({
+    url:'api/yxShippingTemplates/getYxShippingTemplatess',
+    method:'get', 
+    params
+  })
+} 
 
 export function getPlanDetail(id){
   return request({

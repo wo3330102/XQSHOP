@@ -19,6 +19,5 @@ module.exports = {
             vuex: "Vuex",
             axios: 'axios',
         }
-    }
-
+    } 
 }

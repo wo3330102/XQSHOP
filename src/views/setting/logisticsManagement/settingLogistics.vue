@@ -1,7 +1,13 @@
 <template>
   <div class="container">
     <router-link
-      to="/logisticsManagement"
+      :to="{
+        path:'/commonLogistics',
+        query:{
+          status:status,
+          id:tempId, 
+        }
+      }"
       style="
         color: #5e7185;
         margin-bottom: 12px;
@@ -113,7 +119,7 @@
                       v-for="(item, index) in moneyOflogisticsList"
                       :key="index"
                     >
-                      <td>{{ item.title }}</td>
+                      <td>{{ item.name }}</td>
                       <td>
                         ${{ item.minUnit }}
                         {{
@@ -170,11 +176,13 @@
                       v-for="(item, index) in weightOflogisticsList"
                       :key="index"
                     >
-                      <td>{{ item.title }}</td>
+                      <td>{{ item.name }}</td>
                       <td>
                         ${{ item.minUnit }}
                         {{
-                          item.maxUnitl == "" ? "and up" : "- " + item.maxUnitl
+                          Number(item.maxUnitl) === 0
+                            ? "and up"
+                            : "- " + item.maxUnitl
                         }}
                       </td>
                       <td>
@@ -292,7 +300,7 @@
                     >
                       <el-checkbox
                         v-for="city in v.children"
-                        :label="city.id"
+                        :label="city.city_id"
                         :key="city.id"
                         style="
                           padding: 8px 0px;
@@ -357,10 +365,10 @@
                     : "客户在结账选择物流方式时，将会看到这个名称"
                 }})</span
               >
-              <span style="float: right">{{ form.title.length }}/100</span>
+              <span style="float: right">{{ form.name.length }}/100</span>
             </h4>
             <el-autocomplete
-              v-model="form.title"
+              v-model="form.name"
               :fetch-suggestions="QuerySearch"
               placeholder="Standard shipping"
               maxlength="100"
@@ -374,7 +382,7 @@
                 <el-input
                   style="flex: 1"
                   placeholder="0.00"
-                  v-model="form.minUnit" 
+                  v-model="form.minUnit"
                   @blur="form.minUnit = $IsNaN(form.minUnit)"
                 >
                   <template slot="prepend"
@@ -421,7 +429,7 @@
               v-model="form.price"
               placeholder="请输入物流费用"
               maxlength="100"
-               @blur="form.price = $IsNaN(form.price)"
+              @blur="form.price = $IsNaN(form.price)"
             >
               <template slot="prefix">$</template>
             </el-input>
@@ -442,7 +450,8 @@ import { getCitys, save, createShipping } from "@/api/logistics";
 export default {
   data() {
     return {
-      id:0,
+      id: "", // 物流方案的Id (可以为空)
+      tempId: 0, // 物流模板Id  （最外层的Id）
       logisticsName: "",
       selectContryList: [], // 选中的国家/地区
       moneyOflogisticsList: [], // 物流根据金额设置运费列表
@@ -457,18 +466,23 @@ export default {
       showLogisticsPlan: false, // 是否显示物流方案对话框
       logisticsPlanType: 1, // 物流方案类型  1为订单金额  2为商品重量
       form: {
-        title: "",
-        minUnit: 0,
-        maxUnitl: 0,
-        price: 0,
-        isFree: 0,
+        name: "",
+        minUnit: "",
+        maxUnitl: "",
+        price: "",
+        isFree: "",
         type: 1,
+        name: "",
       },
       isShowAll: false,
     };
   },
   created() {
-    this.id = this.$route.query.id
+    // 判断是否为新增
+    if (this.$route.query.id) {
+      this.id = this.$route.query.id;
+    }
+    this.tempId = this.$route.query.tempId;
     getCitys().then((res) => {
       res.map((item) => {
         item.childrenList = [];
@@ -493,7 +507,7 @@ export default {
           // 判断是否存在城市
           if (item.children && item.children.length > 0) {
             item.children.map((v) => {
-              item.childrenList.push(v.id);
+              item.childrenList.push(v.city_id);
             });
           }
         });
@@ -504,6 +518,7 @@ export default {
           // 判断是否存在城市
           item.childrenList = [];
         });
+        plate.childrenList = [];
       }
     },
     // 国家全选(点击国家前面的多选框)
@@ -521,7 +536,7 @@ export default {
           : (plate.isCheck = false);
         if (country.children) {
           country.children.map((v) => {
-            country.childrenList.push(v.id);
+            country.childrenList.push(v.city_id);
           });
         }
         country.isCheck = true;
@@ -552,7 +567,6 @@ export default {
       } else {
         // 未选择城市
         plate.childrenList.splice(plate.childrenList.indexOf(country), 1);
-        console.log(plate.childrenList);
         if (plate.childrenList.length == 0) {
           plate.isCheck = false;
         } else {
@@ -620,7 +634,7 @@ export default {
         }
       }
       this.form = {
-        title: "",
+        name: "",
         minUnit: "",
         maxUnitl: "",
         price: "",
@@ -631,23 +645,35 @@ export default {
     },
     // 保存物流方案
     Save: function () {
+      if (this.logisticsName == "") {
+        this.$message.warning("请输入物流运输区域名称！");
+        return false;
+      }
       let freeInfo = this.moneyOflogisticsList.concat(
         this.weightOflogisticsList
       );
+      if (this.selectContryList == 0) {
+        this.$message.warning("配送国家/地区至少有一项！");
+        return false;
+      }
+      if (freeInfo.length == 0) {
+        this.$message.warning("至少设置一项物流方案选择条件!");
+        return false;
+      }
       let arr = [];
       this.countryList.map((item) => {
-        // 判断当前大洲下是否有选择数据
+        // item为各大洲   判断当前大洲下是否有选择数据
         if (item.childrenList.length > 0) {
           let arr1 = [];
-          console.log(1);
           item.childrenList.map((country) => {
-            // 判断当前国家下是否有城市选择
             let arr2 = [],
               obj = {};
+            // country为各个国家  判断当前国家下是否有城市选择
             if (country.childrenList.length > 0) {
               country.childrenList.map((city) => {
+                // city为选中的城市的city_id;
                 country.children.map((val) => {
-                  if (val.id == city) {
+                  if (val.city_id == city) {
                     arr2.push({
                       city_id: val.city_id,
                       provincesName: val.name,
@@ -676,18 +702,22 @@ export default {
           });
         }
       });
+
+      let data = {
+        freeInfo: freeInfo,
+        shippingName: this.logisticsName,
+        regionInfo: arr,
+        tempId: this.tempId,
+      };
       // 判断是否为第一次创建通用物流
       if (this.$route.query.init) {
         createShipping({ name: "通用", type: 0 }).then((res) => {
           console.log(res);
         });
       } else {
-        let data = {
-          freeInfo: freeInfo,
-          id: Number(this.$route.query.id),
-          shippingName: this.logisticsName,
-          regionInfo: arr,
-        };
+        if (this.id) {
+          data.id = this.id;
+        }
         save(data).then((res) => {
           console.log(res);
         });
@@ -714,12 +744,6 @@ export default {
               .indexOf(queryString.toLowerCase()) === 0
           );
         };
-      }
-    },
-    // 保留两位小数
-    DiscountPrice: function (el) {
-      if (this.form[el]) {
-        this.form[el] = this.$toDecimal2(this.form[el]);
       }
     },
   },
