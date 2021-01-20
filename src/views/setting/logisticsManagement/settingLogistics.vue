@@ -2,11 +2,11 @@
   <div class="container">
     <router-link
       :to="{
-        path:'/commonLogistics',
-        query:{
-          status:status,
-          id:tempId, 
-        }
+        path: '/commonLogistics',
+        query: {
+          status: status,
+          id: tempId,
+        },
       }"
       style="
         color: #5e7185;
@@ -89,16 +89,7 @@
           <div class="box p0">
             <h3 class="title express-title">
               基于订单金额设置物流
-              <span
-                class="option"
-                @click="
-                  () => {
-                    form.type = 1;
-                    showLogisticsPlan = true;
-                  }
-                "
-                >添加条件</span
-              >
+              <span class="option" @click="AddPlan(1)">添加条件</span>
             </h3>
             <div class="desc">
               <p class="desc p20" v-if="moneyOflogisticsList.length == 0">
@@ -123,7 +114,9 @@
                       <td>
                         ${{ item.minUnit }}
                         {{
-                          item.maxUnitl == "" ? "and up" : "- " + item.maxUnitl
+                          Number(item.maxUnit) == 0 || !item.maxUnit
+                            ? "and up"
+                            : "- " + $IsNaN(item.maxUnit)
                         }}
                       </td>
                       <td>
@@ -133,8 +126,12 @@
                         <span
                           class="el-icon-edit-outline"
                           style="margin-right: 14px"
+                          @click="EditPlan(item, index)"
                         ></span>
-                        <span class="el-icon-delete"></span>
+                        <span
+                          class="el-icon-delete"
+                          @click="moneyOflogisticsList.splice(index, 1)"
+                        ></span>
                       </td>
                     </tr>
                   </tbody>
@@ -146,16 +143,7 @@
           <div class="box p0">
             <h3 class="title express-title">
               基于商品重量设置物流
-              <span
-                class="option"
-                @click="
-                  () => {
-                    logisticsPlanType = 2;
-                    showLogisticsPlan = true;
-                  }
-                "
-                >添加条件</span
-              >
+              <span class="option" @click="AddPlan(2)">添加条件</span>
             </h3>
             <div class="desc">
               <p class="desc p20" v-if="weightOflogisticsList.length == 0">
@@ -180,9 +168,9 @@
                       <td>
                         ${{ item.minUnit }}
                         {{
-                          Number(item.maxUnitl) === 0
+                          Number(item.maxUnit) == 0 || !item.maxUnit
                             ? "and up"
-                            : "- " + item.maxUnitl
+                            : "- " + $IsNaN(item.maxUnit)
                         }}
                       </td>
                       <td>
@@ -192,8 +180,12 @@
                         <span
                           class="el-icon-edit-outline"
                           style="margin-right: 14px"
+                          @click="EditPlan(item, index)"
                         ></span>
-                        <span class="el-icon-delete"></span>
+                        <span
+                          class="el-icon-delete"
+                          @click="weightOflogisticsList.splice(index, 1)"
+                        ></span>
                       </td>
                     </tr>
                   </tbody>
@@ -203,7 +195,7 @@
           </div>
         </el-col>
         <el-col :span="8">
-          <div class="box">
+          <div class="box-right">
             <p class="infoTip">温馨提示</p>
             <p class="infoContent">
               1.设置店铺可支持的物流配送地区，以及在订单结账页中，提供可供客户选择的物流配送方案。
@@ -215,7 +207,7 @@
         </el-col>
       </el-row>
       <div class="pageSaveBtn">
-        <el-button>取消</el-button>
+        <el-button @click="Cancal">取消</el-button>
         <el-button type="primary" @click="Save">保存</el-button>
       </div>
       <el-dialog
@@ -354,8 +346,15 @@
         :close-on-click-modal="false"
         :close-on-press-escape="false"
       >
-        <el-form :model="form" class="form">
-          <el-form-item>
+        <el-form :model="form" :rules="rule" ref="form" class="form">
+          <el-form-item
+            :rules="{
+              required: true,
+              message: '请输入物流选项名称',
+              trigger: ['change', 'bulr'],
+            }"
+            prop="name"
+          >
             <h4>
               物流选项名称
               <span
@@ -376,9 +375,19 @@
             ></el-autocomplete>
           </el-form-item>
           <div style="margin-top: -10px">
-            <h4>订单金额范围</h4>
+            <h4>订单{{ logisticsPlanType == 1 ? "金额" : "重量" }}范围</h4>
             <div style="display: flex; justify-content: space-between">
-              <el-form-item>
+              <el-form-item
+                :rules="{
+                  required: true,
+                  message:
+                    logisticsPlanType == 1
+                      ? '请填写最小金额'
+                      : '请填写最小重量',
+                  trigger: ['change', 'bulr'],
+                }"
+                prop="minUnit"
+              >
                 <el-input
                   style="flex: 1"
                   placeholder="0.00"
@@ -396,12 +405,12 @@
                   <template v-else slot="suffix">g</template>
                 </el-input>
               </el-form-item>
-              <el-form-item>
+              <el-form-item prop="maxUnit">
                 <el-input
                   style="flex: 1"
                   placeholder="不限制"
-                  v-model="form.maxUnitl"
-                  @blur="form.maxUnitl = $IsNaN(form.maxUnitl)"
+                  v-model="form.maxUnit"
+                  @blur="form.maxUnit = $IsNaN(form.maxUnit)"
                 >
                   <template slot="prepend"
                     >最高{{
@@ -449,9 +458,21 @@
 import { getCitys, save, createShipping } from "@/api/logistics";
 export default {
   data() {
+    var checkmaxUnit = (rule, value, callback) => {
+      if (value && value < this.form.minUnit) {
+        callback(
+          new Error(
+            "不得小于" + (this.logisticsPlanType == 1 ? "金额" : "重量")
+          )
+        );
+      } else {
+        callback();
+      }
+    };
     return {
       id: "", // 物流方案的Id (可以为空)
       tempId: 0, // 物流模板Id  （最外层的Id）
+      type: 0, // 判断当前是否为新增还是修改  0为新增，1为修改
       logisticsName: "",
       selectContryList: [], // 选中的国家/地区
       moneyOflogisticsList: [], // 物流根据金额设置运费列表
@@ -468,32 +489,119 @@ export default {
       form: {
         name: "",
         minUnit: "",
-        maxUnitl: "",
+        maxUnit: "",
         price: "",
         isFree: "",
         type: 1,
         name: "",
       },
+      rule: {
+        maxUnit: [{ validator: checkmaxUnit, trigger: "blur" }],
+      },
       isShowAll: false,
+      editLogisticsPlan: false, // 是否为编辑物流方案  true为修改，false为新增
+      editLogisticsPlanIndex: 0, // 编辑的物流方案索引
     };
   },
   created() {
     // 判断是否为新增
     if (this.$route.query.id) {
+      console.log(id);
       this.id = this.$route.query.id;
     }
     this.tempId = this.$route.query.tempId;
+    this.status = this.$route.query.status;
+    this.type = this.$route.query.type ? this.$route.query.type : 0;
+    let detail = JSON.parse(localStorage.getItem("logisticsPlan"));
+    this.logisticsName = detail.shippingName;
+    // 获取国家列表
     getCitys().then((res) => {
-      res.map((item) => {
-        item.childrenList = [];
-        item.isCheck = false;
-        item.contries.map((v) => {
-          v.childrenList = [];
-          v.isCheck = false;
+      if (this.type == 0) {
+        res.map((item) => {
+          item.childrenList = [];
+          item.isCheck = false;
+          item.contries.map((v) => {
+            v.childrenList = [];
+            v.isCheck = false;
+          });
         });
-      });
+      } else {
+        detail.regionInfos.map((minItem) => {
+          res.map((maxItem) => {
+            // minItem 为当前物流详情的大洲
+            // maxItem 为城市数据中的大洲
+            maxItem.childrenList = [];
+            maxItem.isCheck = false;
+            if (minItem.city_id == maxItem.cityId) {
+              // 判断当前详情里面有没有国家（有则遍历，无则代表全部）
+              if (minItem.countriess && minItem.countriess.length > 0) {
+                maxItem.isCheck = false;
+                minItem.countriess.map((minCountry) => {
+                  maxItem.contries.map((maxCountry) => {
+                    if (minCountry.city_id == maxCountry.city_id) {
+                      // 如果有城市列表，则继续赋值
+                      if (minCountry.provincess) {
+                        maxCountry.isCheck = false;
+                        maxCountry.childrenList = minCountry.provincess.map(
+                          (v) => {
+                            return Number(v.city_id);
+                          }
+                        );
+                        console.log(maxCountry);
+                      } else {
+                        // 没有则代表全选
+                        maxCountry.isCheck = true;
+                        maxCountry.childrenList = maxCountry.children.map(
+                          (v) => {
+                            return v.city_id;
+                          }
+                        );
+                      }
+                      this.selectContryList.push(maxCountry);
+                      maxItem.childrenList.push(maxCountry);
+                    }
+                  });
+                });
+              } else {
+                // 没有国家（当前大洲全选）
+                maxItem.isCheck = true;
+                let arr = [];
+                maxItem.childrenList = maxItem.contries.map((val) => {
+                  val.isCheck = true;
+                  val.childrenList = val.children.map((v) => {
+                    return v.city_id;
+                  });
+                  arr.push(val);
+                });
+                console.log(maxItem.childrenList);
+                this.selectContryList = arr;
+              }
+              console.log(maxItem);
+              // maxItem.childrenList.push(maxItem)
+            }
+            maxItem.childrenList.length == maxItem.contries.length
+              ? (maxItem.isCheck = true)
+              : (maxItem.isCheck = false);
+          });
+        });
+      }
+      console.log(res);
       this.countryList = res;
     });
+    // 判断当前是否为修改
+    if (this.type == 1) {
+      // 初始化物流条件
+      detail.freeInfo.map((item) => {
+        item.maxUnit = item.maxUnit ? this.$IsNaN(item.maxUnit) : "0";
+        item.minUnit = this.$IsNaN(item.minUnit);
+        item.price = this.$IsNaN(item.price);
+        if (item.type == 1) {
+          this.moneyOflogisticsList.push(item);
+        } else {
+          this.weightOflogisticsList.push(item);
+        }
+      });
+    }
   },
   methods: {
     // 区域全选（全选亚洲，非洲等国家）
@@ -502,6 +610,7 @@ export default {
       plate.isCheck = e;
       if (e) {
         // 遍历洲下的国家
+        plate.childrenList = [];
         plate.contries.map((item) => {
           item.isCheck = e;
           // 判断是否存在城市
@@ -541,7 +650,6 @@ export default {
         }
         country.isCheck = true;
       } else {
-        console.log(plate);
         plate.childrenList.splice(plate.childrenList.indexOf(country), 1);
         plate.isCheck = false;
         country.childrenList = [];
@@ -554,12 +662,13 @@ export default {
       // 判断是否存在选择的城市
       if (e.length > 0) {
         // 判断当前国家是否被大洲选中（未选中则添加，已有则更新）
+        console.log(country);
+        console.log(plate.childrenList);
         if (plate.childrenList.indexOf(country) == -1) {
           plate.childrenList.push(country);
         } else {
           plate.childrenList[plate.childrenList.indexOf(country)] = country;
         }
-
         // 判断所选国家下的城市是否全选
         e.length == country.children.length
           ? (country.isCheck = true)
@@ -620,28 +729,68 @@ export default {
       });
       this.selectContryList.splice(index, 1);
     },
-    // 关闭物流方案对话框
-    CloseLogisticsPlan: function (e) {
-      if (e == "pass") {
-        this.form.isFree = this.form.price == 0 ? 1 : 0;
-        if (this.logisticsPlanType == 1) {
-          this.form.type = 1;
-          this.moneyOflogisticsList.push({ ...this.form });
-        } else {
-          this.form.type = 2;
-          this.weightOflogisticsList.push({ ...this.form });
-          console.log(this.weightOflogisticsList);
-        }
-      }
+    // 编辑物流方案
+    EditPlan: function (item, index) {
+      this.form = { ...item };
+      this.editLogisticsPlan = true;
+      this.editLogisticsPlanIndex = index;
+      this.showLogisticsPlan = true;
+    },
+    // 显示物流对话框
+    AddPlan: function (e) {
+      // 重新赋值是为了解决第一次显示对话框为修改时之后的重置表单问题
       this.form = {
         name: "",
         minUnit: "",
-        maxUnitl: "",
+        maxUnit: "",
         price: "",
-        isFree: 0,
-        type: 1,
+        isFree: "",
+        type: e,
+        name: "",
       };
-      this.showLogisticsPlan = false;
+      if (this.$refs["form"]) {
+        this.$refs["form"].resetFields();
+      }
+      this.form.type = e;
+      this.logisticsPlanType = e;
+      this.editLogisticsPlan = false;
+      this.showLogisticsPlan = true;
+    },
+    // 关闭物流方案对话框
+    CloseLogisticsPlan: function (e) {
+      if (e == "pass") {
+        this.$refs["form"].validate((valid) => {
+          if (valid) {
+            console.log({ ...this.form });
+            this.form.isFree = Number(this.form.price) == 0 ? 1 : 0;
+            if (this.logisticsPlanType == 1) {
+              this.form.type = 1;
+              if (this.editLogisticsPlan) {
+                this.moneyOflogisticsList[this.editLogisticsPlanIndex] = {
+                  ...this.form,
+                };
+              } else {
+                this.moneyOflogisticsList.push({ ...this.form });
+              }
+            } else {
+              this.form.type = 2;
+              if (this.editLogisticsPlan) {
+                this.weightOflogisticsList[this.editLogisticsPlanIndex] = {
+                  ...this.form,
+                };
+              } else {
+                this.weightOflogisticsList.push({ ...this.form });
+              }
+            }
+            this.$refs["form"].resetFields();
+            this.showLogisticsPlan = false;
+          } else {
+            return false;
+          }
+        });
+      } else {
+        this.showLogisticsPlan = false;
+      }
     },
     // 保存物流方案
     Save: function () {
@@ -663,13 +812,28 @@ export default {
       let arr = [];
       this.countryList.map((item) => {
         // item为各大洲   判断当前大洲下是否有选择数据
-        if (item.childrenList.length > 0) {
+        if (
+          (item.isCheck && item.childrenList.length == 0) ||
+          item.childrenList.length == item.contries.length
+        ) {
+          arr.push({
+            city_id: item.cityId,
+            countriess: [],
+            regionPlate: item.name,
+          });
+        } else if (item.childrenList.length > 0) {
           let arr1 = [];
           item.childrenList.map((country) => {
             let arr2 = [],
               obj = {};
             // country为各个国家  判断当前国家下是否有城市选择
-            if (country.childrenList.length > 0) {
+            if (country.isCheck && country.childrenList.length == 0) {
+              obj = {
+                provincess: [],
+                city_id: country.city_id,
+                name: country.name,
+              };
+            } else if (country.childrenList.length > 0) {
               country.childrenList.map((city) => {
                 // city为选中的城市的city_id;
                 country.children.map((val) => {
@@ -686,12 +850,6 @@ export default {
                 city_id: country.city_id,
                 name: country.name,
               };
-            } else if (country.isCheck) {
-              obj = {
-                provincess: [],
-                city_id: country.city_id,
-                name: country.name,
-              };
             }
             arr1.push(obj);
           });
@@ -702,7 +860,6 @@ export default {
           });
         }
       });
-
       let data = {
         freeInfo: freeInfo,
         shippingName: this.logisticsName,
@@ -712,16 +869,37 @@ export default {
       // 判断是否为第一次创建通用物流
       if (this.$route.query.init) {
         createShipping({ name: "通用", type: 0 }).then((res) => {
-          console.log(res);
+          data.id = 0;
+          data.tempId = res.id;
+          save(data).then((res) => {
+            this.$message.success("添加成功");
+            this.$router.push('/logisticsManagement')
+          });
         });
       } else {
         if (this.id) {
           data.id = this.id;
         }
         save(data).then((res) => {
-          console.log(res);
+          this.$message.success("添加成功");
+          this.$router.push({
+            path: "/commonLogistics",
+            query: {
+              status: this.status,
+              id: this.tempId,
+            },
+          });
         });
       }
+    },
+    Cancal: function () {
+      this.$router.push({
+        path: "/commonLogistics",
+        query: {
+          status: this.status,
+          id: this.tempId,
+        },
+      });
     },
     // 设置辅助输入列表(用法参照elementUI)
     QuerySearch: function (queryString, cb) {
@@ -1004,6 +1182,26 @@ h1 {
   text-align: right;
   font-size: 0;
   margin-bottom: 40px;
+}
+.box-right {
+  margin-bottom: 20px;
+  padding: 12px;
+  box-sizing: border-box;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px 0 rgba(35, 35, 112, 0.2),
+    0 0 0 1px rgba(67, 67, 145, 0.05);
+  overflow: hidden;
+  & > .infoTip {
+    color: #1a1d2c;
+    font-size: 14px;
+    padding-bottom: 14px;
+  }
+  .infoContent {
+    line-height: 18px;
+    font-size: 12px;
+    color: #606266;
+  }
 }
 </style>  
 <style>

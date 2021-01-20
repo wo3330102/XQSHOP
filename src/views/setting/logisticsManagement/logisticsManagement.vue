@@ -20,7 +20,10 @@
       <el-row>
         <el-col :span="16" class="logistics-container" v-loading="loading">
           <!-- 活动名称 currencyPlan.length == 0 && logisticsList.length == 0-->
-          <div class="box" v-if="currencyPlan.length == 0 && logisticsList.length == 0">
+          <div
+            class="box"
+            v-if="currencyPlan.length == 0 && logisticsList.length == 0"
+          >
             <h3 class="title">物流配送方案</h3>
             <div class="content" style="text-align: center">
               <template v-if="logisticsList == 0">
@@ -53,7 +56,7 @@
                     >
                     <span
                       class="option textBtn not-pd"
-                      @click="EditLogistics(0, item.id)"
+                      @click="EditLogistics(0, item)"
                       >编辑</span
                     >
                   </p>
@@ -85,7 +88,13 @@
                     <p>
                       {{ item.name }}
                       <span class="product-num"></span>
-                      <span class="option textBtn not-pd" @click="EditLogistics(1, item.id)">编辑</span>
+                      <span class="option textBtn" style="margin-left: 10px;" @click="Del(item.id)">删除</span>
+                      <span
+                        class="option textBtn not-pd"
+                        @click="EditLogistics(1, item)"
+                        >编辑</span
+                      >
+                      
                     </p>
                   </div>
                   <div class="logistics-box-content">
@@ -116,11 +125,11 @@
       </el-row>
     </div>
     <el-dialog title="增加自定义物流" :visible.sync="showAddCustom">
-      <el-form :model="formData">
+      <el-form :model="formData" ref="form">
         <el-form-item
           label="名称"
           prop="name"
-          :rules="{ require: true, tagget: 'blur' }"
+          :rules="{ required: true, message: '请填写物流名称', trigger: ['blur','change'] }"
         >
           <el-input
             v-model="formData.name"
@@ -137,7 +146,7 @@
   </div>
 </template> 
 <script>
-import { getPlan, createShipping } from "@/api/logistics";
+import { getPlan, createShipping, del } from "@/api/logistics";
 export default {
   data() {
     return {
@@ -147,7 +156,7 @@ export default {
       currencyPlan: [],
       logisticsList: [],
       showAddCustom: false,
-      loading:true,
+      loading: true,
     };
   },
   created() {
@@ -164,9 +173,9 @@ export default {
         }
       });
       let that = this;
-      setTimeout(function(){
-        that.loading = false
-      },200)
+      setTimeout(function () {
+        that.loading = false;
+      }, 200);
     });
   },
   methods: {
@@ -180,22 +189,31 @@ export default {
       });
     },
     CreateCustom: function () {
-      let par = { name: this.formData.name, type: 1 };
-      createShipping(par).then((res) => {
-        console.log(res);
-        this.logisticsList.push(res)
+      this.$refs["form"].validate((valid) => {
+        if (valid) { 
+          let par = { name: this.formData.name, type: 1 };
+          createShipping(par).then((res) => { 
+            this.logisticsList.push(res);
+          });
+          this.showAddCustom = false;
+        }
       });
-      this.showAddCustom = false;
     },
-    EditLogistics: function (type, id) {
+    EditLogistics: function (type, item) {
+      localStorage.setItem('logisticsName',item.name)
       this.$router.push({
         path: "/commonLogistics",
         query: {
           status: type,
-          id: id,
+          id: item.id, 
         },
       });
     },
+    Del:function(id){ 
+      del([id]).then(res=>{
+        console.log(res);
+      })
+    }
   },
 };
 </script>
@@ -299,6 +317,17 @@ h1 {
       margin: 12px 0 28px;
     }
   }
+}
+.customer-logistics-no-content{ 
+    display: flex; 
+    flex-grow: 1;
+    border-top: 1px solid #dcdfe6;
+    margin: 0 -12px; 
+    justify-content: center; 
+    align-items: center;
+    font-size: 12px;
+    color: #c4c7cd;
+        height: 60px; 
 }
 .box-right {
   margin-bottom: 20px;

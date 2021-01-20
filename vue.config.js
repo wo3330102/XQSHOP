@@ -4,7 +4,21 @@ module.exports = {
         // 移除 prefetch 插件
         config.plugins.delete('prefetch');
         // 移除 preload 插件
-        config.plugins.delete('preload'); 
+        config.plugins.delete('preload');
+    },
+    // qxj add by 2021-1-12
+    devServer: {
+        open: true,
+        port: "8080", // 代理端口
+        proxy: {
+            "/api": {
+                target: "http://192.168.2.134:8001/admin", // 开发接口--吕外冬
+                changeOrigin: true, // 开启代理，在本地创建一个虚拟服务端
+                /* pathRewrite: {
+          "^/api": ""
+        } */
+            }
+        }
     },
     configureWebpack: config => {
         // 生产环境下生效
@@ -19,5 +33,5 @@ module.exports = {
             vuex: "Vuex",
             axios: 'axios',
         }
-    } 
+    }
 }

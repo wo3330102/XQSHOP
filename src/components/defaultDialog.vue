@@ -3,15 +3,14 @@
     <el-dialog
       :title="title"
       width="40%"
-      :visible.sync="visible"
+      :visible.sync="dialogVisible"
       :close-on-press-escape="false"
       :close-on-click-modal="false"
-      :before-close="cancel"
-      @close="cancel"
+      :before-close="handleClose"
     >
     <slot/>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="cancel">取 消</el-button>
+        <el-button @click="handleClose">取 消</el-button>
         <el-button type="primary" @click="confirm">确 定</el-button>
       </span>
     </el-dialog>
@@ -25,36 +24,32 @@ export default {
       type: String,
       default: "提示",
     },
-    show: {
+    visible: {
       type: Boolean,
       default: false,
     }
   },
   watch: {
-    // 监听show，visible 随着show变化而变化
-    show: {
-      immediate: true,
-      handler(show) {
-        this.visible = show;
-      }
-    }
+    visible(val) {
+      this.dialogVisible = val;
+    },
   },
   computed: {
      
   },
   data() {
     return {
-      visible: this.show
+      dialogVisible: false
     };
   },
   created() {
   },
   methods: {
-    cancel() {
-      this.$emit('update:show', false);  // 子组件更新弹框隐藏
+    handleClose() {
+      this.$emit('update:visible', false);
     },
     confirm() {
-      this.$emit('update:show', false);  // 子组件更新弹框隐藏
+      this.$emit("toConfirm");
     }
   },
 };

@@ -14,7 +14,7 @@ export function getShop(username, password, code, uuid) {
 
 export function getStoreTemplate() {
     return request({
-        url: 'api/yxSystemStore/yxSystemStoreTemplate',
+        url: 'api/yxSystemStoreTemplate/queryPage',
         method: 'get', 
     })
 } 

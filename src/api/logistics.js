@@ -53,3 +53,44 @@ export function getPlan(params){
     params,
   })
 }
+
+export function delPlan(data){
+  return request({
+    url:'api/yxShippingTemplates/deleteShippingPlan',
+    method:'post',
+    data,
+  }) 
+}
+
+export function del(data){ 
+  return request({
+    url:'api/yxShippingTemplates/deleteAll',
+    method:'delete',
+    data,
+  })
+}
+
+export function getCustomProduct(params){
+  return request({
+    url:'api/yxShippingTemplates/customProutList',
+    method:'get',
+    params
+  })
+}
+
+export function addCustomProduct(data){
+  return request({
+    url:'api/yxShippingTemplates/addProduct',
+    method:'post',
+    data
+  })
+}
+
+export function deleteTemplateProudct(data){
+  return request({
+    url:'api/yxShippingTemplates/deleteTemplateProudct',
+    method:'post',
+    data
+  })
+}
+

@@ -19,7 +19,8 @@
     <div>
       <el-row>
         <el-col :span="16">
-          <div class="box p0">
+          <!-- 通用物流方案页面 -->
+          <div class="box p0" v-if="status == 0">
             <div class="product-title-box p20">
               <p class="product-title">
                 全部商品
@@ -29,7 +30,11 @@
               </p>
               <p class="product-sub-title">
                 若要针对特定的商品添加自定义物流方案，请在
-                <span class="textBtn not-pd">物流管理</span>
+                <span
+                  class="textBtn not-pd"
+                  @click="$NavgitorTo('/logisticsManagement')"
+                  >物流管理</span
+                >
                 中创建自定义物流
               </p>
             </div>
@@ -45,7 +50,7 @@
                       ></span>
                     </td>
                     <td>
-                      <span class="desc">{{ item.tagName }}</span>
+                      <span class="desc">{{ item.storeName }}</span>
                     </td>
                   </tr>
                 </tbody>
@@ -62,6 +67,83 @@
               </div>
             </div>
           </div>
+          <!-- 自定义物流方案页面 -->
+          <template v-else>
+            <div class="box prl-20">
+              <el-form :model="form">
+                <el-form-item label="名称" :rules="{ require: true }">
+                  <el-input v-model="form.name" placeholder=""></el-input>
+                </el-form-item>
+              </el-form>
+            </div>
+            <div class="box p0">
+              <div class="product-title-box p20">
+                <p class="product-title">
+                  商品
+                  <span class="light-title">
+                    (添加的商品将在通用物流中移除)
+                  </span>
+                  <span
+                    class="textBtn not-pd"
+                    style="float: right"
+                    @click="ClickAddProduct"
+                    >添加商品</span
+                  >
+                </p>
+              </div>
+              <div class="product-container">
+                <template v-if="commodityList.length > 0">
+                  <table class="product-table">
+                    <tbody>
+                      <tr v-for="(item, index) in commodityList" :key="item.id">
+                        <td style="min-width: 44px">{{ index + 1 }}</td>
+                        <td>
+                          <span
+                            class="small-img"
+                            :style="{
+                              backgroundImage: 'url(' + item.image + ')',
+                            }"
+                          ></span>
+                        </td>
+                        <td>
+                          <span class="desc">{{ item.storeName }}</span>
+                        </td>
+                        <td>
+                          <span
+                            style="
+                              color: rgb(193, 194, 204);
+                              cursor: pointer;
+                              float: right;
+                            "
+                          >
+                            <i
+                              class="el-icon-delete"
+                              @click="DelProduct(item, index)"
+                            ></i>
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="pagination">
+                    <el-pagination
+                      @current-change="CurrentChange"
+                      :current-page.sync="currentPage"
+                      background
+                      :page-size="requestParams.size"
+                      layout="total, prev, pager, next"
+                      :total="total"
+                    ></el-pagination>
+                  </div>
+                </template>
+                <template v-else>
+                  <div class="no-content">
+                    没有商品，请点击“添加商品”按钮来为特定的商品设置物流地区与价格
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
           <div class="logistics-programme">
             <p class="logistics-programme-title">物流方案</p>
             <span class="fr textBtn no-pd" @click="AddPlan">添加物流方案</span>
@@ -73,19 +155,28 @@
               :key="index"
             >
               <h3 class="title ptrl-20">
-                {{item.shippingName}}
-                <span class="option" style="margin-left: 10px">删除</span>
-                <span class="option" @click="EditPlan">编辑</span>
+                {{ item.shippingName }}
+                <span
+                  class="option"
+                  style="margin-left: 10px"
+                  @click="DelPlan(item, index)"
+                  >删除</span
+                >
+                <span class="option" @click="EditPlan(item)">编辑</span>
               </h3>
               <p class="desc">{{ item.countries_list }}</p>
               <table class="express-list">
                 <tr v-for="(plan, index) in item.freeInfo" :key="index">
                   <td>
-                    <p>{{ plan.title }}</p>
+                    <p>{{ plan.name }}</p>
                     <p>
                       <template v-if="plan.type == 1">
-                        下单金额：${{ plan.minUnit?$IsNaN(plan.minUnit):'0.00' }}
-                        {{ plan.maxUnit ? "- $" + $IsNaN(plan.maxUnit) : "and up" }}
+                        下单金额：${{
+                          plan.minUnit ? $IsNaN(plan.minUnit) : "0.00"
+                        }}
+                        {{
+                          plan.maxUnit ? "- $" + $IsNaN(plan.maxUnit) : "and up"
+                        }}
                       </template>
                       <template v-else>
                         下单重量：{{ plan.minUnit }}g
@@ -95,8 +186,8 @@
                       </template>
                     </p>
                   </td>
-                  <td> 
-                    {{ Boolean(plan.isFree) ? "免运费" : "$" + $IsNaN(plan.price) }}
+                  <td>
+                    {{ plan.price == 0 ? "免运费" : "$" + $IsNaN(plan.price) }}
                   </td>
                 </tr>
               </table>
@@ -109,7 +200,6 @@
               </div>
             </div>
           </template>
-
         </el-col>
         <el-col :span="8">
           <div class="box-right">
@@ -123,15 +213,125 @@
           </div>
         </el-col>
       </el-row>
-      <div class="pageSaveBtn">
-        <el-button>取消</el-button>
+      <div class="pageSaveBtn" v-if="status == 1">
+        <el-button type="danger" style="float: left" @click="Del"
+          >删除</el-button
+        >
+        <el-button @click="$NavgitorTo('/logisticsManagement')">取消</el-button>
         <el-button type="primary" @click="Save">保存</el-button>
       </div>
     </div>
+    <el-dialog title="请选择商品" :visible.sync="shopDialog">
+      <div class="search-conditions">
+        <template>
+          <!-- 商品标签 -->
+          <!-- <el-select
+              v-model="requestParams.shopLabelValue"
+              size
+              placeholder="请选择标签"
+              style="width: 200px"
+              @change="
+                () => {
+                  table = [];
+                  initData();
+                }
+              "
+            >
+              <el-option
+                v-for="item in shopLabelList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select> -->
+          <!-- 商品分类 -->
+          <el-select
+            v-model="requestParams.tagId"
+            size
+            placeholder="请选择分类"
+            style="width: 200px"
+            @change="
+              () => {
+                table = [];
+                InitData();
+              }
+            "
+          >
+            <el-option
+              v-for="item in shopCategoryList"
+              :key="item.id"
+              :label="item.title"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+          <el-input
+            style="width: 380px"
+            size
+            v-model="shopContent"
+            placeholder="请输入内容"
+          >
+            <el-button slot="append" @click="requestParams.tagId = shopContent"
+              >查询</el-button
+            >
+          </el-input>
+        </template>
+      </div>
+      <el-table
+        v-if="table.length > 0"
+        :data="table"
+        style="width: 100%"
+        empty-text
+        v-el-table-infinite-scroll="Load"
+        infinite-scroll-delay="200"
+        infinite-scroll-distance="50"
+        @selection-change="
+          (e) => {
+            selectItem = e;
+          }
+        "
+      >
+        <el-table-column type="selection" width="55"></el-table-column>
+        <el-table-column align="left" width="80" prop="image" label="商品图片">
+          <template slot-scope="scope">
+            <span
+              class="small-img"
+              :style="{ backgroundImage: 'url(' + scope.row.image + ')' }"
+            ></span>
+          </template>
+        </el-table-column>
+        <el-table-column align="left" prop="storeName" label="商品名称">
+          <template slot-scope="scope">
+            <p class="preWrap">{{ scope.row.storeName }}</p>
+            <span class="sign-span-item" v-if="scope.row.isShow == 0"
+              >已下架</span
+            >
+          </template>
+        </el-table-column>
+      </el-table>
+      <div slot="footer">
+        <span style="float: left; line-height: 41px"
+          >总共{{ tableTotal }}个商品， 已选择{{ selectItem.length }}个</span
+        >
+        <el-button @click="shopDialog = false">取消</el-button>
+        <el-button type="primary" @click="CheckSelectItem">确定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template> 
-<script> 
-import { getPlanDetail, getCommodity, getPlanList } from "@/api/logistics";
+<script>
+import {
+  getPlanDetail,
+  getCommodity,
+  getPlanList,
+  createShipping,
+  getCustomProduct,
+  addCustomProduct,
+  del,
+  delPlan,
+  deleteTemplateProudct,
+} from "@/api/logistics";
+import { getCates } from "@/api/yxStoreCategory";
+import elTableInfiniteScroll from "el-table-infinite-scroll";
 export default {
   data() {
     return {
@@ -140,49 +340,35 @@ export default {
       requestParams: {
         page: 0,
         size: 6,
-        tempId:0,
+        tempId: 0,
+      },
+      form: {
+        name: "",
       },
       total: 0,
       currentPage: 1,
       commodityList: [],
-      logisticsList: [
-        {
-          title: "全球",
-          countries_list: "全球",
-          expresses: [
-            {
-              title: "测试金额",
-              price: 1,
-              minUnit: 0.0,
-              maxUnit: 10.0,
-              isFree: 0,
-              type: 1,
-            },
-            {
-              title: "测试金额",
-              price: 0,
-              minUnit: 10.1,
-              maxUnit: "",
-              isFree: 1,
-              type: 1,
-            },
-            {
-              title: "测试重量",
-              price: 0,
-              minUnit: 10.1,
-              maxUnit: "",
-              isFree: 1,
-              type: 2,
-            },
-          ],
-        },
-      ],
+      logisticsList: [],
+      shopDialog: false, // 自定义物流时是否显示添加商品弹框
+      customRequest: {
+        page: 0,
+        size: 20,
+      },
+      shopCategoryList: [], // 分类列表
+      shopContent: "",
+      table: [], // 自定义物流的可选择商品列表
+      tableNum: 0, //
+      selectItem: [], // 已选商品列表
     };
   },
+  directives: {
+    "el-table-infinite-scroll": elTableInfiniteScroll,
+  },
   created() {
-    this.requestParams.tempId = this.$route.query.id,
-    this.status = this.$route.query.status;
+    (this.requestParams.tempId = this.$route.query.id),
+      (this.status = this.$route.query.status);
     this.id = this.$route.query.id;
+    this.form.name = localStorage.getItem("logisticsName");
     //判断物流类型   0为通用物流  1为自定义物流
     if (this.$route.query.status == 0) {
       // 获取除自定义商品外的商品
@@ -192,22 +378,37 @@ export default {
       });
     } else {
       // 获取自定义物流商品
+      this.requestParams.tempId = this.$route.query.id;
+      getCommodity(this.requestParams).then((res) => {
+        console.log(res);
+        this.commodityList = res.content;
+        this.total = res.totalElements;
+      });
+      // 获取自定义可选商品分类
+      getCates({ page: 0, size: 99 }).then((res) => {
+        this.shopCategoryList = res.content;
+      });
     }
     // 获取物流方案
     let par = {
-      tempId:this.$route.query.id
-    }
+      tempId: this.$route.query.id,
+    };
     getPlanDetail(this.$route.query.id).then((res) => {
-      console.log(res);  
-      res.map(item=>{
+      console.log(res);
+      res.map((item) => {
         let arr = [];
-        item.regionInfos.map(val=>{
-          val.countriess.map(v=>{
-            arr.push(v.name)
-          })
-        })
-        item.countries_list = arr.toString()
-      }) 
+        // 判断是否有国家选中（无则为整洲配送）
+        item.regionInfos.map((val) => {
+          if (val.countriess && val.countriess.length > 0) {
+            val.countriess.map((v) => {
+              arr.push(v.name);
+            });
+          } else {
+            arr.push(val.regionPlate);
+          }
+        });
+        item.countries_list = arr.toString();
+      });
       this.logisticsList = res;
     });
   },
@@ -218,17 +419,117 @@ export default {
       this.params.page = e - 1;
       this.getData();
     },
-    // 编辑当前物流
-    EditPlan: function () {},
-    // 新增物流方案
-    AddPlan:function(){
-      this.$router.push({
-        path:'/settingLogistics',
-        query:{
-          tempId:this.id, 
+    // 点击添加商品
+    ClickAddProduct: function (res) {
+      this.table = [];
+      this.customRequest = {
+        page: 0,
+        size: 20,
+      };
+      this.shopDialog = true;
+      this.InitData();
+    },
+    // 加载表单数据
+    InitData: function () {
+      getCustomProduct(this.customRequest).then((res) => {
+        console.log(res);
+        let arr = this.table.concat(res.content);
+        if (arr.length <= res.totalElements) {
+          this.table = arr;
         }
-      })
-    }
+        this.tableTotal = res.totalElements;
+      });
+    },
+    // 下拉加载商品列表
+    Load: function (res) {
+      this.requestParams.page += 1;
+      this.InitData();
+    },
+    // 确认添加商品
+    CheckSelectItem: function () {
+      let arr = [];
+      this.selectItem.map((item) => {
+        arr.push(item.id);
+      });
+      let par = {
+        tempId: this.id,
+        productIs: arr,
+      };
+      addCustomProduct(par).then((res) => {
+        console.log(this.selectItem);
+        this.commodityList = this.commodityList.concat([...this.selectItem]);
+        this.$message.success("添加成功");
+        this.selectItem = [];
+        this.shopDialog = false;
+        this.customRequest = {
+          page: 0,
+          size: 20,
+        };
+      });
+    },
+    // 删除当前自定义物流的已配置商品
+    DelProduct: function (item, index) {
+      let par = {
+        productId: item.id,
+        tempId: this.id,
+      };
+      deleteTemplateProudct(par).then((res) => {
+        this.$message.success("删除成功");
+        this.commodityList.splice(index, 1);
+        this.customRequest = {
+          page: 0,
+          size: 20,
+        };
+      });
+    },
+    // 编辑当前物流
+    EditPlan: function (item) {
+      localStorage.setItem("logisticsPlan", JSON.stringify(item));
+      this.$router.push({
+        path: "/settingLogistics",
+        query: {
+          tempId: this.id,
+          id: item.id,
+          status: this.status,
+          type: 1,
+        },
+      });
+    },
+    // 新增物流方案
+    AddPlan: function () {
+      this.$router.push({
+        path: "/settingLogistics",
+        query: {
+          tempId: this.id,
+          status: this.status,
+        },
+      });
+    },
+    // 删除当前物流方案
+    DelPlan: function (item, index) {
+      delPlan([item.id]).then((res) => {
+        this.$message.success("删除成功");
+        this.logisticsList.splice(index, 1);
+      });
+    },
+    // 修改自定义物流名称
+    Save: function () {
+      let par = {
+        id: this.id,
+        name: this.form.name,
+        type: 1,
+      };
+      createShipping(par).then((res) => {
+        this.$message.success("修改成功");
+      });
+    },
+    // 删除当前物流
+    Del: function () {
+      del([this.id]).then((res) => {
+        this.$message.success("删除成功");
+        this.$router.push("/logisticsManagement");
+      });
+    },
   },
 };
 </script>
@@ -433,7 +734,27 @@ h1 {
   text-align: right;
   font-size: 0;
   margin-bottom: 40px;
-} 
+}
+.sign-span-item {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+  margin-right: 20px;
+  display: inline-block;
+  &::before {
+    top: -1px;
+    content: "";
+    width: 6px;
+    height: 6px;
+    margin-right: 4px;
+    border-radius: 4px;
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    border: 1px solid #8c8c8c;
+    background-color: #e4e4e4;
+  }
+}
 .p0 {
   padding: 0 !important;
 }

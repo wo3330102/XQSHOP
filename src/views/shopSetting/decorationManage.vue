@@ -26,22 +26,15 @@
       <h1 class="margin-bottom-12">已发布模版</h1>
       <div class="overview padding-bottom-0">
         <div class="flex-1">
-          <h3 class="sub-title">多品综合站-默认</h3>
+          <h3 class="sub-title">{{ publishedForm.name }}</h3>
           <p class="sub-info">
-            2020/12/18 18:39:24 <span>模版ID：77759953</span>
+            {{ publishedForm.updateTime }}
+            <span>模版ID：{{ publishedForm.id }}</span>
           </p>
           <div class="img1-box">
-            <img
-              class="img-size1"
-              src="https://cdn.xshoppy.shop/uploader/bc17651a9f509036d3ebda2cf5abddd21f0d9975.jpg?x-oss-process=image/format,webp"
-              alt=""
-            />
-            <img
-              class="mob"
-              src="https://cdn.xshoppy.shop/uploader/0848ee394c1be8b8ed9eadb8de16ea994465e5b8.jpg?x-oss-process=image/format,webp"
-              alt=""
-            />
-            <img class="phone" src="../../static/phone_2x.png" alt="" />
+            <img class="img-size1" :src="publishedForm.pcImage" alt="" />
+            <img class="mob" :src="publishedForm.mobileImage" alt="" />
+            <img class="phone" src="@/static/phone.png" alt="" />
           </div>
         </div>
         <div class="operate-box">
@@ -63,7 +56,7 @@
                 :margin="0"
                 :auto-color="true"
                 :dot-scale="1"
-                :text="appSrc"
+                :text="publishedForm.mobileLink || defaultUrl"
               />
               <p class="desc">扫描二维码查看移动端效果</p>
             </div>
@@ -160,12 +153,28 @@
 
     <!-- test -->
     <div class="infinite-list-wrapper">
+      <div>
+        <div class="inline-block"><h1>模版列表</h1></div>
+        <el-select
+          class="float-right"
+          v-model="typeValue"
+          placeholder="请选择"
+          @change="filterTemplate"
+        >
+          <el-option
+            v-for="item in typeList"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          ></el-option>
+        </el-select>
+      </div>
       <ul
         class="temlist"
         v-infinite-scroll="load"
         infinite-scroll-disabled="disabled"
       >
-        <li class="item" v-for="item in templateList" :key="item.id">
+        <li class="item" v-for="item in templateList">
           <div class="header">
             <div class="left">
               <h3 class="sub-title2">{{ item.name }}</h3>
@@ -183,19 +192,22 @@
                 编辑
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item
-                    v-for="item in operateList2"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                    :command="item.value"
-                    >{{ item.label }}</el-dropdown-item
+                    v-for="item2 in operateList2"
+                    :key="item2.value"
+                    :label="item2.label"
+                    :value="item2.value"
+                    :command="{ type: item2.value, params: item }"
+                    >{{ item2.label }}</el-dropdown-item
                   >
                 </el-dropdown-menu>
               </el-dropdown>
             </div>
           </div>
           <div class="content">
-            <img :src="item.pcImage" alt="" />
+            <!-- <img :src="item.pcImage" alt="" /> -->
+            <img class="img-1" :src="item.pcImage || defaultPCImg" alt="" />
+            <img class="img-2" :src="item.mobileImage || defaultMImg" alt="" />
+            <img class="img-3" src="../../static/phone.png" alt="" />
           </div>
         </li>
       </ul>
@@ -203,23 +215,84 @@
       <p v-if="noMore" class="no-more">--没有更多了--</p>
     </div>
 
-    <default-dialog :show.sync="showDialog">
-      <div class="dialog-content"><span><img src="../../static/i.png" alt=""></span>此操作将创建一个副本，是否继续？</div>
+    <!-- 创建副本--弹框 -->
+    <default-dialog :visible.sync="showDialog0" @toConfirm="createCopy">
+      <div class="dialog-content">
+        <span><img src="../../static/i.png" alt="" /></span
+        >此操作将创建一个副本，是否继续？
+      </div>
+    </default-dialog>
+    <!-- 发布--弹框 -->
+    <default-dialog :visible.sync="showDialog1" @toConfirm="toPublish">
+      <div class="dialog-content">
+        <span><img src="../../static/yellow-i.png" alt="" /></span
+        >此操作将设置该模板为默认项，是否继续？
+      </div>
+    </default-dialog>
+    <!-- 删除--弹框 -->
+    <default-dialog :visible.sync="showDialog2" @toConfirm="toDelete">
+      <div class="dialog-content">
+        <span><img src="../../static/yellow-i.png" alt="" /></span
+        >此操作将永久删除该模版, 是否继续?
+      </div>
+    </default-dialog>
+    <!-- 重命名--弹框 -->
+    <default-dialog
+      :visible.sync="showDialog3"
+      title="提示"
+      @toConfirm="toRename"
+    >
+      <el-form>
+        <el-form-item label="请输入新名称">
+          <el-input v-model="rename"></el-input>
+        </el-form-item>
+      </el-form>
+    </default-dialog>
+    <!-- 更换语言--弹框 -->
+    <default-dialog
+      :visible.sync="showDialog4"
+      title="更换店铺语言"
+      @toConfirm="toChangeLang"
+    >
+      <el-row>
+        <el-col :span="24">
+          <el-select
+            class="float-right"
+            v-model="langValue"
+            @change="filterLanguage"
+          >
+            <el-option
+              v-for="langItem in langList"
+              :key="langItem.value"
+              :label="langItem.label"
+              :value="langItem.value"
+            ></el-option>
+          </el-select>
+        </el-col>
+      </el-row>
     </default-dialog>
   </div>
 </template>
 <script>
-
-import { getCodeURL, queryPage } from "@/api/yxStoreDecoration.js";
-import defaultDialog from "@/components/defaultDialog.vue"
+import {
+  getPublished,
+  queryPage,
+  deleteAll,
+  yxStoreTemplate,
+  rename,
+  publish,
+} from "@/api/yxStoreDecoration.js";
+import defaultDialog from "@/components/defaultDialog.vue";
 
 //在需要生成二维码的文件中引入比如qrCode.vue
 import VueQr from "vue-qr";
+const storeId = localStorage.getItem("storeId");
 export default {
   name: "DecorationManage",
+  inject: ["reload"],
   components: {
     VueQr,
-    defaultDialog
+    defaultDialog,
   },
   data() {
     return {
@@ -264,30 +337,29 @@ export default {
           value: "createCopy",
         },
       ],
-      typeValue: "0",
+      typeValue: null,
       typeList: [
         {
           label: "显示全部模版",
-          value: "0",
+          value: null,
         },
         {
           label: "只显示通用模版",
-          value: "1",
+          value: 1,
         },
         {
           label: "只显示专属模版",
-          value: "2",
+          value: 2,
         },
       ],
       logoSrc: require("@/static/icon-code.png"),
-      appSrc: "http://www.baidu.com",
       isHover: false,
       templateList: [
         /* {
           id: 141974205,
           name: "多品综合站-默认",
           updateTime: "2021/01/07 15:52:14",
-          pcImage: "../../static/2-2.png",
+          pcImage: require("@/static/pc-img.png"),
           isCopy: 0,
         },
         {
@@ -312,19 +384,69 @@ export default {
           isCopy: 1,
         }, */
       ],
-      count: 0,//起始页数值为0
+      count: 0, //起始页数值为0
       loading: false,
-      totalPages: 0,//取后端返回内容的总页数
-      size: 3,// 每页条数
-      type: null, // 模板类型
+      totalPages: 0, //取后端返回内容的总页数
+      size: 3, // 每页条数
+      type: 0, // 模板类型
       /* list: [] //后端返回的数组 */
-      showDialog: false,
+      showDialog0: false, // 是否显示创建副本提示框
+      showDialog1: false, // 是否显示发布提示框
+      showDialog2: false, // 是否显示删除提示框
+      showDialog3: false, // 是否显示重命名提示框
+      showDialog4: false, // 是否显示编辑语言提示框
+      myForm: {},
+      rename: "",
+      defaultUrl: "https://www.xqkj.top/",
+      publishedForm: {
+        id: 71,
+        name: "多品综合站-默认",
+        updateTime: "2020-12-18 18:39:24",
+        mobileLink: "https://www.xqkj.top/",
+      }, // 已发布模板的信息
+      langValue: "en",
+      langList: [
+        {
+          label: "英语",
+          value: "en",
+        },
+        {
+          label: "德语",
+          value: "de",
+        },
+        {
+          label: "法语",
+          value: "fr",
+        },
+        {
+          label: "葡萄牙语",
+          value: "pt",
+        },
+        {
+          label: "西班牙语",
+          value: "es",
+        },
+        {
+          label: "意大利语",
+          value: "it",
+        },
+        {
+          label: "繁体中文",
+          value: "zh-hk",
+        },
+        {
+          label: "日语",
+          value: "ja",
+        },
+      ],
+      defaultPCImg: require("@/static/pc-default.png"),
+      defaultMImg: require("@/static/m-default.png")
     };
   },
   computed: {
     noMore() {
       //当起始页数大于总页数时停止加载
-      return this.count >= this.totalPages-1;
+      return this.count >= this.totalPages - 1;
     },
     disabled() {
       return this.loading || this.noMore;
@@ -338,23 +460,26 @@ export default {
     },
     getTemplateList() {
       let that = this;
-      const storeId = localStorage.getItem('storeId');
       let param = {
-        page: that.totalPages,
+        page: that.count,
         size: that.size,
-        type: that.type,
+        type: that.typeValue,
         storeId: storeId,
-      }
-      /* this.templateList = this.templateList.concat(this.templateList); */
-      
-      queryPage(param).then(res => {
-        that.templateList = that.templateList.concat(res.content);
-        that.totalPages = Math.ceil(res.totalElements/that.size);
-      }).catch(error => {
-
-      })
-      /* this.templateList = this.templateList.concat(this.templateList); */
-      this.loading = false;
+      };
+      queryPage(param)
+        .then((res) => {
+          if (res.data.content.length) {
+            that.templateList = that.templateList.concat(res.data.content);
+            that.totalPages =
+              res.data.totalElements % that.size === 0
+                ? res.data.totalElements / that.size
+                : Math.ceil(res.data.totalElements / that.size);
+          }
+          this.loading = false;
+        })
+        .catch((error) => {
+          this.loading = false;
+        });
     },
     toOperate(e) {
       switch (e) {
@@ -363,6 +488,7 @@ export default {
           break;
         case "editLanguage":
           // 编辑语言
+          this.showDialog4 = true;
           break;
         case "rename":
           // 重命名
@@ -373,51 +499,142 @@ export default {
       }
     },
     // 选择模版筛选
-    filterTemplate(e) {},
+    filterTemplate(e) {
+      let that = this;
+      that.typeValue = e;
+      that.count = 0;
+      that.totalPages = 0;
+      setTimeout(() => {
+        that.templateList = [];
+        that.getTemplateList();
+      }, 1000);
+    },
+    // 选择语言
+    filterLanguage(e) {
+      this.langValue = e;
+    },
+    // 提交选择语言
+    toChangeLang(e) {
+      let that = this; 
+    },
     // 编辑模版
     editTemplate(id) {
       console.log("当前操作模块的内容：", id);
     },
     // 其他操作，比如预览，发布，删除，重命名，创建副本
-    changeOperateType(operate) {
-      console.log("操作类型：：：：", operate);
-      switch (operate) {
+    changeOperateType(item) {
+      this.myForm = {};
+      this.myForm = item.params;
+      console.log("操作类型：：：：", item);
+      switch (item.type) {
         case "preview":
           // 预览
           break;
         case "release":
           // 发布
+          this.showDialog1 = true;
           break;
         case "delete":
           // 删除
+          this.showDialog2 = true;
           break;
         case "rename":
           // 重命名
+          this.showDialog3 = true;
           break;
         case "createCopy":
           // 创建副本
-          this.showDialog = true;
-          console.log(this.showDialog);
+          this.showDialog0 = true;
           break;
       }
     },
-    // 获取二维码地址
-    getQRCodeURL() {
-      /* let param = {};
-      getCodeURL(param)
-        .then((res) => {
-          console.log(res);
+    // 获取已发布模版
+    getPublishedTemplate() {
+      let that = this;
+      let params = {
+        storeId: parseInt(storeId),
+      };
+      getPublished(params)
+        .then((res) => { 
+          this.publishedForm = res.data.data;
+          console.log("获取已发布模版：", res);
         })
         .catch((error) => {
           console.log(error);
-        }); */
+        });
     },
     /* async getQRCodeURL(text) {
       return QRCode.toDataURL(text);
     }, */
+    // 创建副本
+    createCopy() {
+      let that = this;
+      that.showDialog0 = false;
+      let params = that.myForm;
+      yxStoreTemplate(params)
+        .then((res) => {
+          if (res) {
+            that.$message.success("检测到当前域名为");
+            that.reload(); // 调用注入的刷新方法
+          }
+        })
+        .catch((error) => {});
+    },
+    // 发布
+    toPublish() {
+      let that = this;
+      that.showDialog1 = false;
+      let params = {
+        storeId: storeId,
+        templateId: that.myForm.id,
+      };
+      publish(params)
+        .then((res) => {
+          if (res.data.status === 200) {
+            that.$message.success(res.data.msg);
+            that.reload();
+          }
+        })
+        .catch((error) => {
+          debugger;
+        });
+    },
+    // 删除
+    toDelete() {
+      let that = this;
+      that.showDialog2 = false;
+      deleteAll([that.myForm.id])
+        .then((res) => {
+          that.$message.success("删除成功！");
+          that.reload(); // 调用注入的刷新方法
+        })
+        .catch((error) => {
+          that.$message.success(error);
+        });
+    },
+    // 重命名
+    toRename() {
+      let that = this;
+      let param = {
+        storeId: storeId,
+        id: that.myForm.id,
+        name: that.rename,
+      };
+      rename(param)
+        .then((res) => {
+          if (res.data.status == 200) {
+            that.$message.success(res.data.msg);
+            that.showDialog3 = false;
+            that.reload(); // 调用注入的刷新方法
+          }
+        })
+        .catch((error) => {
+          that.$message.error(error);
+        });
+    },
   },
   created() {
-    this.getQRCodeURL();
+    this.getPublishedTemplate();
     this.getTemplateList();
   },
 };
@@ -509,7 +726,7 @@ h1 {
   overflow: hidden;
   height: 394px;
 }
-/* .img-1 {
+.img-1 {
   border: 1px solid #ebecf3;
   border-bottom: none;
   -webkit-box-sizing: border-box;
@@ -542,7 +759,7 @@ h1 {
   bottom: 0;
   right: 0;
   z-index: 1;
-} */
+}
 .padding-20 {
   padding: 20px;
 }
@@ -682,9 +899,6 @@ h1 {
   padding-right: 5%;
   font-size: 0;
   overflow: hidden;
-  img {
-    width: 354px;
-  }
 }
 #decoration_qrcode {
   display: inline-block;
