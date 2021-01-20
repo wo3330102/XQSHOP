@@ -80,7 +80,7 @@
                 style="flex: 1"
               >
                 <span slot="prefix" style="line-height: 36px; margin-left: 3px"
-                  >$</span
+                  >{{currency.s}}</span
                 >
                 <span slot="prepend">{{
                   discountTypeValueOfInfomation[0].prepend
@@ -182,7 +182,7 @@
                   <span
                     slot="prefix"
                     style="line-height: 36px; margin-left: 3px"
-                    >$</span
+                    >{{currency.s}}</span
                   >
                 </el-input>
                 <span
@@ -287,9 +287,9 @@
                       v-if="detail.discountMoney || detail.discountQuota"
                     >
                       <template v-if="detail.discountType === 0">
-                        减免${{ detail.discountMoney }}
+                        减免{{currency.s+ detail.discountMoney }}
                         <span class="en"
-                          >(${{ detail.discountMoney }} off)</span
+                          >({{ currency.s + detail.discountMoney }} off)</span
                         >
                       </template>
                       <template v-if="detail.discountType === 1">
@@ -309,9 +309,9 @@
                 <p style="margin-bottom: 22px" v-show="detail.effectMoney">
                   <span class="title">生效条件</span>
                   <span class="text">
-                    最低消费金额$ {{ detail.effectMoney }}
+                    最低消费金额 {{currency.s+ detail.effectMoney }}
                     <span class="en"
-                      >(Mininum purchase of ${{ detail.effectMoney }})</span
+                      >(Mininum purchase of {{currency.s+ detail.effectMoney }})</span
                     >
                   </span>
                 </p>
@@ -340,11 +340,11 @@
                 <dd>使用次数</dd>
               </dl>
               <dl>
-                <dt>${{ $IsNaN(detail.discountTotal) || '0.00' }}</dt>
+                <dt>{{currency.s}}{{$IsNaN(detail.discountTotal) || '0.00' }}</dt>
                 <dd>优惠金额</dd>
               </dl>
               <dl>
-                <dt>${{ $IsNaN(detail.saleTotal) || '0.00' }}</dt>
+                <dt>{{currency.s}}{{$IsNaN(detail.saleTotal) ||'0.00' }}</dt>
                 <dd>销售总额</dd>
               </dl>
             </div>

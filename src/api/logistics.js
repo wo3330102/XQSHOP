@@ -94,3 +94,10 @@ export function deleteTemplateProudct(data){
   })
 }
 
+export function getPlanName(id){
+  return request({
+    url:'api/yxShippingTemplates/freeNameHists/'+id,
+    method:'get'
+  })
+}
+

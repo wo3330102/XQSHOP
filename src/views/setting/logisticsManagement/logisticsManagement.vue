@@ -212,6 +212,7 @@ export default {
     Del:function(id){ 
       del([id]).then(res=>{
         console.log(res);
+        
       })
     }
   },

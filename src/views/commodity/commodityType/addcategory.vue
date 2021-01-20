@@ -127,7 +127,7 @@
                       type="number"
                       v-if="formItem.shopAttributeValue == 3"
                     >
-                      <el-button slot="append">USD</el-button>
+                      <el-button slot="append">{{currency.n}}</el-button>
                     </el-input>
                     <el-input
                       v-model.number="formItem.value"
@@ -135,7 +135,7 @@
                       type="number"
                       v-if="formItem.shopAttributeValue == 4"
                     >
-                      <el-button slot="append">USD</el-button>
+                      <el-button slot="append">{{currency.n}}</el-button>
                     </el-input>
                     <el-input
                       v-model.number="formItem.value"

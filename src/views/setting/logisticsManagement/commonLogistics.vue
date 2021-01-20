@@ -42,7 +42,7 @@
               <table class="product-table">
                 <tbody>
                   <tr v-for="(item, index) in commodityList" :key="item.id">
-                    <td style="min-width: 44px">{{ index + 1 }}</td>
+                    <td style="min-width: 44px">{{ requestParams.page*6 + index+1}}</td>
                     <td>
                       <span
                         class="small-img"
@@ -96,7 +96,7 @@
                   <table class="product-table">
                     <tbody>
                       <tr v-for="(item, index) in commodityList" :key="item.id">
-                        <td style="min-width: 44px">{{ index + 1 }}</td>
+                        <td style="min-width: 44px">{{ requestParams.page*6 + index+1 }}</td>
                         <td>
                           <span
                             class="small-img"
@@ -171,11 +171,11 @@
                     <p>{{ plan.name }}</p>
                     <p>
                       <template v-if="plan.type == 1">
-                        下单金额：${{
+                        下单金额：{{currency.s}}{{
                           plan.minUnit ? $IsNaN(plan.minUnit) : "0.00"
                         }}
                         {{
-                          plan.maxUnit ? "- $" + $IsNaN(plan.maxUnit) : "and up"
+                          plan.maxUnit ? "- "+currency.s + $IsNaN(plan.maxUnit) : "and up"
                         }}
                       </template>
                       <template v-else>
@@ -187,7 +187,7 @@
                     </p>
                   </td>
                   <td>
-                    {{ plan.price == 0 ? "免运费" : "$" + $IsNaN(plan.price) }}
+                    {{ plan.price == 0 ? "免运费" : currency.s + $IsNaN(plan.price) }}
                   </td>
                 </tr>
               </table>
@@ -246,7 +246,7 @@
             </el-select> -->
           <!-- 商品分类 -->
           <el-select
-            v-model="requestParams.tagId"
+            v-model="customRequest.tagId"
             size
             placeholder="请选择分类"
             style="width: 200px"
@@ -270,7 +270,9 @@
             v-model="shopContent"
             placeholder="请输入内容"
           >
-            <el-button slot="append" @click="requestParams.tagId = shopContent"
+            <el-button
+              slot="append"
+              @click="customRequest.shopContent = shopContent"
               >查询</el-button
             >
           </el-input>
@@ -282,8 +284,8 @@
         style="width: 100%"
         empty-text
         v-el-table-infinite-scroll="Load"
-        infinite-scroll-delay="200"
-        infinite-scroll-distance="50"
+        :infinite-scroll-delay="200"
+        :infinite-scroll-distance="50"
         @selection-change="
           (e) => {
             selectItem = e;
@@ -364,6 +366,20 @@ export default {
   directives: {
     "el-table-infinite-scroll": elTableInfiniteScroll,
   },
+  watch: {
+    requestParams: {
+      handler: function (val) {
+        this.GetData();
+      },
+      deep: true,
+    },
+    customRequest:{
+      handler: function (val) {
+        this.InitData();
+      },
+      deep: true,
+    }
+  },
   created() {
     (this.requestParams.tempId = this.$route.query.id),
       (this.status = this.$route.query.status);
@@ -378,7 +394,6 @@ export default {
       });
     } else {
       // 获取自定义物流商品
-      this.requestParams.tempId = this.$route.query.id;
       getCommodity(this.requestParams).then((res) => {
         console.log(res);
         this.commodityList = res.content;
@@ -416,8 +431,15 @@ export default {
     // 分页选择
     CurrentChange: function (e) {
       this.currentPage = e;
-      this.params.page = e - 1;
-      this.getData();
+      this.requestParams.page = e - 1;
+      this.GetData();
+    },
+    // 获取物流商品
+    GetData: function () {
+      getCommodity(this.requestParams).then((res) => {
+        this.commodityList = res.content;
+        this.total = res.totalElements;
+      });
     },
     // 点击添加商品
     ClickAddProduct: function (res) {
@@ -442,7 +464,7 @@ export default {
     },
     // 下拉加载商品列表
     Load: function (res) {
-      this.requestParams.page += 1;
+      this.customRequest.page += 1;
       this.InitData();
     },
     // 确认添加商品

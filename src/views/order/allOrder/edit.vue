@@ -77,17 +77,17 @@
                   </td>
                   <td class="spec">1</td>
                   <td class="price">
-                    ${{ item.cartInfoMap.truePrice }} *
+                    {{ currency.s+item.cartInfoMap.truePrice }} *
                     {{ item.cartInfoMap.cartNum }}
                   </td>
                   <td class="totalPrice">
-                    ${{
-                      $toDecimal2(
+                    {{
+                      currency.s+$toDecimal2(
                         item.cartInfoMap.truePrice * item.cartInfoMap.cartNum
                       )
                     }}
                   </td>
-                  <td class="discount">$0.00</td>
+                  <td class="discount">{{currency.s}}0.00</td>
                 </tr>
               </tbody>
             </table>
@@ -99,27 +99,27 @@
               <div class="left">小计</div>
               <div class="right">
                 <span>{{ detail.totalNum }}项</span>
-                <span class="num">${{ detail.totalPrice }}</span>
+                <span class="num">{{ currency.s + detail.totalPrice }}</span>
               </div>
             </div>
             <div class="item">
               <div class="left">折扣</div>
               <div class="right">
                 <span>折扣金额</span>
-                <span class="num">${{ detail.deductionPrice }}</span>
+                <span class="num">{{ currency.s + detail.deductionPrice }}</span>
               </div>
             </div>
             <div class="item">
               <div class="left">运费</div>
               <div class="right">
                 <span>Standard Shipping</span>
-                <span class="num">${{ detail.payPostage }}</span>
+                <span class="num">{{ currency.s+detail.payPostage }}</span>
               </div>
             </div>
             <div class="item">
               <div class="left">总计</div>
               <div class="right">
-                <span class="num">${{ detail.payPrice }}</span>
+                <span class="num">{{ currency.s + detail.payPrice }}</span>
               </div>
             </div>
           </div>
@@ -168,7 +168,7 @@
               </p>
               <p class="amount">
                 <span>订单总额：</span>
-                <span class="content">${{ detail.payPrice }}</span>
+                <span class="content">{{ currency.s + detail.payPrice }}</span>
               </p>
             </div>
             <div class="order">
@@ -217,10 +217,10 @@
           </div> -->
         </el-col>
       </el-row>
-      <div class="pageSaveBtn">
-        <el-button>取消</el-button>
+      <!-- <div class="pageSaveBtn">
+        <el-button @click="$NavgitorTo('/order')">取消</el-button>
         <el-button type="primary">保存</el-button>
-      </div>
+      </div> -->
     </div>
     <el-dialog title="录入快递" :visible.sync="showDialog"> 
       <el-input v-model="deliveryId" placeholder="请输入快递单号"></el-input>

@@ -64,7 +64,7 @@
             <div class="item">
               <div class="left">总花费</div>
               <div class="right">
-                <span>{{ detail.sumMoney ? "$" + detail.sumMoney : "$0.00" }}</span>
+                <span>{{ detail.sumMoney ? currency.s + detail.sumMoney : currency.s+"0.00" }}</span>
               </div>
             </div>
           </div>
@@ -114,11 +114,11 @@
                       </td>
                       <td width="110">{{ item.cartInfo[0].cartNum }}</td>
                       <td width="100" align="right">
-                        {{ "$" + item.cartInfo[0].truePrice }} *
+                        {{ currency.s + item.cartInfo[0].truePrice }} *
                         {{ item.cartInfo[0].cartNum }}
                       </td>
                       <td width="80" align="right" style="padding-right: 0px">
-                        {{ "$" + item.payPrice }}
+                        {{ currency.s + item.payPrice }}
                       </td>
                     </tr>
                   </tbody>

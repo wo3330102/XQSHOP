@@ -26,7 +26,7 @@
             />
           </dt>
           <dd class="value">
-            ${{ navData.totalMoney ? navData.totalMoney : "0.00" }}
+            {{currency.s}}{{ navData.totalMoney ? navData.totalMoney : "0.00" }}
           </dd>
           <dd class="desc">总销售额</dd>
         </dl>

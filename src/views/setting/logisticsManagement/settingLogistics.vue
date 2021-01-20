@@ -112,7 +112,7 @@
                     >
                       <td>{{ item.name }}</td>
                       <td>
-                        ${{ item.minUnit }}
+                        {{currency.s}}{{ item.minUnit ? $IsNaN(item.minUnit) : "0.00" }}
                         {{
                           Number(item.maxUnit) == 0 || !item.maxUnit
                             ? "and up"
@@ -120,7 +120,7 @@
                         }}
                       </td>
                       <td>
-                        {{ item.price == 0 ? "免运费" : "$" + item.price }}
+                        {{ item.price ? currency.s + item.price : "免运费" }}
                       </td>
                       <td>
                         <span
@@ -166,7 +166,7 @@
                     >
                       <td>{{ item.name }}</td>
                       <td>
-                        ${{ item.minUnit }}
+                        {{currency.s}}{{ item.minUnit ? $IsNaN(item.minUnit) : "0.00" }}
                         {{
                           Number(item.maxUnit) == 0 || !item.maxUnit
                             ? "and up"
@@ -174,7 +174,7 @@
                         }}
                       </td>
                       <td>
-                        {{ item.price == 0 ? "免运费" : "$" + item.price }}
+                        {{ item.price ? currency.s + item.price : "免运费" }}
                       </td>
                       <td>
                         <span
@@ -208,7 +208,9 @@
       </el-row>
       <div class="pageSaveBtn">
         <el-button @click="Cancal">取消</el-button>
-        <el-button type="primary" @click="Save">保存</el-button>
+        <el-button type="primary" @click="Save" :disabled="disabled"
+          >保存</el-button
+        >
       </div>
       <el-dialog
         title="添加国家/地区"
@@ -216,11 +218,11 @@
         :close-on-click-modal="false"
         :close-on-press-escape="false"
       >
-        <el-input
+        <!-- <el-input
           v-model="searchCountry"
           placeholder="搜索国家/地区"
           @change="SearchCountry"
-        ></el-input>
+        ></el-input> -->
         <div class="countryList search-country" v-show="searchCountry == ''">
           <el-collapse>
             <el-collapse-item
@@ -400,7 +402,7 @@
                     }}</template
                   >
                   <template v-if="logisticsPlanType === 1" slot="prefix"
-                    >$</template
+                    >{{currency.s}}</template
                   >
                   <template v-else slot="suffix">g</template>
                 </el-input>
@@ -418,7 +420,7 @@
                     }}</template
                   >
                   <template v-if="logisticsPlanType === 1" slot="prefix"
-                    >$</template
+                    >{{currency.s}}</template
                   >
                   <template v-else slot="suffix">g</template>
                 </el-input>
@@ -440,7 +442,7 @@
               maxlength="100"
               @blur="form.price = $IsNaN(form.price)"
             >
-              <template slot="prefix">$</template>
+              <template slot="prefix">{{currency.s}}</template>
             </el-input>
           </el-form-item>
         </el-form>
@@ -455,7 +457,8 @@
   </div>
 </template> 
 <script>
-import { getCitys, save, createShipping } from "@/api/logistics";
+import { getCitys, save, createShipping, getPlanName } from "@/api/logistics";
+let planNameList = [];
 export default {
   data() {
     var checkmaxUnit = (rule, value, callback) => {
@@ -501,19 +504,32 @@ export default {
       isShowAll: false,
       editLogisticsPlan: false, // 是否为编辑物流方案  true为修改，false为新增
       editLogisticsPlanIndex: 0, // 编辑的物流方案索引
+      disabled: false, // 判断是否保存
     };
   },
   created() {
-    // 判断是否为新增
+    // 判断是否为新增（有则为修改，无则为新增）
+    let detail = "";
+    let storeId = localStorage.getItem("storeId");
     if (this.$route.query.id) {
-      console.log(id);
       this.id = this.$route.query.id;
+      detail = JSON.parse(localStorage.getItem("logisticsPlan"));
+      this.logisticsName = detail.shippingName;
+      this.type = this.$route.query.type;
     }
     this.tempId = this.$route.query.tempId;
     this.status = this.$route.query.status;
-    this.type = this.$route.query.type ? this.$route.query.type : 0;
-    let detail = JSON.parse(localStorage.getItem("logisticsPlan"));
-    this.logisticsName = detail.shippingName;
+    // 获取历史物流方案名称
+    getPlanName(storeId).then((res) => {
+      console.log(res); 
+      for (let i in res) {
+        let par = {};
+        par.value = res[i];
+        planNameList.push(par);
+      }
+
+      // planNameList = [...res];
+    });
     // 获取国家列表
     getCitys().then((res) => {
       if (this.type == 0) {
@@ -731,7 +747,8 @@ export default {
     },
     // 编辑物流方案
     EditPlan: function (item, index) {
-      this.form = { ...item };
+      console.log(item);
+      this.form = item;
       this.editLogisticsPlan = true;
       this.editLogisticsPlanIndex = index;
       this.showLogisticsPlan = true;
@@ -763,6 +780,12 @@ export default {
           if (valid) {
             console.log({ ...this.form });
             this.form.isFree = Number(this.form.price) == 0 ? 1 : 0;
+            if (!this.form.minUnit) {
+              this.form.minUnit = "";
+            }
+            if (!this.form.maxUnit) {
+              this.form.maxUnit = "";
+            }
             if (this.logisticsPlanType == 1) {
               this.form.type = 1;
               if (this.editLogisticsPlan) {
@@ -782,6 +805,7 @@ export default {
                 this.weightOflogisticsList.push({ ...this.form });
               }
             }
+            console.log(this.moneyOflogisticsList);
             this.$refs["form"].resetFields();
             this.showLogisticsPlan = false;
           } else {
@@ -809,7 +833,9 @@ export default {
         this.$message.warning("至少设置一项物流方案选择条件!");
         return false;
       }
+      console.log(freeInfo);
       let arr = [];
+      this.disabled = true;
       this.countryList.map((item) => {
         // item为各大洲   判断当前大洲下是否有选择数据
         if (
@@ -872,8 +898,9 @@ export default {
           data.id = 0;
           data.tempId = res.id;
           save(data).then((res) => {
+            this.disabled = false;
             this.$message.success("添加成功");
-            this.$router.push('/logisticsManagement')
+            this.$router.push("/logisticsManagement");
           });
         });
       } else {
@@ -881,6 +908,7 @@ export default {
           data.id = this.id;
         }
         save(data).then((res) => {
+          this.disabled = false;
           this.$message.success("添加成功");
           this.$router.push({
             path: "/commonLogistics",
@@ -903,25 +931,17 @@ export default {
     },
     // 设置辅助输入列表(用法参照elementUI)
     QuerySearch: function (queryString, cb) {
-      var restaurants = [];
-      if (this.logisticsPlanType == 1) {
-        restaurants = this.moneyOflogisticsList;
-      } else {
-        restaurants = this.weightOflogisticsList;
-      }
+      var restaurants = planNameList;
+      console.log(restaurants);
       var results = queryString
         ? restaurants.filter(CreateFilter(queryString))
         : restaurants;
       // 调用 callback 返回建议列表的数据
       cb(results);
       function CreateFilter(queryString) {
-        return (restaurant) => {
-          return (
-            restaurant.value
-              .toLowerCase()
-              .indexOf(queryString.toLowerCase()) === 0
+        return (
+            restaurant.toLowerCase().indexOf(queryString.toLowerCase()) === 0
           );
-        };
       }
     },
   },

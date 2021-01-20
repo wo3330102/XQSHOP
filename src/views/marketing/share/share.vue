@@ -100,10 +100,10 @@
                 </el-tooltip>
               </div>
               <div class="data-info-val-item">
-                <span class="data-count">${{ statistics.shareIncome || '0.00' }}</span>
+                <span class="data-count">{{currency.s}}{{ statistics.shareIncome || '0.00' }}</span>
                 <el-tooltip placement="bottom-start">
                   <template slot="content">
-                    通过分享出去的链接，为您带来了额外增加了${{ statistics.shareIncome || '0.00' }}的收入
+                    通过分享出去的链接，为您带来了额外增加了{{currency.s}}{{ statistics.shareIncome || '0.00' }}的收入
                   </template>
                   <span>分享收入</span>
                 </el-tooltip>

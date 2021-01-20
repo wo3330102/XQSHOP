@@ -50,10 +50,10 @@
             <i class="el-icon-s-custom"></i>
             <span slot="title">顾客</span>
           </el-menu-item>
-          <el-menu-item index="/dataCenter">
+          <!-- <el-menu-item index="/dataCenter">
             <i class="el-icon-s-data"></i>
             <span slot="title">数据中心</span>
-          </el-menu-item>
+          </el-menu-item> -->
           <el-submenu index="4">
             <template slot="title">
               <i class="el-icon-s-marketing"></i>
@@ -76,7 +76,7 @@
               <span>店铺管理</span>
             </template>
             <el-menu-item-group>
-              <el-menu-item index="/decorationManage">店铺装修</el-menu-item>
+              <!-- <el-menu-item index="/decorationManage">店铺装修</el-menu-item> -->
               <el-menu-item index="/homeSwiper">首页轮播图</el-menu-item>
               <el-menu-item index="/pageManage">页面管理</el-menu-item>
               <el-menu-item index="/menuManage">菜单栏</el-menu-item>

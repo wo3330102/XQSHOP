@@ -275,7 +275,7 @@ export default {
       this.$router.push({ path: "/commodity/edit", query: { id: e.id } });
     },
     Preview:function(params){
-      let url = 'https://' + localStorage.getItem('storeUrl') + '/product-detalis.html?id=' +  params.params.id
+      let url = 'https://' + localStorage.getItem('storeUrl') + '/product-details.html?id=' +  params.params.id
       window.open(url, '_blank') 
     }
   },

@@ -48,7 +48,7 @@
               placeholder="请输入商品现价"
               @blur="attr.price = $IsNaN(attr.price)"
             >
-              <span slot="append">USD</span>
+              <span slot="append">{{currency.n}}</span>
             </el-input>
           </div>
           <div class="item-margin" v-if="show">
@@ -126,7 +126,7 @@
               placeholder="请输入商品原价"
               @blur="attr.ot_price = $IsNaN(attr.ot_price)"
             >
-              <span slot="append">USD</span>
+              <span slot="append">{{currency.n}}</span>
             </el-input>
           </div>
           <div class="item-margin" v-if="show">

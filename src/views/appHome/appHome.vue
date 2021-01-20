@@ -15,13 +15,14 @@
   </div>
 </template>
 <script>
-export default {
+let url = "http://ddd.xshoppy.shop";
+export default { 
   data() {
     return {
       list: [
         {
           id: 0,
-          image: "/static/productReview.png",
+          image: url+"/static/img/applications/productReview.png",
           title: "商品评论",
           desc:
             "可以为商品添加评论，为买家提供购买后的反馈，以提高商品的加购率。",
@@ -29,20 +30,20 @@ export default {
         },
         {
           id: 1,
-          image: "/static/shippingInsurance.png",
+          image: url+"/static/img/applications/shippingInsurance.png",
           title: "运费险",
           desc:
             "帮助卖家收取额外费用，同时可以增加买家的信任。此功能在各大平台都有很好的表现",
           url: "/shippingInsurance",
         },
-        {
-          id: 2,
-          image: "/static/recommendProducts.png",
-          title: "推荐商品",
-          desc:
-            "随机推荐建议的商品，使其展示在其他商品的详情页中，以提高客单价和转化。",
-          url: "/recommend",
-        },
+        // {
+        //   id: 2,
+        //   image: url+"/static/img/applications/recommendProducts.png",
+        //   title: "推荐商品",
+        //   desc:
+        //     "随机推荐建议的商品，使其展示在其他商品的详情页中，以提高客单价和转化。",
+        //   url: "/recommend",
+        // },
       ],
     };
   },

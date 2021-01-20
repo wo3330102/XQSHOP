@@ -43,14 +43,14 @@
                   <p>Product Name x 1</p>
                 </td>
                 <td style>
-                  <span style>$450.00</span>
+                  <span style>{{currency.s}}450.00</span>
                 </td>
               </tr>
             </table>
             <table class="count" style="margin-top: 10px;">
               <tr style="subtotal">
                 <td style="width: 80px;">Subtotal</td>
-                <td style="color: rgb(51, 51, 51); font-weight: 600; text-align: right;">$900.00</td>
+                <td style="color: rgb(51, 51, 51); font-weight: 600; text-align: right;">{{currency.s}}900.00</td>
               </tr>
               <tr class="discount">
                 <td style="width: 80px; vertical-align: top;">Discount</td>
@@ -58,20 +58,20 @@
                   <span>
                     <i class="el-icon-price-tag"></i>OFF10
                   </span>
-                  <span style="color: rgb(51, 51, 51); font-weight: 600;">-$90.00</span>
+                  <span style="color: rgb(51, 51, 51); font-weight: 600;">-{{currency.s}}90.00</span>
                 </td>
               </tr>
               <tr class="shipping">
                 <td style="width: 80px; padding-bottom: 20px;">Shipping Insurance</td>
                 <td
                   style="color: rgb(51, 51, 51); font-weight: 600; text-align: right; padding-bottom: 20px;"
-                >+$5.00</td>
+                >+{{currency.s}}5.00</td>
               </tr>
               <tr class="shipping">
                 <td style="width: 80px; padding-bottom: 20px;">Shipping</td>
                 <td
                   style="color: rgb(51, 51, 51); font-weight: 600; text-align: right; padding-bottom: 20px;"
-                >+$20.00</td>
+                >+{{currency.s}}20.00</td>
               </tr>
               <tr class="total">
                 <td
@@ -83,9 +83,9 @@
                   <p style="line-height: 26px; font-weight: normal;">
                     <span
                       style="height: 23px; font-size: 20px; font-weight: 600; margin-right: 4px; font-family: ArialRoundedMTBold; vertical-align: -2px;"
-                    >$835.00</span>USD
+                    >{{currency.s}}835.00</span>{{currency.n}}
                   </p>
-                  <p style="margin-top: 20px; color: rgb(102, 102, 102);">You saved $90.00</p>
+                  <p style="margin-top: 20px; color: rgb(102, 102, 102);">You saved {{currency.s}}90.00</p>
                 </td>
               </tr>
             </table>

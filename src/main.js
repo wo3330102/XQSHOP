@@ -17,7 +17,7 @@ Vue.use(infiniteScroll);
 // 强制保留两位小数
 Vue.prototype.$toDecimal2 = function (x) {
   var f = parseFloat(x);
-  if (isNaN(f)) {
+  if (isNaN(f) || f<0) {
     return false;
   }
   var f = Math.round(x * 100) / 100;
@@ -33,11 +33,10 @@ Vue.prototype.$toDecimal2 = function (x) {
   return s;
 };
 // 判断是否为数字类型
-Vue.prototype.$IsNaN = function (e) {
-  console.log(e);
+Vue.prototype.$IsNaN = function (e) { 
   if(e){
-    if (isNaN(e)) {
-      return e = '';
+    if (isNaN(e) || e<0) {
+      return e = '0.00';
     } else {
       var f = parseFloat(e);
       if (isNaN(f)) {
@@ -73,6 +72,11 @@ Vue.prototype.$DelTip = function(cb){
     return false;
   });
 }
+// 货币符号
+Vue.prototype.currency = {
+  s:'₱',
+  n:'PHP'
+} 
 
 new Vue({ 
   router,

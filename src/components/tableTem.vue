@@ -84,7 +84,7 @@
               >
               <span v-else-if="item.label.indexOf('金额') > -1">
                 {{
-                  scope.row[item.prop] ? "$" + scope.row[item.prop] : "$0.00"
+                  scope.row[item.prop] ? currency.s + scope.row[item.prop] : currency.s+"0.00"
                 }}
               </span>
               <span v-else-if="item.prop == 'categoryType'">手动分类</span>
