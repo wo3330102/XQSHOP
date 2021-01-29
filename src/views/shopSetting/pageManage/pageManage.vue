@@ -30,7 +30,11 @@
         :requestParams="requestParams"
         :tableHeader="tableHeader"
         @rowClick="RowClick"
-      ></table-tem>
+      >
+        <span slot="status" slot-scope="params">
+          {{params.params.status == 1?'可见':'隐藏'}}
+        </span>
+      </table-tem>
     </div>
   </div>
 </template>

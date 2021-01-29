@@ -28,10 +28,12 @@
             </div>
           </div>
           <div class="box image">
-            <h3 class="title">轮播图图片</h3>
+            <h3 class="title">
+              轮播图图片 
+            </h3>
             <div class="content">
               <el-upload
-                :action="url+'/api/upload'"
+                :action="url + '/api/upload'"
                 :headers="{
                   Authorization: token,
                 }"
@@ -76,12 +78,12 @@
     </div>
   </div>
 </template> 
-<script> 
-import { add,edit } from "@/api/yxSystemGroupData";
+<script>
+import { add, edit } from "@/api/yxSystemGroupData";
 export default {
   data() {
     return {
-      url:localStorage.getItem('uploadUrl'),
+      url: localStorage.getItem("uploadUrl"),
       token: "",
       categotyList: [], // 轮播图列表
       upLoadHeaders: {}, // 上传头部字段
@@ -90,8 +92,8 @@ export default {
       showUpload: false, // 是否显示上传按钮
       limit: 1, // 最大上传数
       detail: {
-				status:1
-			},
+        status: 1,
+      },
       id: "",
     };
   },
@@ -104,9 +106,9 @@ export default {
         this.imageUrl = [{ url: detail.map.pic }];
         this.showUpload = true;
       }
-			this.detail = detail.map;
-			this.detail.groupName = detail.groupName;
-			this.detail.id = detail.id
+      this.detail = detail.map;
+      this.detail.groupName = detail.groupName;
+      this.detail.id = detail.id;
     }
     this.token = localStorage.getItem("token");
   },
@@ -127,17 +129,17 @@ export default {
     // 保存
     Save: function () {
       let imageUrl = "";
-      let that = this; 
-			if(this.detail.name == ''){
-				this.$message.error('请填写轮播图名称');
-				return false
-			} 
-			if (this.imageUrl.length > 0) {
+      let that = this;
+      if (this.detail.name == "") {
+        this.$message.error("请填写轮播图名称");
+        return false;
+      }
+      if (this.imageUrl.length > 0) {
         imageUrl = this.imageUrl[0].url;
       } else {
-        this.$message.error('请上传轮播图');
-				return false
-			} 
+        this.$message.error("请上传轮播图");
+        return false;
+      }
       if (this.id) {
         edit(this.detail).then((res) => {
           this.$message.success("修改成功");
@@ -146,17 +148,17 @@ export default {
           }, 200);
         });
       } else {
-				let par = {
-        groupName: "xqshop_home_banner",
-        imageArr: [ imageUrl ],
-        name: that.detail.name,
-        pic: imageUrl,
-        sort: 0,
-        status: that.detail.status, 
-        uniapp_url: "",
-        url: that.detail.url,
-        wxapp_url: "",
-      };
+        let par = {
+          groupName: "xqshop_home_banner",
+          imageArr: [imageUrl],
+          name: that.detail.name,
+          pic: imageUrl,
+          sort: 0,
+          status: that.detail.status,
+          uniapp_url: "",
+          url: that.detail.url,
+          wxapp_url: "",
+        };
         add(par).then((res) => {
           this.$message.success("新增成功");
           setTimeout(function () {
@@ -195,6 +197,12 @@ h1 {
     font-size: 14px;
     font-weight: 600;
     padding-bottom: 12px;
+    .subTitle {
+      font-size: 12px;
+      color: #606266;
+      padding-left: 6px;
+      font-weight: 400;
+    }
   }
   & > .infoTip {
     color: #1a1d2c;
@@ -221,7 +229,7 @@ h1 {
   padding: 0 -10px;
   /deep/.el-input--suffix {
     width: 55px !important;
-  } 
+  }
 }
 /deep/.el-input-group__append {
   background: #fff;

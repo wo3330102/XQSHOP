@@ -36,14 +36,14 @@ export default {
             "帮助卖家收取额外费用，同时可以增加买家的信任。此功能在各大平台都有很好的表现",
           url: "/shippingInsurance",
         },
-        // {
-        //   id: 2,
-        //   image: url+"/static/img/applications/recommendProducts.png",
-        //   title: "推荐商品",
-        //   desc:
-        //     "随机推荐建议的商品，使其展示在其他商品的详情页中，以提高客单价和转化。",
-        //   url: "/recommend",
-        // },
+        {
+          id: 2,
+          image: url+"/static/img/applications/recommendProducts.png",
+          title: "推荐商品",
+          desc:
+            "随机推荐建议的商品，使其展示在其他商品的详情页中，以提高客单价和转化。",
+          url: "/recommend",
+        }, 
       ],
     };
   },

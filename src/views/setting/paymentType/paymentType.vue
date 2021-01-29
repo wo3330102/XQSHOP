@@ -119,10 +119,7 @@
                 >保存</el-button
               >
               <el-button
-                @click="
-                  showPay = false;
-                  payOption = {};
-                "
+                @click="$NavgitorTo('/setting')"
                 >取消</el-button
               >
             </el-form-item>

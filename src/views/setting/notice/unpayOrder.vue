@@ -72,7 +72,7 @@
                   class="title"
                   style="line-height: 45px; font-size: 32px; margin-bottom: 32px;"
                 >ddd</h4>
-                <tinymce-editor ref="editor" v-model="privacyPolicy"></tinymce-editor>
+                <wangeditor ref="editor" v-model="privacyPolicy"></wangeditor>
                 <p class="viewOrder">Items in your cart</p>
                 <p style="text-align: center; font-size: 16px;">
                   or
@@ -138,10 +138,10 @@
   </div>
 </template> 
 <script>
-import tinymceEditor from "@/components/tinymce-editor";
+import wangeditor from "@/components/wangeditor";
 export default {
   components: {
-    tinymceEditor,
+    wangeditor,
   },
   data() {
     return {

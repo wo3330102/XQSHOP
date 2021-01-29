@@ -2,7 +2,13 @@
   <div class="container">
     <router-link
       to="/notice"
-      style="color: #5e7185;margin-bottom:12px;display:inline-block;height:20px;line-height:20px"
+      style="
+        color: #5e7185;
+        margin-bottom: 12px;
+        display: inline-block;
+        height: 20px;
+        line-height: 20px;
+      "
     >
       <i class="el-icon-arrow-left"></i>
       <span>通知</span>
@@ -15,7 +21,10 @@
       <!-- 退款政策 -->
       <div class="box">
         <h3 class="title">邮件主题</h3>
-        <el-input v-model="email" placeholder="Complete your Purchase!"></el-input>
+        <el-input
+          v-model="title"
+          placeholder="Complete your Purchase!"
+        ></el-input>
       </div>
       <!-- 隐私政策 -->
       <div class="box">
@@ -24,115 +33,206 @@
           <div class="box1">
             <h4 class="title">ddd</h4>
             <p class="order_number">ORDER 66422240C817758F0708BD2D7AD63E76</p>
-            <tinymce-editor ref="editor" v-model="privacyPolicy"></tinymce-editor>
+            <wangeditor ref="editor" v-model="privacyPolicy"></wangeditor>
             <p class="viewOrder">View your order</p>
-            <p style="text-align: center; font-size: 16px;">
+            <p style="text-align: center; font-size: 16px">
               or
               <a href target="_blank">View our store</a>
             </p>
-            <p style="padding-top: 30px;">
+            <p style="padding-top: 30px">
               Tracking number:
               <a href="##">WL1234567890</a>
             </p>
           </div>
-          <div class="box1 order" style="padding-bottom: 10px;">
+          <div class="box1 order" style="padding-bottom: 10px">
             <h4>Order summary</h4>
             <table class="goods">
               <tr>
-                <td style="padding: 8px 0px;">
+                <td style="padding: 8px 0px">
                   <p>Product Name x 1</p>
                 </td>
                 <td style>
-                  <span style>{{currency.s}}450.00</span>
+                  <span style>{{ currency.s }}450.00</span>
                 </td>
               </tr>
             </table>
-            <table class="count" style="margin-top: 10px;">
+            <table class="count" style="margin-top: 10px">
               <tr style="subtotal">
-                <td style="width: 80px;">Subtotal</td>
-                <td style="color: rgb(51, 51, 51); font-weight: 600; text-align: right;">{{currency.s}}900.00</td>
+                <td style="width: 80px">Subtotal</td>
+                <td
+                  style="
+                    color: rgb(51, 51, 51);
+                    font-weight: 600;
+                    text-align: right;
+                  "
+                >
+                  {{ currency.s }}900.00
+                </td>
               </tr>
               <tr class="discount">
-                <td style="width: 80px; vertical-align: top;">Discount</td>
-                <td style="display:flex;justify-content:space-between">
-                  <span>
-                    <i class="el-icon-price-tag"></i>OFF10
-                  </span>
-                  <span style="color: rgb(51, 51, 51); font-weight: 600;">-{{currency.s}}90.00</span>
+                <td style="width: 80px; vertical-align: top">Discount</td>
+                <td style="display: flex; justify-content: space-between">
+                  <span> <i class="el-icon-price-tag"></i>OFF10 </span>
+                  <span style="color: rgb(51, 51, 51); font-weight: 600"
+                    >-{{ currency.s }}90.00</span
+                  >
                 </td>
               </tr>
               <tr class="shipping">
-                <td style="width: 80px; padding-bottom: 20px;">Shipping Insurance</td>
+                <td style="width: 80px; padding-bottom: 20px">
+                  Shipping Insurance
+                </td>
                 <td
-                  style="color: rgb(51, 51, 51); font-weight: 600; text-align: right; padding-bottom: 20px;"
-                >+{{currency.s}}5.00</td>
+                  style="
+                    color: rgb(51, 51, 51);
+                    font-weight: 600;
+                    text-align: right;
+                    padding-bottom: 20px;
+                  "
+                >
+                  +{{ currency.s }}5.00
+                </td>
               </tr>
               <tr class="shipping">
-                <td style="width: 80px; padding-bottom: 20px;">Shipping</td>
+                <td style="width: 80px; padding-bottom: 20px">Shipping</td>
                 <td
-                  style="color: rgb(51, 51, 51); font-weight: 600; text-align: right; padding-bottom: 20px;"
-                >+{{currency.s}}20.00</td>
+                  style="
+                    color: rgb(51, 51, 51);
+                    font-weight: 600;
+                    text-align: right;
+                    padding-bottom: 20px;
+                  "
+                >
+                  +{{ currency.s }}20.00
+                </td>
               </tr>
               <tr class="total">
                 <td
-                  style="width: 80px; vertical-align: top; border-top: 1px solid rgb(221, 221, 221); padding-top: 20px;"
-                >Total</td>
-                <td
-                  style="color: rgb(51, 51, 51); font-weight: 600; text-align: right; border-top: 1px solid rgb(221, 221, 221); padding-top: 20px;"
+                  style="
+                    width: 80px;
+                    vertical-align: top;
+                    border-top: 1px solid rgb(221, 221, 221);
+                    padding-top: 20px;
+                  "
                 >
-                  <p style="line-height: 26px; font-weight: normal;">
+                  Total
+                </td>
+                <td
+                  style="
+                    color: rgb(51, 51, 51);
+                    font-weight: 600;
+                    text-align: right;
+                    border-top: 1px solid rgb(221, 221, 221);
+                    padding-top: 20px;
+                  "
+                >
+                  <p style="line-height: 26px; font-weight: normal">
                     <span
-                      style="height: 23px; font-size: 20px; font-weight: 600; margin-right: 4px; font-family: ArialRoundedMTBold; vertical-align: -2px;"
-                    >{{currency.s}}835.00</span>{{currency.n}}
+                      style="
+                        height: 23px;
+                        font-size: 20px;
+                        font-weight: 600;
+                        margin-right: 4px;
+                        font-family: ArialRoundedMTBold;
+                        vertical-align: -2px;
+                      "
+                      >{{ currency.s }}835.00</span
+                    >{{ currency.n }}
                   </p>
-                  <p style="margin-top: 20px; color: rgb(102, 102, 102);">You saved {{currency.s}}90.00</p>
+                  <p style="margin-top: 20px; color: rgb(102, 102, 102)">
+                    You saved {{ currency.s }}90.00
+                  </p>
                 </td>
               </tr>
             </table>
           </div>
           <div class="box1 customer-information">
             <p
-              style="height: 28px; font-size: 20px; font-family: PingFangSC-Medium; font-weight: 500; color: rgb(51, 51, 51); line-height: 28px;"
-            >Customer information</p>
+              style="
+                height: 28px;
+                font-size: 20px;
+                font-family: PingFangSC-Medium;
+                font-weight: 500;
+                color: rgb(51, 51, 51);
+                line-height: 28px;
+              "
+            >
+              Customer information
+            </p>
             <p class="title">Shipping address</p>
-            <p>Green Chuangyungu Building, No. 38, Gaoxin North 6th Road, Nanyuan Street, Nanshan District, Shenzhen,Guangdong, China</p>
+            <p>
+              Green Chuangyungu Building, No. 38, Gaoxin North 6th Road, Nanyuan
+              Street, Nanshan District, Shenzhen,Guangdong, China
+            </p>
             <p class="title">Billing address</p>
-            <p>Green Chuangyungu Building, No. 38, Gaoxin North 6th Road, Nanyuan Street, Nanshan District, Shenzhen,Guangdong, China</p>
+            <p>
+              Green Chuangyungu Building, No. 38, Gaoxin North 6th Road, Nanyuan
+              Street, Nanshan District, Shenzhen,Guangdong, China
+            </p>
             <p class="title">Shipping method</p>
             <p>Standard</p>
             <p class="title">Payment method</p>
             <p>Express</p>
           </div>
-          <div style="padding: 30px 23px 80px;">
+          <div style="padding: 30px 23px 80px">
             If you have any questions, reply to this email or contact us at
-            <span
-              style="color: rgb(16, 142, 233); cursor: pointer;"
-            >xxx@gmail.com</span>
+            <span style="color: rgb(16, 142, 233); cursor: pointer"
+              >xxx@gmail.com</span
+            >
           </div>
         </div>
       </div>
     </div>
     <div class="pageSaveBtn">
-      <el-button type="primary">保存</el-button>
+      <el-button type="primary" @click="Save">保存</el-button>
     </div>
   </div>
 </template> 
 <script>
-import tinymceEditor from "@/components/tinymce-editor";
+import { getDetial,editTemp } from "@/api/notice";
+import wangeditor from "@/components/wangeditor";
 export default {
   components: {
-    tinymceEditor,
+    wangeditor,
   },
   data() {
     return {
-      email: "Order {{ name }} confirmed",
+      title: "",
+      defaultTitle: "Order {{ name }} confirmed",
       privacyPolicy: "",
+      default:
+        '<p style="color: #333333; font-size: 24px; line-height: 33px; height: 33px; margin-bottom: 16px;">Thank you for your purchase!</p><p style="color: #666666; line-height: 20px;">Hi {{first_name}}, we\'re getting your order ready to be shipped. We will notify you when it has been sent.1</p>',
+      id: 0,
     };
+  },
+  created() {
+    getDetial(this.$route.query.id).then((res) => {
+      if (res) {
+        this.title = res.title;
+        this.privacyPolicy = res.content;
+        this.id = res.id;
+      } else {
+        this.privacyPolicy = this.default;
+        this.title = this.defaultTitle;
+      }
+    });
   },
   methods: {
     DelMenu: function (index) {
       console.log(index);
       this.selectData.splice(index, 1);
+    },
+    Save: function () {
+      let par = {
+        content:this.privacyPolicy,
+        id:this.id,
+        title:this.title, 
+      }
+      editTemp(par).then(res=>{
+        console.log(res);
+        this.$message.success('修改成功')
+        this.$router.push('/notice')
+      })
     },
   },
 };

@@ -35,7 +35,7 @@
           "
           >添加评论</el-button
         >
-        <el-button type="primary">速卖通导入</el-button>
+        <!-- <el-button type="primary">速卖通导入</el-button> -->
       </span>
     </h1>
     <div class="product-review-info">
@@ -244,6 +244,7 @@
             :on-preview="PictureCardPreview"
             :on-remove="RemoveImg"
             :on-change="ChangeImg"
+            :on-exceed="TipImg"
             :limit="limit"
             :file-list="fileList"
             :class="showUpload ? 'hide' : ''"
@@ -367,7 +368,7 @@
                   Authorization: token,
                 }"
                 class="avatar-uploader"
-                :show-file-list="false"
+                :show-file-list="false" 
                 :on-success="
                   (res, file) => {
                     item.fictitiousPics = res.link;
@@ -392,6 +393,7 @@
                 :multiple="true"
                 :on-preview="PictureCardPreview"
                 :on-remove="RemoveImg"
+                :on-exceed="TipImg"
                 :on-change="
                   (file, fileList) => {
                     ChangeItemImg(file, fileList, index);
@@ -710,6 +712,7 @@ export default {
           this.showEditComment = true;
           // 深拷贝，解决点击编辑时表格内当前项评分会立马变成编辑后评分的BUG
           this.form = { ...item };
+          console.log(this.form)
           this.form.productScore =
             this.form.productScore === 0 ? 1 : this.form.productScore;
           if (item.pics) {
@@ -720,6 +723,12 @@ export default {
                 obj.url = i;
                 arr.push(obj);
               });
+              console.log(arr)
+              if(arr.length == 3){
+                this.showUpload = true;
+              } else {
+                this.showUpload = false;
+              } 
               this.fileList = arr;
             } else {
               let arr = { url: item.pics };
@@ -759,7 +768,7 @@ export default {
           i.url = i.response.link;
         }
       });
-      this.fileList = fileList;
+      this.fileList = fileList; 
       this.showUpload = fileList.length >= this.limit;
     },
     ChangeItemImg(file, fileList, index) {
@@ -778,6 +787,9 @@ export default {
         }
       });
       this.showUpload = false;
+    },
+    TipImg:function(){
+      this.$message.info('最多上传3张图片')
     },
     // 保存对单个评论的修改
     SaveChangeItemComment: function () {
@@ -955,13 +967,18 @@ h1 {
     }
     & > span {
       background: #fff;
-      padding: 8px 12px;
+      // padding: 8px 12px;
       border: 1px solid #dcdfe6;
       margin-right: -5px;
       border-bottom-left-radius: 4px;
       border-top-left-radius: 4px;
       position: relative;
-      cursor: pointer;
+      /deep/.el-checkbox{
+        width: 54px;
+        height: 37px;
+        line-height: 37px;
+        text-align: center;
+      }
       /deep/.el-checkbox__input {
         display: none;
       }
@@ -1048,6 +1065,7 @@ h1 {
     border-radius: 6px;
     box-sizing: border-box;
     font-size: 26px;
+    overflow: hidden;
   }
   /deep/.avatar-uploader-icon {
     font-size: 28px;
@@ -1056,6 +1074,10 @@ h1 {
     height: 80px;
     line-height: 80px;
     text-align: center;
+  }
+  img{
+    width: 80px;
+    height: 80px;
   }
 }
 /deep/.el-progress-bar__inner {

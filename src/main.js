@@ -57,8 +57,15 @@ Vue.prototype.$IsNaN = function (e) {
   }
 }
 // 全局跳转
-Vue.prototype.$NavgitorTo = function (path) {
-  router.push(path)
+Vue.prototype.$NavgitorTo = function (path,par = false) {
+  if(par){
+    router.push({
+    path:path,
+    query:par
+    })
+  } else {
+    router.push(path)
+  }
 }
 // 删除操作的提示
 Vue.prototype.$DelTip = function(cb){ 

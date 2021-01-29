@@ -42,7 +42,9 @@
               <table class="product-table">
                 <tbody>
                   <tr v-for="(item, index) in commodityList" :key="item.id">
-                    <td style="min-width: 44px">{{ requestParams.page*6 + index+1}}</td>
+                    <td style="min-width: 44px">
+                      {{ requestParams.page * 6 + index + 1 }}
+                    </td>
                     <td>
                       <span
                         class="small-img"
@@ -96,7 +98,9 @@
                   <table class="product-table">
                     <tbody>
                       <tr v-for="(item, index) in commodityList" :key="item.id">
-                        <td style="min-width: 44px">{{ requestParams.page*6 + index+1 }}</td>
+                        <td style="min-width: 44px">
+                          {{ (currentPage - 1) * 6 + index + 1 }}
+                        </td>
                         <td>
                           <span
                             class="small-img"
@@ -130,7 +134,7 @@
                       @current-change="CurrentChange"
                       :current-page.sync="currentPage"
                       background
-                      :page-size="requestParams.size"
+                      :page-size="6"
                       layout="total, prev, pager, next"
                       :total="total"
                     ></el-pagination>
@@ -171,11 +175,12 @@
                     <p>{{ plan.name }}</p>
                     <p>
                       <template v-if="plan.type == 1">
-                        下单金额：{{currency.s}}{{
-                          plan.minUnit ? $IsNaN(plan.minUnit) : "0.00"
-                        }}
+                        下单金额：{{ currency.s
+                        }}{{ plan.minUnit ? $IsNaN(plan.minUnit) : "0.00" }}
                         {{
-                          plan.maxUnit ? "- "+currency.s + $IsNaN(plan.maxUnit) : "and up"
+                          plan.maxUnit
+                            ? "- " + currency.s + $IsNaN(plan.maxUnit)
+                            : "and up"
                         }}
                       </template>
                       <template v-else>
@@ -187,7 +192,11 @@
                     </p>
                   </td>
                   <td>
-                    {{ plan.price == 0 ? "免运费" : currency.s + $IsNaN(plan.price) }}
+                    {{
+                      plan.price == 0
+                        ? "免运费"
+                        : currency.s + $IsNaN(plan.price)
+                    }}
                   </td>
                 </tr>
               </table>
@@ -253,7 +262,6 @@
             @change="
               () => {
                 table = [];
-                InitData();
               }
             "
           >
@@ -270,11 +278,7 @@
             v-model="shopContent"
             placeholder="请输入内容"
           >
-            <el-button
-              slot="append"
-              @click="customRequest.shopContent = shopContent"
-              >查询</el-button
-            >
+            <el-button slot="append" @click="Search">查询</el-button>
           </el-input>
         </template>
       </div>
@@ -332,6 +336,7 @@ import {
   delPlan,
   deleteTemplateProudct,
 } from "@/api/logistics";
+let customProductList = [];
 import { getCates } from "@/api/yxStoreCategory";
 import elTableInfiniteScroll from "el-table-infinite-scroll";
 export default {
@@ -354,7 +359,8 @@ export default {
       shopDialog: false, // 自定义物流时是否显示添加商品弹框
       customRequest: {
         page: 0,
-        size: 20,
+        size: 30,
+        shopContent: "",
       },
       shopCategoryList: [], // 分类列表
       shopContent: "",
@@ -369,16 +375,19 @@ export default {
   watch: {
     requestParams: {
       handler: function (val) {
-        this.GetData();
+        if (this.$route.query.status == 0) {
+          this.GetData();
+        }
       },
       deep: true,
     },
-    customRequest:{
+    customRequest: {
       handler: function (val) {
+        console.log("监听");
         this.InitData();
       },
       deep: true,
-    }
+    },
   },
   created() {
     (this.requestParams.tempId = this.$route.query.id),
@@ -394,9 +403,11 @@ export default {
       });
     } else {
       // 获取自定义物流商品
+      this.requestParams.size = 99;
       getCommodity(this.requestParams).then((res) => {
-        console.log(res);
-        this.commodityList = res.content;
+        // customProductList为所有的当前自定义物流下已选择的商品数据，commodityList为当前表格展示数据
+        customProductList = res.content;
+        this.commodityList = res.content.slice(0, 6);
         this.total = res.totalElements;
       });
       // 获取自定义可选商品分类
@@ -430,9 +441,13 @@ export default {
   methods: {
     // 分页选择
     CurrentChange: function (e) {
-      this.currentPage = e;
-      this.requestParams.page = e - 1;
-      this.GetData();
+      if (this.$route.query.status == 0) {
+        this.currentPage = e;
+        this.requestParams.page = e - 1;
+      } else {
+        this.commodityList = customProductList.slice((e - 1) * 6, e * 6);
+        this.currentPage = e;
+      }
     },
     // 获取物流商品
     GetData: function () {
@@ -449,12 +464,10 @@ export default {
         size: 20,
       };
       this.shopDialog = true;
-      this.InitData();
     },
     // 加载表单数据
     InitData: function () {
       getCustomProduct(this.customRequest).then((res) => {
-        console.log(res);
         let arr = this.table.concat(res.content);
         if (arr.length <= res.totalElements) {
           this.table = arr;
@@ -465,7 +478,6 @@ export default {
     // 下拉加载商品列表
     Load: function (res) {
       this.customRequest.page += 1;
-      this.InitData();
     },
     // 确认添加商品
     CheckSelectItem: function () {
@@ -478,8 +490,14 @@ export default {
         productIs: arr,
       };
       addCustomProduct(par).then((res) => {
-        console.log(this.selectItem);
-        this.commodityList = this.commodityList.concat([...this.selectItem]);
+        customProductList = customProductList.concat([...this.selectItem]);
+        this.commodityList = [
+          ...customProductList.slice(
+            (this.currentPage - 1) * 6,
+            this.currentPage * 6
+          ),
+        ];
+        this.total = customProductList.length;
         this.$message.success("添加成功");
         this.selectItem = [];
         this.shopDialog = false;
@@ -497,7 +515,16 @@ export default {
       };
       deleteTemplateProudct(par).then((res) => {
         this.$message.success("删除成功");
-        this.commodityList.splice(index, 1);
+        if (this.currentPage == 1) {
+          customProductList.splice(index, 1);
+        } else {
+          customProductList.splice((this.currentPage - 1) * 6 + index, 1);
+        }
+        this.commodityList = customProductList.slice(
+          (this.currentPage - 1) * 6,
+          this.currentPage * 6
+        );
+        this.total = customProductList.length;
         this.customRequest = {
           page: 0,
           size: 20,
@@ -551,6 +578,16 @@ export default {
         this.$message.success("删除成功");
         this.$router.push("/logisticsManagement");
       });
+    },
+    // 搜索商品
+    Search: function () {
+      this.table = [];
+      this.tableTotal = 0;
+      this.customRequest = {
+        page: 0,
+        size: 30,
+        shopContent: this.shopContent,
+      };
     },
   },
 };

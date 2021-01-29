@@ -21,10 +21,13 @@ service.interceptors.request.use(config => {
   const storeId = localStorage.getItem('storeId')
   if ((config.method === 'post' || config.method === 'put') && config.url.indexOf('api/yxStoreProductReply') < 0 && config.url.indexOf('api/yxStorePromotions/mod') < 0) {
     // 判断post,put是否需要增加storeId
-    if (!config.data.notStoreId && !(config.data instanceof Array)) {
-      config.data = {
-        storeId: storeId,
-        ...config.data
+    console.log(config.data)
+    if(config.data){
+      if (!config.data.notStoreId && !(config.data instanceof Array)) {
+        config.data = {
+          storeId: storeId,
+          ...config.data
+        }
       }
     }
   } else if (config.method === 'get') {
@@ -53,7 +56,7 @@ service.interceptors.request.use(config => {
       type: 'warning',
     }).then(() => {
       return config
-    })
+    }) 
   } else {
     return config
   }
@@ -97,13 +100,13 @@ service.interceptors.response.use(res => {
     } = error;
     console.log(message)
     if (message == 'Request failed with status code 401') {
-      // let token = localStorage.getItem('token');
-      // if(token){
-      //   message = '登入过期，请重新登入' 
-      // } else {
-      //   message = '尚未登入，请登入'
-      // }
-      // router.push('/login') 
+      let token = localStorage.getItem('token');
+      if(token){
+        message = '登入过期，请重新登入' 
+      } else {
+        message = '尚未登入，请登入'
+      }
+      router.push('/login') 
       if (pass) {
         pass = false;
         // MessageBox.confirm(
@@ -119,6 +122,9 @@ service.interceptors.response.use(res => {
         // })
         localStorage.clear();
         router.push('/login')
+        setTimeout(function () {
+          pass = true;
+        }, 2000)
       } else {
         setTimeout(function () {
           pass = true;

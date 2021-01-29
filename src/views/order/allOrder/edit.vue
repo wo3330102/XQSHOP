@@ -77,17 +77,17 @@
                   </td>
                   <td class="spec">1</td>
                   <td class="price">
-                    {{ currency.s+item.cartInfoMap.truePrice }} *
+                    {{currency.s}}{{ $IsNaN(item.cartInfoMap.truePrice) }} *
                     {{ item.cartInfoMap.cartNum }}
                   </td>
                   <td class="totalPrice">
                     {{
-                      currency.s+$toDecimal2(
+                      currency.s+$IsNaN(
                         item.cartInfoMap.truePrice * item.cartInfoMap.cartNum
                       )
                     }}
                   </td>
-                  <td class="discount">{{currency.s}}0.00</td>
+                  <td class="discount">{{currency.s}}{{detail.discount?$IsNaN(detail.discount):'0.00'}}</td>
                 </tr>
               </tbody>
             </table>
@@ -99,27 +99,34 @@
               <div class="left">小计</div>
               <div class="right">
                 <span>{{ detail.totalNum }}项</span>
-                <span class="num">{{ currency.s + detail.totalPrice }}</span>
+                <span class="num">{{currency.s}} {{ $IsNaN(detail.totalPrice) }}</span>
               </div>
             </div>
             <div class="item">
               <div class="left">折扣</div>
               <div class="right">
                 <span>折扣金额</span>
-                <span class="num">{{ currency.s + detail.deductionPrice }}</span>
+                <span class="num">{{currency.s}} {{ detail.discount?$IsNaN(detail.discount):'0.00' }}</span>
               </div>
             </div>
             <div class="item">
               <div class="left">运费</div>
               <div class="right">
                 <span>Standard Shipping</span>
-                <span class="num">{{ currency.s+detail.payPostage }}</span>
+                <span class="num">{{currency.s}} {{ (detail.payPostage?$IsNaN(detail.payPostage):'0.00') }}</span>
               </div>
+            </div>
+            <div class="item">
+              <div class="left">运费险</div>
+              <div class="right">
+                <span></span>
+                <span class="num">{{currency.s}} {{ (detail.freightPrice?$IsNaN(detail.freightPrice):'0.00') }}</span>
+              </div> 
             </div>
             <div class="item">
               <div class="left">总计</div>
               <div class="right">
-                <span class="num">{{ currency.s + detail.payPrice }}</span>
+                <span class="num">{{currency.s}} {{ detail.payPrice }}</span>
               </div>
             </div>
           </div>
@@ -175,7 +182,7 @@
               <p>
                 <span>订单编号：</span>
                 <span>{{ detail.orderId }}</span>
-              </p>
+              </p> 
               <p>
                 <span>支付编号：</span>
                 <span>{{ detail.payType }}</span>

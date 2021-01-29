@@ -34,13 +34,9 @@
             :style="{ backgroundImage: 'url(' + params.params.pic + ')' }"
           ></span>
         </template>
-        <template slot="option" slot-scope="params">
+        <template slot="option" slot-scope="params"> 
           <span
-            @click.stop="
-              (e) => {
-                params;
-              }
-            "
+            @click.stop="Preview(params)"
             class="textBtn"
             >预览</span
           >
@@ -128,6 +124,11 @@ export default {
         })
       }
     },
+    Preview:function(params){
+      // let url = 'https://' + localStorage.getItem('storeUrl') + '/product-list.html?sid=' +  params.params.id + '&titleName=' + encodeURIComponent(params.params.title)
+      let url = 'http://' + localStorage.getItem('storeUrl') + '/product-list.html?sid=' +  params.params.id + '&titleName=' + encodeURIComponent(params.params.title)
+      window.open(url, '_blank') 
+    }
   },
 };
 </script>

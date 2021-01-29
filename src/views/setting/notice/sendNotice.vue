@@ -24,7 +24,8 @@
           <div class="box1">
             <h4 class="title">ddd</h4>
             <p class="order_number">ORDER 66422240C817758F0708BD2D7AD63E76</p>
-            <tinymce-editor ref="editor" v-model="privacyPolicy"></tinymce-editor>
+            <wangeditor ref="editor" v-model="privacyPolicy"></wangeditor>
+            
             <p class="viewOrder">View your order</p>
             <p style="text-align: center; font-size: 16px;">
               or
@@ -60,10 +61,10 @@
   </div>
 </template> 
 <script>
-import tinymceEditor from "@/components/tinymce-editor";
+import wangeditor from "@/components/wangeditor";
 export default {
   components: {
-    tinymceEditor,
+    wangeditor,
   },
   data() {
     return {

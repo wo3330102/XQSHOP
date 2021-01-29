@@ -12,11 +12,8 @@ module.exports = {
         port: "8080", // 代理端口
         proxy: {
             "/api": {
-                target: "http://192.168.2.134:8001/admin", // 开发接口--吕外冬
-                changeOrigin: true, // 开启代理，在本地创建一个虚拟服务端
-                /* pathRewrite: {
-          "^/api": ""
-        } */
+                target: "https://admin.xqshopify.com/admin", // 开发接口--吕外冬
+                changeOrigin: true, // 开启代理，在本地创建一个虚拟服务端 
             }
         }
     },

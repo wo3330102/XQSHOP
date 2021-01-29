@@ -208,20 +208,22 @@ export default {
           that.loading = false;
         }, 200);
         that.data = res.content;
-        that.total = res.totalElements;
+        that.total = res.totalElements; 
         if (res.hasOwnProperty("cateList")) {
           that.$emit("GetCategory", res.cateList);
         } 
         if(that.requestUrl === 'api/getYxStoreProductReplyList'){ 
           this.$emit('GetData',res);
         }
-
+        that.$emit('resultData',res);
       });
     },
     // 选择单条数据
     SelectionChange: function (e, row) {
       this.selectItem = e;  
       this.isActive = true;
+      // 用于导出数据
+      this.$emit('SelectionChange',e)
     },
     // 批量操作
     DispachSelect: function (e) {

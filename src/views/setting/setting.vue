@@ -35,13 +35,13 @@ export default {
           tip: "管理客户下单时可以选择的物流配送方案",
           url: "/logisticsManagement",
         },
-        // {
-        //   id: 3,
-        //   icon: url + "/static/img/settings/notice.png",
-        //   title: "通知",
-        //   tip: "自动发送给客户通知",
-        //   url: "/notice",
-        // },
+        {
+          id: 3,
+          icon: url + "/static/img/settings/notice.png",
+          title: "通知",
+          tip: "自动发送给客户通知",
+          url: "/notice",
+        },
         // {
         //   id: 4,
         //   icon: url + "/static/img/settings/accout.png",

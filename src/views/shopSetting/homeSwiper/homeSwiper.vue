@@ -2,7 +2,9 @@
   <div class="container">
     <h1 class="title">
       <span>首页轮播图</span>
-      <el-button type="primary" @click="$NavgitorTo('/editHomeSwiper')">新增</el-button>
+      <el-button type="primary" @click="$NavgitorTo('/editHomeSwiper')"
+        >新增</el-button
+      >
     </h1>
     <div class="content">
       <!-- <div class="conditions"> 
@@ -16,27 +18,32 @@
         :requestParams="requestParams"
         :requestUrl="'api/yxSystemGroupData'"
         :tableHeader="tableHeader"
-        :optionList="['删除']" 
+        :optionList="['删除']"
         @BatchOption="SelectOption"
         @rowClick="RowClick"
         :isRefresh="isRefresh"
-      > 
+      >
         <el-table-column
           v-for="(item, index) in tableHeader"
           :key="index"
           :prop="item.prop ? item.prop : ''"
           :label="item.label ? item.label : ''"
-          :width="item.width ? item.width : ''" 
+          :width="item.width ? item.width : ''"
           :sortable="item.sortable"
         >
-          <template slot-scope="scope"> 
+          <template slot-scope="scope">
             <template v-if="item.prop == 'pic'">
-              <span class="small-img" :style="{ backgroundImage: 'url(' + scope.row['map'].pic + ')' }"></span>
+              <span
+                class="small-img"
+                :style="{
+                  backgroundImage: 'url(' + scope.row['map'].pic + ')',
+                }"
+              ></span>
             </template>
             <template v-else-if="item.prop == 'status'">
-              <span>{{scope.row.status == 0?'隐藏':'显示'}}</span>
+              <span>{{ scope.row.status == 0 ? "隐藏" : "显示" }}</span>
             </template>
-            <span v-else>{{ scope.row['map'][item.prop] }}</span> 
+            <span v-else>{{ scope.row["map"][item.prop] }}</span>
           </template>
         </el-table-column>
       </table-tem>
@@ -50,7 +57,8 @@
 <script>
 import exportFunction from "@/components/exportFunction";
 import tableTem from "@/components/tableTem";
-import {del} from "@/api/yxSystemGroupData"
+import { del } from "@/api/yxSystemGroupData";
+var async = require("async");
 export default {
   components: {
     exportFunction,
@@ -67,47 +75,50 @@ export default {
         {
           prop: "pic",
           label: "",
-          width:90,
+          width: 90,
         },
         {
           prop: "name",
-          label: "标题", 
-          sortable:true
+          label: "标题",
+          sortable: true,
         },
         {
           prop: "url",
-          label: "链接", 
+          label: "链接",
         },
         {
           prop: "status",
           label: "状态",
           width: 175,
-        }
+        },
       ],
       currentPage: 1,
       showExport: false,
-      isRefresh:0,
+      isRefresh: 0,
+      timeOut: null,
     };
   },
-  methods: {  
-    RowClick:function(e){
-      localStorage.setItem('swiperDetail',JSON.stringify(e))
+  methods: {
+    RowClick: function (e) {
+      localStorage.setItem("swiperDetail", JSON.stringify(e));
       this.$router.push({
-        name:'EditHomeSwiper',
-        query:{
-          id:e.id
-        }
-      })
+        name: "EditHomeSwiper",
+        query: {
+          id: e.id,
+        },
+      });
     },
-    SelectOption:function(index,item){ 
+    SelectOption: function (index, item) {
       let that = this;
-      item.map(i=>{
-        del(i.id).then(res=>{
-          that.$message.success('删除成功')
-          that.isRefresh += 1; 
-        })
-      }) 
-    }
+      item.map(async (i) => {
+        let res = await del(i.id);
+        clearTimeout(that.timeOut);
+        that.timeOut = setTimeout(() => {
+          that.$message.success("删除成功");
+          that.isRefresh += 1;
+        }, 200);
+      });
+    },
   },
 };
 </script>
@@ -157,12 +168,12 @@ export default {
     /deep/ .el-button {
       height: 36px;
       padding: 0 15px;
-    } 
+    }
   }
   .pagination {
     padding: 14px 0;
     text-align: center;
   }
-}  
+}
 </style>
 

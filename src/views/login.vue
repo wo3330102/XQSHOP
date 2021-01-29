@@ -162,7 +162,8 @@ export default {
           )
             .then((res) => {
               localStorage.setItem("token", res.token);
-              this.$router.push("/"); 
+              localStorage.setItem('uploadUrl',process.env.VUE_APP_BASE_API)
+              this.$router.push("/");  
               this.showLoading = false;
             })
             .catch((res) => {

@@ -8,17 +8,17 @@
   },
   "dependencies": {
     "@riophae/vue-treeselect": "^0.4.0",
-    "@tinymce/tinymce-vue": "^2.0.1",
+    "async": "^3.2.0",
     "compression-webpack-plugin": "^6.0.1",
     "core-js": "^3.6.5",
     "echarts": "^4.9.0",
     "el-table-infinite-scroll": "^1.0.10",
     "jsencrypt": "^3.0.0-rc.1",
-    "tinymce": "^5.0.3",
     "vue-echarts": "^5.0.0-beta.0",
     "vue-infinite-scroll": "^2.0.2",
     "vue-qr": "^2.3.0",
     "vue-video-player": "^5.0.2",
+    "wangeditor": "^4.6.3",
     "webpack-bundle-analyzer": "^3.8.0"
   },
   "devDependencies": {

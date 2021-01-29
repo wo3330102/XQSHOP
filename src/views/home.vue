@@ -50,10 +50,10 @@
             <i class="el-icon-s-custom"></i>
             <span slot="title">顾客</span>
           </el-menu-item>
-          <!-- <el-menu-item index="/dataCenter">
+          <el-menu-item index="/dataCenter">
             <i class="el-icon-s-data"></i>
             <span slot="title">数据中心</span>
-          </el-menu-item> -->
+          </el-menu-item>
           <el-submenu index="4">
             <template slot="title">
               <i class="el-icon-s-marketing"></i>
@@ -240,8 +240,10 @@ export default {
           break;
         case "5":
           // this.$store.commit("setUrl", "/themeShop");
-          this.openUrl = '/decorationManage';
-          this.$router.push("/decorationManage");
+          // this.openUrl = '/decorationManage';
+          // this.$router.push("/decorationManage");
+          this.openUrl = '/homeSwiper';
+          this.$router.push("/homeSwiper");
       }
     },
     Command: function (e) {

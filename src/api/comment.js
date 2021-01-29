@@ -1,4 +1,14 @@
 import request from '@/utils/request'
+
+// 控制评论功能是否开启
+export function isOpen(data) {
+  return request({
+    url: 'api/yxSystemStore/comments/isOpen',
+    method: 'post', 
+    data
+  })
+}
+
 // 根据商品id获取评论列表
 export function getCommentListById(params) {
   return request({
@@ -31,15 +41,7 @@ export function addComment(data) {
     method: 'post',
     data 
   })
-}
-// // 删除
-// export function deleteAll(data) {
-//   return request({
-//     url: 'api/yxStoreProductReply/deleteAll',
-//     method: 'get',
-//     data
-//   })
-// }
+} 
 // 控制当前商品评论列表是否展示
 export function editMainStatus(data) {
   return request({

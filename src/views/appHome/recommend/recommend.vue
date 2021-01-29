@@ -339,6 +339,7 @@ export default {
         page: 0,
         count: 0,
         click: 0,
+        countType:0,
       },
       currentPage:0,
       total:0,
@@ -362,8 +363,7 @@ export default {
     this.Init();
     getCates().then((res) => {
       this.shopCategoryList = res.content;
-    });
-
+    });  
     let time = new Date().toLocaleDateString();
     this.date = [
       // '2020-10-11 00:00:00',
@@ -380,6 +380,7 @@ export default {
     ChangeType: function (e) {
       this.table = [];
       this.active = e;
+      this.requestParams.countType = e;
       this.requestParams.count = e;
       this.requestParams.click = 0;
       this.GetList();
@@ -392,13 +393,13 @@ export default {
         console.log(this.active)
         switch (this.active){
           case 0:
-            this.total = res.browseNum;
+            this.total = res.totalElements;
             break;
           case 1:
-            this.total = res.toCartNum;
+            this.total = res.totalElements;
             break;
           case 2:
-            this.total = res.buyNum;
+            this.total = res.totalElements;
             break;
         }
         // this.total = res.

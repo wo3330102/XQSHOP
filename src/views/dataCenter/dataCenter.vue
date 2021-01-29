@@ -269,7 +269,7 @@ import ECharts from "vue-echarts";
 import "echarts/lib/chart/line";
 import "echarts/lib/chart/pie";
 import "echarts/lib/component/legend";
-import "echarts/lib/component/tooltip";
+import "echarts/lib/component/tooltip";   
 
 export default {
   components: {
@@ -281,8 +281,8 @@ export default {
       this.Init();
     },
   },
-  data() {
-    return {
+  data() {0
+    return { 
       dateList: "",
       pickerOptions: {
         disabledDate(time) {

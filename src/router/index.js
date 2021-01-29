@@ -140,6 +140,10 @@ const routes = [{
       path: '/recommendOption',
       name: 'RecommendOption',
       component: () => import( /* webpackChunkName: "about" */ '../views/appHome/recommend/recommendOption.vue'),
+    },{
+      path: '/facebookPixel',
+      name: 'FacebookPixel',
+      component: () => import( /* webpackChunkName: "about" */ '../views/appHome/facebookPixel.vue'),
     }]
   }, {
     path: 'shopSetting',

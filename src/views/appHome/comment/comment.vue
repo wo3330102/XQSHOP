@@ -27,8 +27,8 @@
         >
       </span>
       <span class="options">
-        <el-button>关闭</el-button>
-        <el-button>配置</el-button>
+        <el-button @click="IsOpen">{{status == 1 ? "关闭" : "开启"}}</el-button>
+        <!-- <el-button>配置</el-button> -->
       </span>
     </h1>
     <div class="content">
@@ -69,8 +69,9 @@
           </div>
         </template>
         <!-- 筛选星级 -->
-        <template v-else>
+        <template v-else >
           <span
+            @change="CheckAll"
             ><el-checkbox
               :indeterminate="!isCheckAll"
               v-model="isCheckAll"
@@ -114,6 +115,7 @@
         :default-sort="{ prop: 'num', order: 'descending' }"
         @rowClick="ToDetail"
         @BatchOption="BatchOption"
+        @resultData="InitStatus"
       >
         <el-table-column
           v-for="(item, index) in tableHeader"
@@ -192,11 +194,11 @@
             <!-- 操作 -->
             <template v-else-if="item.prop == 'option'">
               <template v-if="requestUrl == '/api/yxStoreProductReplyAll'">
-                <span
+                <!-- <span
                   class="textBtn"
                   @click.stop="Option(scope.row, 'important')"
                   >速卖通导入</span
-                >
+                > -->
                 <span class="textBtn" @click.stop="Option(scope.row, 'review')"
                   >预览</span
                 >
@@ -325,7 +327,7 @@
 <script>
 import tableTem from "@/components/tableTem";
 import { edit, getCates } from "@/api/yxStoreCategory";
-import { reviewComment, del, editMainStatus } from "@/api/comment";
+import { reviewComment, del, editMainStatus,isOpen } from "@/api/comment";
 export default {
   components: {
     tableTem,
@@ -435,9 +437,23 @@ export default {
         },
       ],
     };
-  },
-  created() {},
+  }, 
   methods: {
+    // 控制当前店铺评论状态
+    IsOpen:function(){
+      let status = this.status == 1?0:1
+      let par = {
+        isOpen:status
+      }
+      isOpen(par).then(res=>{
+        console.log(res);
+      })
+    },
+    // 查看当前店铺评论状态
+    InitStatus:function(res){
+      console.log(res);
+      this.status = Number(res.isOpen)
+    },
     // 查询评论类别
     ChangeActive: function (index) {
       this.active = index;
@@ -592,7 +608,7 @@ export default {
     // 单个评论操作
     Option: function (detail, status) {
       let that = this;
-      this.itemDetail = detail;
+      this.itemDetail = detail; 
       if (this.requestUrl == "/api/yxStoreProductReplyAll") {
         let type = status;
         switch (type) {
@@ -601,6 +617,8 @@ export default {
             break;
           case "review":
             // 跳转到预览链接
+            let url = 'https://' + localStorage.getItem('storeUrl') + '/product-details.html?id=' +  detail.id
+            window.open(url, '_blank') 
             break;
           case "status":
             let par = {

@@ -8,14 +8,25 @@
           <div class="box">
             <h3 class="title">
               Facebook Pixel
-              <span class="subTitle">可通过追踪您的店铺数据，为您找到最精准的客户进行营销</span>
-            </h3>
-            <div>
+              <span class="subTitle"
+                >可通过追踪您的店铺数据，为您找到最精准的客户进行营销</span
+              >
+            </h3> 
+            <div class="detail">
+              <el-tag
+                :key="index"
+                v-for="(tag, index) in tagList"
+                closable
+                @close="CloseTag(tag, index)"
+                >{{ tag }}</el-tag
+              >
               <el-input
-                v-model="detail.facebookPixel"
+                class="input-new-tag"
+                v-model="facebookPixel"
+                ref="saveTagInput"
                 size="medium"
-                maxlength="100"
-                placeholder="请将您的Facebook Pixel ID粘贴至此处"
+                placeholder="请输入Facebook Pixel ID （按回车键添加）"
+                @keyup.enter.native="InputConfirm(index)"
               ></el-input>
             </div>
           </div>
@@ -23,17 +34,26 @@
           <div class="box">
             <h3 class="title">
               Snap Pixel
-              <span class="subTitle">可通过追踪您的店铺数据，为您找到最精准的客户进行营销</span>
+              <span class="subTitle"
+                >可通过追踪您的店铺数据，为您找到最精准的客户进行营销</span
+              >
             </h3>
             <div>
-              <el-input v-model="detail.snapPixel" size="medium" maxlength="100" placeholder="请将您的插件代码粘贴至此处"></el-input>
+              <el-input
+                v-model="detail.snapPixel"
+                size="medium"
+                maxlength="100"
+                placeholder="请将您的Snap Pixel ID粘贴至此处"
+              ></el-input>
             </div>
           </div>
           <!-- Pinterest Pixel -->
           <div class="box">
             <h3 class="title">
               Pinterest Pixel
-              <span class="subTitle">可通过追踪您的店铺数据，为您找到最精准的客户进行营销</span>
+              <span class="subTitle"
+                >可通过追踪您的店铺数据，为您找到最精准的客户进行营销</span
+              >
             </h3>
             <div>
               <el-input
@@ -48,17 +68,26 @@
           <div class="box">
             <h3 class="title">
               Bing Ads UET标签
-              <span class="subTitle">可通过追踪您的店铺数据，为您找到最精准的客户进行营销</span>
+              <span class="subTitle"
+                >可通过追踪您的店铺数据，为您找到最精准的客户进行营销</span
+              >
             </h3>
             <div>
-              <el-input v-model="detail.bingAdsUet" size="medium" maxlength="100" placeholder="请将您的插件代码粘贴至此处"></el-input>
+              <el-input
+                v-model="detail.bingAdsUet"
+                size="medium"
+                maxlength="100"
+                placeholder="请将您的插件代码粘贴至此处"
+              ></el-input>
             </div>
           </div>
           <!-- Google Analytics -->
           <div class="box">
             <h3 class="title">
               Google Analytics
-              <span class="subTitle">可协助您追踪店铺访客的行为，辅助您更好的进行营销</span>
+              <span class="subTitle"
+                >可协助您追踪店铺访客的行为，辅助您更好的进行营销</span
+              >
             </h3>
             <div>
               <el-input
@@ -73,7 +102,9 @@
           <div class="box">
             <h3 class="title">
               Google Ads
-              <span class="subTitle">可为您揭示客户在点击您的广告后所进行的操作，并以此作为优化广告投放的依据</span>
+              <span class="subTitle"
+                >可为您揭示客户在点击您的广告后所进行的操作，并以此作为优化广告投放的依据</span
+              >
             </h3>
             <div>
               <el-input
@@ -90,7 +121,9 @@
           <div class="box">
             <h3 class="title">
               TikTok Ads
-              <span class="subTitle">可通过追踪您的店铺数据，为您找到最精准的客户进行营销</span>
+              <span class="subTitle"
+                >可通过追踪您的店铺数据，为您找到最精准的客户进行营销</span
+              >
             </h3>
             <div>
               <el-input
@@ -107,7 +140,9 @@
           <div class="box">
             <h3 class="title">
               网站归属认证
-              <span class="subTitle">可通过追踪您的店铺数据，为您找到最精准的客户进行营销</span>
+              <span class="subTitle"
+                >可通过追踪您的店铺数据，为您找到最精准的客户进行营销</span
+              >
             </h3>
             <div>
               <el-input
@@ -126,49 +161,64 @@
           <div class="box">
             <p class="infoTip">温馨提示</p>
             <p class="infoContent">1、放置过多的代码，可能会影响网站加载速</p>
-            <p class="infoContent" style="margin-top: 12px;">2、放置跟踪代码后，建议观察网站浏览是否正常，如有问题，请联系我们。</p>
+            <p class="infoContent" style="margin-top: 12px">
+              2、放置跟踪代码后，建议观察网站浏览是否正常，如有问题，请联系我们。
+            </p>
           </div>
         </el-col>
       </el-row>
-      <div class="pageSaveBtn"> 
+      <div class="pageSaveBtn">
         <el-button type="primary" @click="Save">保存</el-button>
       </div>
     </div>
   </div>
 </template> 
 <script>
-import {get,edit,add} from '@/api/yxSystemStoreTrack'
+import { get, edit, add } from "@/api/yxSystemStoreTrack";
 export default {
   data() {
-    return { 
-      isAdd:true,
-      detail:{},
+    return {
+      isAdd: true,
+      tagList: [],
+      facebookPixel: "",
+      detail: {},
     };
   },
-  created(){
+  created() {
     let par = {
-      page:0,
-      size:10,
-    }
-    get(par).then(res=>{ 
-      if(res.content.length>0){
-        this.isAdd = false;
+      page: 0,
+      size: 10,
+    };
+    get(par).then((res) => { 
+      if (res.content.length > 0) {
+        this.isAdd = false; 
+        if(res.content[0].facebookPixel.split(',')[0] !== ''){
+          this.tagList = res.content[0].facebookPixel.split(',')
+        }
         this.detail = res.content[0];
-      } else {
-        this.detail = {}; 
-      }
-    })
+      } 
+    });
   },
   methods: {
-    Save:function(){
-      if(this.isAdd){
-        add(this.detail).then(res=>{ 
-          this.$message.success('新增成功')
-        })
+    CloseTag: function (item, index) { 
+      this.tagList.splice(index,1)
+    },
+    InputConfirm: function (e) { 
+      if(this.facebookPixel.trim()){
+        this.tagList.push(this.facebookPixel);
+      } 
+      this.facebookPixel = "";
+    },
+    Save: function () {
+      this.detail.facebookPixel = this.tagList.toString();
+      if (this.isAdd) { 
+        add(this.detail).then((res) => {
+          this.$message.success("新增成功");
+        });
       } else {
-        edit(this.detail).then(res=>{
-          this.$message.success('修改成功')
-        })
+        edit(this.detail).then((res) => {
+          this.$message.success("修改成功");
+        });
       }
     },
   },
@@ -224,11 +274,42 @@ h1 {
     color: #606266;
   }
 }
-.pageSaveBtn{
-    border-top: 1px solid #dcdfe6;
-    padding-top: 20px;
-    text-align: right;
-    font-size: 0;
-    margin-bottom: 40px;
-} 
+.detail {
+  display: flex;
+  flex: 1; 
+  flex-wrap: wrap;
+  align-items: center;
+  -webkit-appearance: none;
+  background-color: #fff;
+  background-image: none;
+  border-radius: 4px;
+  border: 1px solid #dcdfe6;
+  box-sizing: border-box;
+  color: #606266;
+  font-size: inherit;
+  line-height: 36px;
+  outline: 0;
+  padding: 0 5px; 
+  transition: border-color 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+  width: 100%;
+  /deep/.input-new-tag {
+    min-width: 200px;
+    flex: 1;
+  }
+  /deep/ .el-input__inner {
+    border: 0;
+    height: 34px;
+  }
+  /deep/ .el-tag {
+    margin-right: 5px;
+    margin-top: 3px;
+  }
+}
+.pageSaveBtn {
+  border-top: 1px solid #dcdfe6;
+  padding-top: 20px;
+  text-align: right;
+  font-size: 0;
+  margin-bottom: 40px;
+}
 </style>  

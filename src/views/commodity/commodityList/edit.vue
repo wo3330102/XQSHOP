@@ -41,14 +41,14 @@
           <div class="item-margin" v-if="show">
             <span class="text-span">售价</span>
             <el-input
-              class="box-item-entry" 
+              class="box-item-entry"
               v-model="attr.price"
               maxlength="8"
               size="medium"
               placeholder="请输入商品现价"
               @blur="attr.price = $IsNaN(attr.price)"
             >
-              <span slot="append">{{currency.n}}</span>
+              <span slot="append">{{ currency.n }}</span>
             </el-input>
           </div>
           <div class="item-margin" v-if="show">
@@ -60,10 +60,15 @@
               maxlength="8"
               placeholder="请输入商品库存"
             ></el-input>
-          </div> 
+          </div>
           <div class="item-margin" v-if="show">
             <span class="text-span">商品SKU</span>
-            <el-input class="box-item-entry" v-model="detail.shopSku" size="medium" placeholder="请输入商品SKU"></el-input>
+            <el-input
+              class="box-item-entry"
+              v-model="detail.shopSku"
+              size="medium"
+              placeholder="请输入商品SKU"
+            ></el-input>
           </div>
           <!-- <div class="item-margin">
             <span class="text-span">库存方式</span>
@@ -119,20 +124,20 @@
           <div class="item-margin" v-if="show">
             <span class="text-span">原价</span>
             <el-input
-              class="box-item-entry" 
+              class="box-item-entry"
               v-model="attr.ot_price"
               maxlength="8"
               size="medium"
               placeholder="请输入商品原价"
               @blur="attr.ot_price = $IsNaN(attr.ot_price)"
             >
-              <span slot="append">{{currency.n}}</span>
+              <span slot="append">{{ currency.n }}</span>
             </el-input>
           </div>
           <div class="item-margin" v-if="show">
             <span class="text-span">商品重量</span>
             <el-input
-              class="box-item-entry" 
+              class="box-item-entry"
               v-model="attr.weight"
               maxlength="8"
               @blur="attr.weight = $IsNaN(attr.weight)"
@@ -175,10 +180,7 @@
       <div class="box">
         <h3 class="title">商品详情</h3>
         <div>
-          <tinymce-editor
-            ref="editor"
-            v-model="detail.description"
-          ></tinymce-editor>
+          <wangeditor ref="editor" v-model="detail.description"></wangeditor>
         </div>
       </div>
       <div class="box image">
@@ -192,10 +194,18 @@
             "
             >（{{ fileList.length }}/250）</span
           >
+          <span
+            style="
+              font-weight: normal;
+              font-size: 14px;
+              color: rgb(162, 163, 172);
+            "
+            >推荐尺寸 800 * 800</span
+          >
         </h3>
         <div class="content">
           <el-upload
-            :action="url+'/api/upload'"
+            :action="url + '/api/upload'"
             :headers="{
               Authorization: token,
             }"
@@ -338,7 +348,7 @@
                     </el-image>
                   </div>
                   <input
-                    class="edit-inp" 
+                    class="edit-inp"
                     v-model.number="scope.row[item.slot]"
                     @blur="scope.row[item.slot] = $IsNaN(scope.row[item.slot])"
                     v-else-if="
@@ -371,11 +381,14 @@
             <div class="jh-seo-preview">
               <p class="seo-title" v-html="detail.seoTitle"></p>
               <p
-                class="seo-link mt8" 
+                class="seo-link mt8"
                 v-html="
-                  detail.linkUrl?detail.linkUrl.lastIndexOf('/') == detail.linkUrl.length - 1
-                    ? detail.linkUrl + detail.seoLink
-                    : detail.linkUrl + '/' + detail.seoLink:''
+                  detail.linkUrl
+                    ? detail.linkUrl.lastIndexOf('/') ==
+                      detail.linkUrl.length - 1
+                      ? detail.linkUrl + detail.seoLink
+                      : detail.linkUrl + '/' + detail.seoLink
+                    : ''
                 "
               ></p>
               <p class="seo-desc mt8" v-html="detail.seo_info"></p>
@@ -413,9 +426,12 @@
               <div>
                 <el-input v-model="detail.seoLink" placeholder="请输入SEO链接">
                   <template slot="prepend">{{
-                    detail.linkUrl?detail.linkUrl.lastIndexOf("/") == detail.linkUrl.length - 1
-                      ? detail.linkUrl
-                      : detail.linkUrl + "/":''
+                    detail.linkUrl
+                      ? detail.linkUrl.lastIndexOf("/") ==
+                        detail.linkUrl.length - 1
+                        ? detail.linkUrl
+                        : detail.linkUrl + "/"
+                      : ""
                   }}</template>
                 </el-input>
               </div>
@@ -477,21 +493,20 @@
   </div>
 </template> 
 <script>
-
-import tinymceEditor from "@/components/tinymce-editor";
+import wangeditor from "@/components/wangeditor";
 import tableTem from "@/components/tableTem";
 import { add, edit, getInfo, isFormatAttr } from "@/api/yxStoreProduct";
 import { getCates } from "@/api/yxStoreCategory";
 export default {
   components: {
-    tinymceEditor,
     tableTem,
+    wangeditor,
   },
   data() {
     return {
-      url:localStorage.getItem('uploadUrl'),
+      url: localStorage.getItem("uploadUrl"),
       id: "",
-      isFirst:true,
+      isFirst: true,
       token: "",
       isGrounding: true,
       price: "",
@@ -557,10 +572,10 @@ export default {
       specifications: "", // 规格设置
       detail: {
         store_name: "",
-        description: "", 
-        linkUrl:'',
-        seoTitle:'',
-        seo_info:'',
+        description: "",
+        linkUrl: "",
+        seoTitle: "",
+        seo_info: "",
       },
       // 表格变量
       isActive: false, // 批量操作按钮是否可以点击
@@ -635,26 +650,32 @@ export default {
         storeId,
       };
       getInfo(par).then((res) => {
-        if (that.id === 0) { 
-          this.temp_id = ""; 
-        } else { 
+        if (that.id === 0) {
+          this.temp_id = "";
+        } else {
           that.detail = { ...res.productInfo };
           that.tagIds = res.tagList;
           if (res.productInfo.classIds) {
-            that.classList = res.productInfo.classIds.split(","); 
-          } 
+            that.classList = res.productInfo.classIds.split(",");
+          }
           that.attr = res.productInfo.attr;
-          res.productInfo.attr.price == 0 ?that.attr.price = "":that.attr.price = this.$IsNaN(res.productInfo.attr.price) 
-          res.productInfo.attr.weight == 0 ?that.attr.weight = "":that.attr.weight = this.$IsNaN(res.productInfo.attr.weight) 
-          res.productInfo.attr.ot_price == 0? that.attr.ot_price = "":that.attr.ot_price = this.$IsNaN(res.productInfo.attr.ot_price)
-          res.productInfo.attr.stock === 0?  that.attr.stock = "":'';
-          that.detail.cate_id = Number(that.detail.cate_id); 
+          res.productInfo.attr.price == 0
+            ? (that.attr.price = "")
+            : (that.attr.price = this.$IsNaN(res.productInfo.attr.price));
+          res.productInfo.attr.weight == 0
+            ? (that.attr.weight = "")
+            : (that.attr.weight = this.$IsNaN(res.productInfo.attr.weight));
+          res.productInfo.attr.ot_price == 0
+            ? (that.attr.ot_price = "")
+            : (that.attr.ot_price = this.$IsNaN(res.productInfo.attr.ot_price));
+          res.productInfo.attr.stock === 0 ? (that.attr.stock = "") : "";
+          that.detail.cate_id = Number(that.detail.cate_id);
           // 判断是否上架
           that.detail.is_show == Number(that.isGrounding);
           // 判断是单规格还是多规格
           if (res.productInfo.spec_type == 1) {
             // 多规格
-            that.shopAttributeList = res.productInfo.items; 
+            that.shopAttributeList = res.productInfo.items;
             that.InitFormatAttr();
             this.show = false;
           }
@@ -725,14 +746,14 @@ export default {
       this.InitFormatAttr();
     },
     // 判断属性名称是否一样
-    CheckAttrName:function(index){ 
-      let val = this.shopAttributeList[index].value; 
+    CheckAttrName: function (index) {
+      let val = this.shopAttributeList[index].value;
       console.log(val);
-      for(var i in this.shopAttributeList){
-        if(this.shopAttributeList[i].value == val && index != i){ 
-          this.$message.warning('重复属性')
-          this.shopAttributeList[index].value = '';
-          return false
+      for (var i in this.shopAttributeList) {
+        if (this.shopAttributeList[i].value == val && index != i) {
+          this.$message.warning("重复属性");
+          this.shopAttributeList[index].value = "";
+          return false;
         }
       }
     },
@@ -789,18 +810,18 @@ export default {
         });
         this.tableHeader = arr;
         let array = [];
-        if (this.id !== "" && this.detail.spec_type == 1 && this.isFirst) {  
+        if (this.id !== "" && this.detail.spec_type == 1 && this.isFirst) {
           this.isFirst = false;
-          this.detail.attrs.map(i=>{
-            if(i.is_show == 1){
+          this.detail.attrs.map((i) => {
+            if (i.is_show == 1) {
               array.push(i);
             }
-          })
-          this.table = array; 
-        } else {  
+          });
+          this.table = array;
+        } else {
           r.value.map((v, i) => {
-            v.index = i; 
-            if(v.is_show == 1){
+            v.index = i;
+            if (v.is_show == 1) {
               array.push(v);
             }
           });
@@ -824,9 +845,12 @@ export default {
         let arr = [];
         item.map((i) => {
           table.map((item, inx) => {
-            if (item.index == i.index) {   
-              if(this.shopAttributeList.length === 1){ 
-                this.shopAttributeList[0].detail.splice(this.shopAttributeList[0].detail.indexOf(table[inx].value1),1) 
+            if (item.index == i.index) {
+              if (this.shopAttributeList.length === 1) {
+                this.shopAttributeList[0].detail.splice(
+                  this.shopAttributeList[0].detail.indexOf(table[inx].value1),
+                  1
+                );
               }
               table.splice(inx, 1);
               item.is_show = 0;
@@ -852,7 +876,7 @@ export default {
           break;
         case 3:
           ChangeTable("ot_price");
-          break; 
+          break;
         case 5:
           ChangeTable("stock");
           break;
@@ -865,7 +889,8 @@ export default {
         item.map((i) => {
           table.map((item, inx) => {
             if (item.index == i.index) {
-              item[e] = e == 'stock'?that.batchValue:that.$IsNaN(that.batchValue);
+              item[e] =
+                e == "stock" ? that.batchValue : that.$IsNaN(that.batchValue);
             }
           });
         });
@@ -883,14 +908,25 @@ export default {
     // 提交图片
     SubImage: function () {
       let that = this;
+      let item = this.selectItem;
       if (that.fileList[that.active].url.indexOf("blob:") === 0) {
         that.fileList[that.active].url =
           that.fileList[that.active].response.link;
       }
       if (that.tableIndex === "") {
-        that.table.map((i) => {
-          i.pic = that.fileList[that.active].url;
-        });
+        if (item.length > 0) {
+          item.map((i) => {
+            that.table.map((val, inx) => {
+              if (val.index == i.index) {
+                val.pic = that.fileList[that.active].url;
+              }
+            });
+          });
+        } else {
+          that.table.map((i) => {
+            i.pic = that.fileList[that.active].url;
+          });
+        }
       } else {
         that.table[that.tableIndex].pic = that.fileList[that.active].url;
       }
@@ -971,8 +1007,8 @@ export default {
           return false;
         }
         // 判断是否输入原价
-        if (this.attr.ot_price > 0) { 
-          if (Number(this.attr.price) > Number(this.attr.ot_price)) { 
+        if (this.attr.ot_price > 0) {
+          if (Number(this.attr.price) > Number(this.attr.ot_price)) {
             that.$message.error("商品售价不能大于商品原价");
             return false;
           }
@@ -996,14 +1032,14 @@ export default {
             return false;
           }
           // 判断是否输入原价
-        if (arr[i].ot_price > 0) { 
-          if (Number(arr[i].price) > Number(arr[i].ot_price)) { 
-            that.$message.error("商品售价不能大于商品原价");
-            return false;
+          if (arr[i].ot_price > 0) {
+            if (Number(arr[i].price) > Number(arr[i].ot_price)) {
+              that.$message.error("商品售价不能大于商品原价");
+              return false;
+            }
+          } else {
+            this.attr.ot_price = 0;
           }
-        } else {
-          this.attr.ot_price = 0;
-        } 
           if (arr[i].stock == "") {
             arr[i].stock = 0;
           }
@@ -1228,7 +1264,7 @@ h1 {
   padding: 0 -10px;
   /deep/.el-input--suffix {
     width: 70px !important;
-  } 
+  }
 }
 /deep/.el-input-group__append {
   background: #fff;

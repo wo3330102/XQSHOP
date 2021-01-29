@@ -81,14 +81,14 @@
               <template v-if="logisticsList.length > 0">
                 <div
                   class="logistics-box"
-                  v-for="item in logisticsList"
+                  v-for="(item,index) in logisticsList"
                   :key="item.id"
                 >
                   <div class="logistics-box-title">
                     <p>
                       {{ item.name }}
                       <span class="product-num"></span>
-                      <span class="option textBtn" style="margin-left: 10px;" @click="Del(item.id)">删除</span>
+                      <span class="option textBtn" style="margin-left: 10px;" @click="Del(item,index)">删除</span>
                       <span
                         class="option textBtn not-pd"
                         @click="EditLogistics(1, item)"
@@ -209,10 +209,10 @@ export default {
         },
       });
     },
-    Del:function(id){ 
-      del([id]).then(res=>{
-        console.log(res);
-        
+    Del:function(item,index){ 
+      del([item.id]).then(res=>{ 
+        this.$message.success('删除成功')
+        this.logisticsList.splice(index,1)
       })
     }
   },

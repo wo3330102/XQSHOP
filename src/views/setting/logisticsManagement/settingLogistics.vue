@@ -746,7 +746,8 @@ export default {
       this.selectContryList.splice(index, 1);
     },
     // 编辑物流方案
-    EditPlan: function (item, index) {
+    EditPlan: function (item, index) { 
+      Number(item.maxUnit)?item.maxUnit:item.maxUnit = '';
       console.log(item);
       this.form = item;
       this.editLogisticsPlan = true;
