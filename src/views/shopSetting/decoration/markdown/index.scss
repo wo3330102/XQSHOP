@@ -1,0 +1,69 @@
+.aside-item{
+    height: 100%;
+    overflow: hidden;
+    overflow-y: auto;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    width: 100%;
+    h2{height: 22px;color: #637381;line-height: 22px;padding: 20px 8px 8px;font-size: 14px;font-weight: 400;}
+    .aside-item-box{padding: 12px 8px;background:#fff;border-top: 1px solid #dcdfe6;border-bottom: 1px solid #dcdfe6;
+        .color-select{display: flex;
+            .color-select-item{display: flex;margin-right:20px;
+                /deep/ .el-color-picker__trigger{padding:0;width:20px;height:20px;
+                    .el-color-picker__icon{display:none;}
+                }
+            }
+        }
+        .aside-item-box-edit{width: 100%;
+            min-height: 150px;
+            border-radius: 3px;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            background-color: #fff;
+        }
+        .aside-item-box-list{display: flex;
+            dl{
+                color: #dfd9e6;
+                cursor: pointer;
+                margin: 0 14px;
+                display: inline-block;
+            }
+            dt{padding: 6px;
+                color: #dfd9e6;
+                border-radius: 4px;
+                display: block;
+                border: 2px solid #dcdfe6;i{font-size: 30px;}}
+            dd{text-align: center;}
+            dl.active{
+                dt{border-color:#273a8a;}
+                color:#273a8a;
+            }
+        }
+    }
+    .el-tooltip{margin-left:4px;}
+    .justify-both{display:flex;justify-content: space-between;}
+    h4{height: 20px;
+        color: #637381;
+        line-height: 20px;
+        padding: 12px 0 8px;
+        font-size: 14px;
+        font-weight: 400;}
+    .carousel-add{position: fixed;bottom: 0;
+            width: 240px;
+            z-index: 100;
+            background: #fff;
+            text-align: center;
+            height: 40px;
+            line-height: 40px;
+            color: #273a8a;
+            cursor: pointer;
+            border-top:1px solid #dcdfe6;
+            border-bottom:1px solid #dcdfe6;
+            i{font-size:16px;margin-right:4px;}}
+}
+.link {
+    cursor: pointer;
+    color: #273a8a;
+    line-height: 20px;
+    text-decoration: underline;   
+}
