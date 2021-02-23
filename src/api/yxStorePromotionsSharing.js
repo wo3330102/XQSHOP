@@ -12,9 +12,7 @@ export function get() {
     url: 'api/yxStorePromotionsSharing/promotion',
     method: 'get', 
   })
-}
-
-
+}  
 
 export function add(data) {
   return request({
