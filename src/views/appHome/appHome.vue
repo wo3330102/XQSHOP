@@ -43,7 +43,23 @@ export default {
           desc:
             "随机推荐建议的商品，使其展示在其他商品的详情页中，以提高客单价和转化。",
           url: "/recommend",
-        }, 
+        },
+        {
+          id: 3,
+          image: url+"/static/img/applications/productGroup.png",
+          title: "组合商品",
+          desc:
+            "当需要提高客单价或者为其他商品进行引流时，可以在详情页中添加组合商品。",
+          url: "/combinationProduct",
+        },
+        {
+          id: 4,
+          image: url+"/static/img/applications/limit-quantity-discount.png",
+          title: "限量优惠",
+          desc:
+            "通过此应用设置限量优惠的商品，以达到引流、提高转化作用。",
+          url: "/limitedProduct",
+        },
       ],
     };
   },

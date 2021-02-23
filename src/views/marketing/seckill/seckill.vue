@@ -214,20 +214,20 @@ export default {
     }
   }
 }
-.small-img {
-  display: inline-block;
-  vertical-align: middle;
-  width: 50px;
-  height: 50px;
-  border-radius: 4px;
-  border: 1px solid #dadde4;
-  background-color: #f7f8fd;
-  background-origin: content-box;
-  background-position: 50% 50%;
-  background-size: contain;
-  background-repeat: no-repeat;
-  overflow: hidden;
-}
+// .small-img {
+//   display: inline-block;
+//   vertical-align: middle;
+//   width: 50px;
+//   height: 50px;
+//   border-radius: 4px;
+//   border: 1px solid #dadde4;
+//   background-color: #f7f8fd;
+//   background-origin: content-box;
+//   background-position: 50% 50%;
+//   background-size: contain;
+//   background-repeat: no-repeat;
+//   overflow: hidden;
+// }
 .textBtn {
   padding: 10px 0;
   color: #273a8a;

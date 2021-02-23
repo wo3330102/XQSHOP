@@ -19,15 +19,15 @@
         <span
           class="sail-app-status-tag"
           :class="
-            status == 1
+            plugStatus == 1
               ? 'sail-app-status-tag-open'
               : 'sail-app-status-tag-close'
           "
-          >{{ status == 1 ? "已开启" : "未开启" }}</span
+          >{{ plugStatus == 1 ? "已开启" : "未开启" }}</span
         >
       </span>
       <span class="options">
-        <el-button @click="IsOpen">{{status == 1 ? "关闭" : "开启"}}</el-button>
+        <el-button @click.stop="IsOpen">{{plugStatus == 1 ? "关闭" : "开启"}}</el-button>
         <!-- <el-button>配置</el-button> -->
       </span>
     </h1>
@@ -334,7 +334,7 @@ export default {
   },
   data() {
     return {
-      status: 1,
+      plugStatus: 1,
       nav: [
         {
           id: 0,
@@ -441,23 +441,26 @@ export default {
   methods: {
     // 控制当前店铺评论状态
     IsOpen:function(){
-      let status = this.status == 1?0:1
+      let status = this.plugStatus == 1?0:1
       let par = {
         isOpen:status
       }
-      isOpen(par).then(res=>{
-        console.log(res);
+      isOpen(par).then(res=>{ 
+        this.$message.success('修改成功')
+        this.plugStatus == 1?this.plugStatus = 0:this.plugStatus = 1
       })
     },
     // 查看当前店铺评论状态
-    InitStatus:function(res){
-      console.log(res);
-      this.status = Number(res.isOpen)
+    InitStatus:function(res){ 
+      if(this.active == 0){
+        this.plugStatus = Number(res.isOpen)
+      }
     },
     // 查询评论类别
     ChangeActive: function (index) {
       this.active = index;
-      this.requestParams.status = this.nav[index].id;
+      this.requestParams.status = this.nav[index].id; 
+      console.log(this.plugStatus)
       switch (index) {
         case 0:
           this.requestUrl = "/api/yxStoreProductReplyAll";
@@ -645,12 +648,10 @@ export default {
             });
             break;
           case "del":
-            this.$DelTip(function () {
-              del([par]).then((res) => {
-                this.$message.success("操作成功");
-                  this.isRefresh += 1;
+            del([par]).then((res) => {
+                that.$message.success("操作成功");
+                  that.isRefresh += 1;
               });
-            });
             break;
         }
       }

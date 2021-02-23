@@ -95,8 +95,7 @@ export default {
     let id = localStorage.getItem('storeId');
     let that = this;
     getStoreTemplate().then((obj) => {
-      debugger;
-      let object = obj.content;
+      let object = obj.data.content;
       that.show = true; 
       getShopById(id).then(res=>{
       if(res.tempId){

@@ -203,7 +203,7 @@ export default {
   data() {
     return {
       userName: "admin",
-      failInit: false,
+      failInit: true,
       stepList: [
         {
           icon:

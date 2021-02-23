@@ -137,16 +137,7 @@
                 </template>
               </el-table-column>
               <el-table-column prop="storeName" label=""></el-table-column>
-              <el-table-column label="次数" align="right" width="100">
-                <template slot-scope="scope">
-                  <span>{{
-                    active === 0
-                      ? Number(scope.row.browseNum)
-                      : active === 1
-                      ? Number(scope.row.toCartNum)
-                      : Number(scope.row.buyNum)
-                  }}</span>
-                </template>
+              <el-table-column prop="totalNum" label="次数" align="right" width="100"> 
               </el-table-column>
             </el-table>
             <el-pagination
@@ -387,21 +378,22 @@ export default {
     },
     GetList: function () {
       getlist(this.requestParams).then((res) => {
-        this.data.push(res.browseNumList);
-        this.data.push(res.toCartNumList);
-        this.data.push(res.buyNumList);
-        console.log(this.active)
-        switch (this.active){
-          case 0:
-            this.total = res.totalElements;
-            break;
-          case 1:
-            this.total = res.totalElements;
-            break;
-          case 2:
-            this.total = res.totalElements;
-            break;
-        }
+        this.data[0] = res.browseNumList
+        this.data[1] = res.toCartNumList
+        this.data[2] = res.buyNumList 
+        console.log(this.data)
+        this.total = res.totalElements;
+        // switch (this.active){
+        //   case 0:
+        //     this.total = res.totalElements;
+        //     break;
+        //   case 1:
+        //     this.total = res.totalElements;
+        //     break;
+        //   case 2:
+            
+        //     break;
+        // }
         // this.total = res.
       });
     },

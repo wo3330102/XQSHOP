@@ -163,6 +163,7 @@
                 <span
                   class="option"
                   style="margin-left: 10px"
+                  v-show="logisticsList.length>1"
                   @click="DelPlan(item, index)"
                   >删除</span
                 >
@@ -561,7 +562,7 @@ export default {
         this.logisticsList.splice(index, 1);
       });
     },
-    // 修改自定义物流名称
+    // 保存修改
     Save: function () {
       let par = {
         id: this.id,
@@ -826,20 +827,20 @@ h1 {
 .ptrl-20 {
   padding: 20px 20px 0 !important;
 }
-.small-img {
-  display: inline-block;
-  vertical-align: middle;
-  width: 50px;
-  height: 50px;
-  border-radius: 4px;
-  border: 1px solid #dadde4;
-  background-color: #f7f8fd;
-  background-origin: content-box;
-  background-position: 50% 50%;
-  background-size: contain;
-  background-repeat: no-repeat;
-  overflow: hidden;
-}
+// .small-img {
+//   display: inline-block;
+//   vertical-align: middle;
+//   width: 50px;
+//   height: 50px;
+//   border-radius: 4px;
+//   border: 1px solid #dadde4;
+//   background-color: #f7f8fd;
+//   background-origin: content-box;
+//   background-position: 50% 50%;
+//   background-size: contain;
+//   background-repeat: no-repeat;
+//   overflow: hidden;
+// }
 /deep/.el-input-group__prepend {
   background: #fff;
 }

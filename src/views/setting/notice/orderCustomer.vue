@@ -227,6 +227,7 @@ export default {
         content:this.privacyPolicy,
         id:this.id,
         title:this.title, 
+        type:1,
       }
       editTemp(par).then(res=>{
         console.log(res);

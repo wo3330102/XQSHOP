@@ -2,7 +2,13 @@
   <div class="container">
     <router-link
       to="/notice"
-      style="color: #5e7185;margin-bottom:12px;display:inline-block;height:20px;line-height:20px"
+      style="
+        color: #5e7185;
+        margin-bottom: 12px;
+        display: inline-block;
+        height: 20px;
+        line-height: 20px;
+      "
     >
       <i class="el-icon-arrow-left"></i>
       <span>通知</span>
@@ -12,12 +18,15 @@
       <el-button>预览</el-button>
     </h1>
     <div>
-      <!-- 退款政策 -->
+      <!-- 邮件主题 -->
       <div class="box">
         <h3 class="title">邮件主题</h3>
-        <el-input v-model="email" placeholder="Complete your Purchase!"></el-input>
+        <el-input
+          v-model="email"
+          placeholder="Complete your Purchase!"
+        ></el-input>
       </div>
-      <!-- 隐私政策 -->
+      <!-- 邮件预览 -->
       <div class="box">
         <h3 class="title">邮件预览</h3>
         <div class="email">
@@ -25,42 +34,54 @@
             <h4 class="title">ddd</h4>
             <p class="order_number">ORDER 66422240C817758F0708BD2D7AD63E76</p>
             <wangeditor ref="editor" v-model="privacyPolicy"></wangeditor>
-            
+
             <p class="viewOrder">View your order</p>
-            <p style="text-align: center; font-size: 16px;">
+            <p style="text-align: center; font-size: 16px">
               or
               <a href target="_blank">View our store</a>
             </p>
-            <p style="padding-top: 30px;">
+            <p style="padding-top: 30px">
               Tracking number:
               <a href="##">WL1234567890</a>
             </p>
           </div>
           <div class="box1">
             <p
-              style="height: 33px; font-size: 20px; font-family: PingFangSC-Medium; color: rgb(51, 51, 51); margin-bottom: 8px; line-height: 33px;"
-            >Items in this shipment</p>
+              style="
+                height: 33px;
+                font-size: 20px;
+                font-family: PingFangSC-Medium;
+                color: rgb(51, 51, 51);
+                margin-bottom: 8px;
+                line-height: 33px;
+              "
+            >
+              Items in this shipment
+            </p>
             <p class="goods">Product Name x1</p>
             <p class="goods">Product Name x1</p>
             <div class="main">
-                <i class="el-icon-price-tag">Free freight</i>
+              <i class="el-icon-price-tag">Free freight</i>
             </div>
           </div>
-          <div style="padding: 30px 23px 80px;">
+          <div style="padding: 30px 23px 80px">
             If you have any questions, reply to this email or contact us at
-            <span
-              style="color: rgb(16, 142, 233); cursor: pointer;"
-            >xxx@gmail.com</span>
+            <span style="color: rgb(16, 142, 233); cursor: pointer"
+              >xxx@gmail.com</span
+            >
           </div>
         </div>
       </div>
     </div>
     <div class="pageSaveBtn">
-      <el-button type="primary">保存</el-button>
+      <el-button style="float:left" @click="Init">恢复默认值</el-button>
+      <el-button type="primary" @click="Save">保存</el-button>
     </div>
   </div>
 </template> 
 <script>
+const htmlStr = `<p class="thanks title" style="color: #333333; font-size: 24px; line-height: 33px; height: 33px; margin-bottom: 16px;" data-mce-style="color: #333333; font-size: 24px; line-height: 33px; height: 33px; margin-bottom: 16px;">Your order is on the way</p><p style="color: #666666; line-height: 20px;" data-mce-style="color: #666666; line-height: 20px;">Hi {{ first_name }},Your order is on the way. Track your shipment to see the delivery status.</p>`
+import { getDetial, editTemp } from "@/api/notice";
 import wangeditor from "@/components/wangeditor";
 export default {
   components: {
@@ -72,11 +93,39 @@ export default {
       privacyPolicy: "",
     };
   },
+  created() {
+    getDetial(this.$route.query.id).then((res) => {
+      console.log(res);
+      if (res) {
+        this.email = res.data.title;
+        this.privacyPolicy = res.data.content;
+        this.id = res.data.id;
+      } else {
+        this.privacyPolicy = htmlStr;
+        this.email = "A shipment from order {{ name }} is on the way";
+      }
+    });
+  },
   methods: {
     DelMenu: function (index) {
       console.log(index);
       this.selectData.splice(index, 1);
     },
+    Init:function(){
+      this.privacyPolicy = htmlStr
+    },
+    Save:function(){
+      let par = {
+        title:this.email,
+        content:this.privacyPolicy, 
+        type:3,
+        id:this.id
+      }
+      editTemp(par).then(res=>{
+        this.$message.success('修改成功')
+        this.$router.go(-1);
+      })
+    }
   },
 };
 </script>
@@ -105,8 +154,8 @@ h1 {
     color: #1a1d2c;
     font-size: 14px;
     font-weight: 600;
-    padding-bottom: 12px; 
-  } 
+    padding-bottom: 12px;
+  }
 }
 .email {
   width: 598px;
@@ -150,10 +199,10 @@ h1 {
     }
     .goods {
       padding: 8px 0px;
-          color: #333;
+      color: #333;
     }
-    .main{
-        margin-top: 12px;
+    .main {
+      margin-top: 12px;
     }
   }
 }

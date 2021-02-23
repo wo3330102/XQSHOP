@@ -479,7 +479,7 @@ export default {
         page: 0,
         size: 30,
         comment: "",
-        sort: "product_score",
+        sort: "",
         productId: "",
         productScore: "",
         status: 1,
@@ -683,12 +683,13 @@ export default {
             obj.replyId = v.id;
             arr.push(obj);
           });
-          this.$DelTip(function(){
-            del(arr).then((res) => {
+          del(arr).then((res) => {
             that.$message.success("删除成功");
             that.isRefresh += 1;
           });
-          })
+          // this.$DelTip(function(){
+            
+          // })
           break;
       }
     },
@@ -707,15 +708,15 @@ export default {
       let that = this;
       let option = par;
       switch (option) {
-        case "edit":
-          this.fileList = [];
+        case "edit": 
+          this.fileList = []; 
           this.showEditComment = true;
           // 深拷贝，解决点击编辑时表格内当前项评分会立马变成编辑后评分的BUG
-          this.form = { ...item };
-          console.log(this.form)
+          this.form = { ...item }; 
           this.form.productScore =
             this.form.productScore === 0 ? 1 : this.form.productScore;
-          if (item.pics) {
+          if (item.pics) { 
+            console.log(item.pics)
             if (item.pics.indexOf(",") > -1) {
               let arr = [];
               item.pics.split(",").map((i) => {
@@ -733,7 +734,10 @@ export default {
             } else {
               let arr = { url: item.pics };
               this.fileList.push(arr);
+              this.showUpload = false;
             }
+          } else {
+            this.showUpload = false;
           }
           break;
         case "delete":

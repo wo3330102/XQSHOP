@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-
 Vue.use(VueRouter)
 const routes = [{
   path: '/',
@@ -81,6 +80,10 @@ const routes = [{
       path: '/dataCenter',
       name: 'DataCenter',
       component: () => import( /* webpackChunkName: "about" */ '../views/dataCenter/dataCenter.vue'),
+    }, {
+      path: '/dataCenterDetail',
+      name: 'DataCenterDetail',
+      component: () => import( /* webpackChunkName: "about" */ '../views/dataCenter/dataCenterDetail.vue'),
     }]
   }, {
     path: 'discount',
@@ -117,34 +120,56 @@ const routes = [{
     name: '应用管理',
     component: () => import( /* webpackChunkName: "home" */ '../views/Main.vue'),
     children: [{
-      path: '/appHome',
-      name: 'AppHome',
-      component: () => import( /* webpackChunkName: "about" */ '../views/appHome/appHome.vue'),
-    }, {
-      path: '/comment',
-      name: 'Comment',
-      component: () => import( /* webpackChunkName: "about" */ '../views/appHome/comment/comment.vue'),
-    }, {
-      path: '/commentDetail',
-      name: 'CommentDetail',
-      component: () => import( /* webpackChunkName: "about" */ '../views/appHome/comment/commentDetail.vue'),
-    }, {
-      path: '/shippingInsurance',
-      name: 'ShippingInsurance',
-      component: () => import( /* webpackChunkName: "about" */ '../views/appHome/shippingInsurance.vue'),
-    }, {
-      path: '/recommend',
-      name: 'Recommend',
-      component: () => import( /* webpackChunkName: "about" */ '../views/appHome/recommend/recommend.vue'),
-    }, {
-      path: '/recommendOption',
-      name: 'RecommendOption',
-      component: () => import( /* webpackChunkName: "about" */ '../views/appHome/recommend/recommendOption.vue'),
-    },{
-      path: '/facebookPixel',
-      name: 'FacebookPixel',
-      component: () => import( /* webpackChunkName: "about" */ '../views/appHome/facebookPixel.vue'),
-    }]
+        path: '/appHome',
+        name: 'AppHome',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/appHome.vue'),
+      }, {
+        path: '/comment',
+        name: 'Comment',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/comment/comment.vue'),
+      }, {
+        path: '/commentDetail',
+        name: 'CommentDetail',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/comment/commentDetail.vue'),
+      }, {
+        path: '/shippingInsurance',
+        name: 'ShippingInsurance',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/shippingInsurance.vue'),
+      }, {
+        path: '/recommend',
+        name: 'Recommend',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/recommend/recommend.vue'),
+      }, {
+        path: '/recommendOption',
+        name: 'RecommendOption',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/recommend/recommendOption.vue'),
+      }, {
+        path: '/facebookPixel',
+        name: 'FacebookPixel',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/facebookPixel.vue'),
+      }, {
+        path: '/combinationProduct',
+        name: 'CombinationProduct',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/combinationProduct/combinationProduct.vue'),
+      },{
+        path: '/combinationDetail',
+        name: 'CombinationDetail',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/combinationProduct/combinationDetail.vue'),
+      },{
+        path: '/combinationOption',
+        name: 'CombinationOption',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/combinationProduct/combinationOption.vue'),
+      },{
+        path: '/limitedProduct',
+        name: 'LimitedProduct',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/limitedProduct/limitedProduct.vue'),
+      },{
+        path: '/limitedProductOption',
+        name: 'LimitedProductOption',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/limitedProduct/limitedProductOption.vue'), 
+      }
+      
+    ]
   }, {
     path: 'shopSetting',
     name: '店铺管理',
@@ -218,11 +243,11 @@ const routes = [{
       path: '/settingLogistics',
       name: 'SettingLogistics',
       component: () => import( /* webpackChunkName: "about" */ '../views/setting/logisticsManagement/settingLogistics.vue'),
-    }, { 
+    }, {
       path: '/commonLogistics',
       name: 'CommonLogistics',
       component: () => import( /* webpackChunkName: "about" */ '../views/setting/logisticsManagement/commonLogistics.vue'),
-    },{
+    }, {
       path: '/notice',
       name: 'Notice',
       component: () => import( /* webpackChunkName: "about" */ '../views/setting/notice/notice.vue'),
@@ -268,7 +293,11 @@ const routes = [{
   path: '/login',
   name: 'Login',
   component: () => import( /* webpackChunkName: "about" */ '../views/login.vue'),
-}]
+}, {
+  path: '/decoration',
+  name: 'decoration',
+  component: () => import( /* webpackChunkName: "decoration" */ '../views/shopSetting/decoration/index'),
+}, ]
 
 const router = new VueRouter({
   mode: 'history',

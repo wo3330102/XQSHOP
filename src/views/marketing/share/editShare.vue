@@ -436,21 +436,7 @@ h1 {
   width: 100%;
   line-height: 23px;
   .img {
-    width: 60px;
-    .small-img {
-      display: inline-block;
-      vertical-align: middle;
-      width: 50px;
-      height: 50px;
-      border-radius: 4px;
-      border: 1px solid #dadde4;
-      background-color: #f7f8fd;
-      background-origin: content-box;
-      background-position: 50% 50%;
-      background-size: contain;
-      background-repeat: no-repeat;
-      overflow: hidden;
-    }
+    width: 60px; 
   }
   .text {
     padding-left: 12px;

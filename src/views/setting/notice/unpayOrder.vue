@@ -20,13 +20,13 @@
             <div class="template-set">
               <label class="template-set-label">邮件主题：</label>
               <div class="template-set-info">
-                <el-input v-model="messageSubject" placeholder="请输入邮件主题"></el-input>
+                <el-input v-model="form.title" placeholder="请输入邮件主题"></el-input>
               </div>
             </div>
             <div class="template-set">
               <label class="template-set-label">发件人：</label>
               <div class="template-set-info">
-                <el-input v-model="messageSubject" placeholder="请输入邮件主题"></el-input>
+                <el-input v-model="form.sender" placeholder="请输入邮件主题"></el-input>
               </div>
               <label class="template-set-label w120">
                 发送时间
@@ -35,7 +35,7 @@
                 </el-tooltip>：
               </label>
               <div class="template-set-info">
-                <el-select v-model="sendTime" placeholder="请选择发送时间" style="width:100%">
+                <el-select v-model="form.sendMoment" placeholder="请选择发送时间" style="width:100%">
                   <el-option
                     v-for="item in timeList"
                     :key="item.value"
@@ -48,12 +48,12 @@
             <div class="template-set">
               <label class="template-set-label">自动应用优惠：</label>
               <div class="template-set-info">
-                <el-select v-model="discount" placeholder="请选择优惠码" style="width:100%">
+                <el-select v-model="form.couponCode" placeholder="请选择优惠码" style="width:100%">
                   <el-option
                     v-for="item in discountList"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
+                    :key="item.promoCode"
+                    :label="item.promoCode"
+                    :value="item.promoCode"
                   ></el-option>
                 </el-select>
               </div>
@@ -72,7 +72,7 @@
                   class="title"
                   style="line-height: 45px; font-size: 32px; margin-bottom: 32px;"
                 >ddd</h4>
-                <wangeditor ref="editor" v-model="privacyPolicy"></wangeditor>
+                <wangeditor ref="editor" v-model="form.content"></wangeditor>
                 <p class="viewOrder">Items in your cart</p>
                 <p style="text-align: center; font-size: 16px;">
                   or
@@ -133,68 +133,115 @@
       </el-row>
     </div>
     <div class="pageSaveBtn">
-      <el-button type="primary">保存</el-button>
+      <el-button style="float:left" @click="Init">恢复默认值</el-button>
+      <el-button type="primary" @click="Save">保存</el-button>
     </div>
   </div>
 </template> 
 <script>
-import wangeditor from "@/components/wangeditor";
+var htmlStr = `<p style="color: #333333; font-size: 24px; line-height: 33px; height: 33px; margin-bottom: 16px;" data-mce-style="color: #333333; font-size: 24px; line-height: 33px; height: 33px; margin-bottom: 16px;">You left items in your cart</p><p style="font-size: 14px; line-height: 22px; margin-bottom: 32px;" data-mce-style="font-size: 14px; line-height: 22px; margin-bottom: 32px;">Hi {{ first_name }}, you added items to your shopping cart and haven't completed your purchase.<br>You can complete it now while they're still available.</p>`
+import { getDetial, editTemp } from "@/api/notice";
+import { get } from "@/api/yxStorePromotionsSharing"; 
+import wangeditor from "@/components/wangeditor"; 
 export default {
   components: {
     wangeditor,
   },
   data() {
     return {
-      messageSubject: "1627239509@qq.com",
-      sendTime: "",
+      form:{
+        title:'',
+        sender:'',
+        sendMoment:'',
+        content:'',
+        couponCode:'',
+      },
+      id:'',
       timeList: [
         {
-          value: 1,
-          label: "5分钟",
-        },
-        {
-          value: 2,
-          label: "10分钟",
-        },
-        {
-          value: 3,
-          label: "15分钟",
-        },
-        {
-          value: 4,
-          label: "20分钟",
+          value:0,
+          label:'不发送'
         },
         {
           value: 5,
-          label: "25分钟",
-        },
-        {
-          value: 6,
-          label: "30分钟",
-        },
-        {
-          value: 7,
-          label: "45分钟",
-        },
-        {
-          value: 8,
-          label: "1小时",
-        },
-        {
-          value: 9,
-          label: "10小时",
+          label: "5分钟",
         },
         {
           value: 10,
+          label: "10分钟",
+        },
+        {
+          value: 15,
+          label: "15分钟",
+        },
+        {
+          value: 20,
+          label: "20分钟",
+        },
+        {
+          value: 25,
+          label: "25分钟",
+        },
+        {
+          value: 30,
+          label: "30分钟",
+        },
+        {
+          value: 45,
+          label: "45分钟",
+        },
+        {
+          value: 60,
+          label: "1小时",
+        },
+        {
+          value: 600,
+          label: "10小时",
+        },
+        {
+          value: 3600,
           label: "24小时",
         },
+        {
+          value: 7200,
+          label: "48小时",
+        }
       ],
       discount: "",
-      discountList: [],
-      privacyPolicy: "",
+      discountList: [], 
+      privacyPolicy: htmlStr,
     };
   },
-  methods: {},
+  created() {
+    get().then(res=>{
+      this.discountList = res;
+    })
+    getDetial(this.$route.query.id).then((res) => { 
+      if (res) {
+        this.form = res.data; 
+        this.id = res.data.id; 
+      } else {
+        this.form.content = htmlStr;
+        this.form.email = "A shipment from order {{ name }} is on the way";
+      }
+    });
+  },
+  methods: {
+    Init:function(){
+      this.form.content=htmlStr;
+    },
+    Save:function(){
+      let par = { 
+        type:3,
+        id:this.id,
+        ...this.form
+      }
+      editTemp(par).then(res=>{
+        this.$message.success('修改成功')
+        this.$router.go(-1);
+      })
+    }
+  },
   updated() {
     console.log("更新");
   },

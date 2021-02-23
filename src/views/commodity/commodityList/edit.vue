@@ -65,7 +65,7 @@
             <span class="text-span">商品SKU</span>
             <el-input
               class="box-item-entry"
-              v-model="detail.shopSku"
+              v-model="detail.skuCode"
               size="medium"
               placeholder="请输入商品SKU"
             ></el-input>
@@ -273,6 +273,7 @@
                   ref="saveTagInput"
                   size="medium"
                   placeholder="请在此输入内容并按回车键"
+                  @blur="item.inputValue = ''"
                   @keyup.enter.native="InputConfirm(index)"
                 ></el-input>
               </div>
@@ -350,12 +351,13 @@
                   <input
                     class="edit-inp"
                     v-model.number="scope.row[item.slot]"
-                    @blur="scope.row[item.slot] = $IsNaN(scope.row[item.slot])"
+                    @blur="BlurSet(item.slot, scope.row)"
                     v-else-if="
-                      item.title == '售价' ||
-                      item.title == '原价' ||
-                      item.title == '库存' ||
-                      item.title == '重量(KG)'
+                      item.slot == 'skuCode' ||
+                      item.slot == 'price' ||
+                      item.slot == 'ot_price' ||
+                      item.slot == 'stock' ||
+                      item.slot == 'weight'
                     "
                   />
                   <span v-else>{{ scope.row[item.slot] }}</span>
@@ -582,10 +584,6 @@ export default {
       optionIndex: 0, // 批量修改类型
       optionList: [
         {
-          label: "删除",
-          value: 1,
-        },
-        {
           label: "修改价格",
           value: 2,
         },
@@ -604,6 +602,14 @@ export default {
         {
           label: "修改重量",
           value: 6,
+        },
+        {
+          label: "修改商品SKU",
+          value: 7,
+        },
+        {
+          label: "删除",
+          value: 1,
         },
       ],
       requestParams: {},
@@ -653,6 +659,7 @@ export default {
         if (that.id === 0) {
           this.temp_id = "";
         } else {
+          console.log(res.productInfo);
           that.detail = { ...res.productInfo };
           that.tagIds = res.tagList;
           if (res.productInfo.classIds) {
@@ -742,7 +749,11 @@ export default {
     // 关闭规格
     CloseOption: function (e) {
       console.log(e);
+
       this.shopAttributeList.splice(e, 1);
+      if (this.shopAttributeList.length == 0) {
+        this.show = true;
+      }
       this.InitFormatAttr();
     },
     // 判断属性名称是否一样
@@ -759,6 +770,7 @@ export default {
     },
     // 新增规格值
     InputConfirm: function (index) {
+      this.show = false;
       let val = this.shopAttributeList[index].inputValue;
       val = val.replace(/(^\s*)|(\s*$)/g, ""); // 使用正则去除首尾空格
       if (val) {
@@ -779,6 +791,7 @@ export default {
     },
     // 关闭规格值
     CloseTag: function (item, index) {
+      console.log("1111");
       let arr = this.shopAttributeList;
       arr[index].detail.splice(arr[index].detail.indexOf(item), 1);
       this.InitFormatAttr();
@@ -799,12 +812,7 @@ export default {
         let headerData = [...r.header];
         let arr = [];
         r.header.map((v, i) => {
-          if (
-            v.slot !== "cost" &&
-            v.slot !== "volume" &&
-            v.slot !== "bar_code" &&
-            v.slot !== "action"
-          ) {
+          if (v.slot !== "cost" && v.slot !== "volume" && v.slot !== "action") {
             arr.push(v);
           }
         });
@@ -829,6 +837,17 @@ export default {
           this.table = array;
         }
       });
+    },
+    // 判断多规格数据是否需要转小数点
+    BlurSet: function (key, data) {
+      console.log(key, data);
+      console.log(data[key]);
+      if (key == "skuCode") {
+      } else if (key !== "skuCode" && key !== "stock") {
+        data[key] = data[key] ? this.$IsNaN(data[key].toString()) : "0.00";
+      } else {
+        data[key] = Number(data[key]);
+      }
     },
     // 选择批量操作数据
     SelectionChange: function (e) {
@@ -869,7 +888,7 @@ export default {
       console.log(that.batchValue);
       let item = this.selectItem;
       let table = this.table;
-      // 1 删除; 2 修改价格; 3 修改原价; 4 修改图片; 5 修改库存; 6 修改重量
+      // 1 删除; 2 修改价格; 3 修改原价; 4 修改图片; 5 修改库存; 6 修改重量; 7 商品SKU
       switch (this.optionIndex + 1) {
         case 2:
           ChangeTable("price");
@@ -883,6 +902,9 @@ export default {
         case 6:
           ChangeTable("weight");
           break;
+        case 7:
+          ChangeTable("skuCode");
+          break;
       }
       function ChangeTable(e) {
         console.log(e);
@@ -890,10 +912,13 @@ export default {
           table.map((item, inx) => {
             if (item.index == i.index) {
               item[e] =
-                e == "stock" ? that.batchValue : that.$IsNaN(that.batchValue);
+                e == "stock" || e == "skuCode"
+                  ? that.batchValue
+                  : that.$IsNaN(that.batchValue);
             }
           });
         });
+        that.isActive = false;
         that.batchOperation = false;
       }
     },
@@ -960,11 +985,11 @@ export default {
         that.$message.error("请输入商品名称");
         return false;
       }
-      // 判断是否选择分类
-      if (!this.tagIds || this.tagIds.length === 0) {
-        that.$message.error("请选择商品分类");
-        return false;
-      }
+      // // 判断是否选择分类
+      // if (!this.tagIds || this.tagIds.length === 0) {
+      //   that.$message.error("请选择商品分类");
+      //   return false;
+      // }
       // 判断是否有标签
       console.log(this.classList);
       if (this.classList) {
@@ -1001,6 +1026,7 @@ export default {
       }
       // 判断是否为多规格数据控制库存
       if (this.table.length === 0) {
+        // 单规格
         // 判断用户是否输入售价
         if (this.attr.price == "" || this.attr.price == 0) {
           that.$message.error("商品售价不能为0");
@@ -1015,6 +1041,14 @@ export default {
         } else {
           this.attr.ot_price = 0;
         }
+        // 判断是否有商品SKU
+        if (!this.detail.skuCode) {
+          that.$message.error("请输入商品Sku");
+          return false;
+        } else {
+          console.log(this.detail.skuCode);
+          this.attr.skuCode = this.detail.skuCode;
+        }
         // 判断用户是否输入库存，默认为空
         if (this.attr.stock == "") {
           this.attr.stock = 0;
@@ -1024,7 +1058,6 @@ export default {
           this.attr.weight = 0;
         }
       } else {
-        console.log("多商品");
         let arr = this.table;
         for (let i in arr) {
           if (arr[i].price == 0 || arr[i].price == "") {
@@ -1040,11 +1073,19 @@ export default {
           } else {
             this.attr.ot_price = 0;
           }
+          if (arr[i].pic == ""){
+            that.$message.error("请完善多规格表单，商品图片不能为空");
+            return false;
+          }
           if (arr[i].stock == "") {
             arr[i].stock = 0;
           }
           if (arr[i].weight == "") {
             arr[i].weight = 0;
+          }
+          if (arr[i].skuCode == "") {
+            that.$message.error("请完善多规格表单，商品SKU不能为空");
+            return false;
           }
         }
       }
@@ -1066,11 +1107,14 @@ export default {
         this.detail.spec_type = 0;
         this.detail.header = [];
         this.detail.items = [];
+        console.log(this.attr);
         this.detail.attrs = [this.attr];
         this.detail.attr = this.attr;
       }
       this.detail.is_show = Number(this.isGrounding);
+
       this.detail.tagIds = this.tagIds.toString();
+
       // 基础参数
       let data = {
         ficti: 0,
@@ -1093,9 +1137,9 @@ export default {
         store_info: "",
         temp_id: 0,
         unit_name: "",
+        skuCode: this.detail.skuCode || "",
         ...this.detail,
       };
-      console.log(that.fileList);
       if (that.id === 0) {
         if (this.table.length > 0) {
           // 多规格
@@ -1110,7 +1154,7 @@ export default {
             cost: 0,
             ot_price: that.attr.ot_price || 0,
             stock: that.attr.stock,
-            bar_code: "",
+            skuCode: "",
             weight: that.attr.weight,
             volume: 0,
             brokerage: 0,
@@ -1125,7 +1169,7 @@ export default {
               cost: 0,
               ot_price: that.attr.ot_price || 0,
               stock: that.attr.stock || 0,
-              bar_code: "",
+              skuCode: that.attr.skuCode || "",
               weight: that.attr.weight || 0,
               volume: 0,
               brokerage: 0,
@@ -1338,12 +1382,19 @@ h1 {
         margin-left: 24px;
         cursor: pointer;
         color: #c0c4cc;
+        width: 24px;
+        font-size: 16px;
+        text-align: center;
       }
     }
     .item {
       padding: 10px;
       font-size: 13px;
       cursor: pointer;
+      &:first-child {
+        padding-left: 0;
+        margin-left: 10px;
+      }
     }
     .disable {
       pointer-events: none;

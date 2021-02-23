@@ -11,6 +11,7 @@
               <span class="subTitle"
                 >可通过追踪您的店铺数据，为您找到最精准的客户进行营销</span
               >
+              <h6 style="display:inline-block;margin-left:10px">(回车键添加)</h6>
             </h3> 
             <div class="detail">
               <el-tag
@@ -27,6 +28,7 @@
                 size="medium"
                 placeholder="请输入Facebook Pixel ID （按回车键添加）"
                 @keyup.enter.native="InputConfirm(index)"
+                @blur="facebookPixel = ''"
               ></el-input>
             </div>
           </div>
@@ -175,6 +177,7 @@
 </template> 
 <script>
 import { get, edit, add } from "@/api/yxSystemStoreTrack";
+import { mapMutations } from "vuex";
 export default {
   data() {
     return {
@@ -200,6 +203,7 @@ export default {
     });
   },
   methods: {
+    ...mapMutations(["isRefresh"]),
     CloseTag: function (item, index) { 
       this.tagList.splice(index,1)
     },
@@ -213,10 +217,12 @@ export default {
       this.detail.facebookPixel = this.tagList.toString();
       if (this.isAdd) { 
         add(this.detail).then((res) => {
+          this.isRefresh(true)
           this.$message.success("新增成功");
         });
       } else {
         edit(this.detail).then((res) => {
+          this.isRefresh(true)
           this.$message.success("修改成功");
         });
       }

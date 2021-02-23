@@ -7,7 +7,7 @@
         <div>
           <img
             class="img-size0"
-            src="../../static/Cards _ Desktop _ 01 Card header@2x.png"
+            src="@/static/Cards _ Desktop _ 01 Card header@2x.png"
             alt=""
             srcset=""
           />
@@ -21,6 +21,7 @@
         <el-button @click="$NavgitorTo('/themeShop')">前往商城列表</el-button>
       </div>
     </div>
+    
     <!-- 已发布模板 -->
     <div>
       <h1 class="margin-bottom-12">已发布模版</h1>
@@ -28,7 +29,7 @@
         <div class="flex-1">
           <h3 class="sub-title">{{ publishedForm.name }}</h3>
           <p class="sub-info">
-            {{ publishedForm.updateTime }}
+            {{ publishedForm.updateTime | dataFormat }}
             <span>模版ID：{{ publishedForm.id }}</span>
           </p>
           <div class="img1-box">
@@ -65,93 +66,27 @@
                 <el-button>
                   操作
                   <i class="el-icon-arrow-down el-icon--right"></i>
-                </el-button>
+                </el-button> 
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item
-                    v-for="item in operateList"
+                    v-for="item in $enums.operateList()"
                     :key="item.value"
                     :label="item.label"
                     :value="item.value"
-                    :command="item.value"
+                    :command="{ type: item.value, params: publishedForm }"
                     >{{ item.label }}</el-dropdown-item
                   >
                 </el-dropdown-menu>
               </el-dropdown>
             </div>
             <div class="vertical-center margin-left-20">
-              <el-button type="primary">编辑</el-button>
+              <el-button type="primary" @click="editTemplate(publishedForm)">编辑</el-button>
             </div>
           </div>
         </div>
       </div>
     </div>
     <!-- 模版列表 -->
-    <!-- <div>
-      <div>
-        <div class="inline-block"><h1>模版列表</h1></div>
-        <el-select
-          class="float-right"
-          v-model="typeValue"
-          placeholder="请选择"
-          @change="filterTemplate"
-        >
-          <el-option
-            v-for="item in typeList"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          ></el-option>
-        </el-select>
-      </div>
-      <div class="temlist">
-        <div class="item" v-for="item in templateList" :key="item.id">
-          <div class="header">
-            <div class="left">
-              <h3 class="sub-title2">{{ item.title }}</h3>
-              <p class="sub-info">
-                {{ item.updateTime }}<span>模版ID：{{ item.id }}</span>
-              </p>
-            </div>
-            <div class="right">
-              <el-dropdown
-                split-button
-                trigger="click"
-                @click="editTemplate(item.id)"
-                @command="changeOperateType"
-              >
-                编辑
-                <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item
-                    v-for="item in operateList2"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                    :command="item.value"
-                    >{{ item.label }}</el-dropdown-item
-                  >
-                </el-dropdown-menu>
-              </el-dropdown>
-            </div>
-          </div>
-          <div class="content">
-            <img src="../../static/2-2.png" alt="" />
-            <img
-              class="img-1"
-              src="https://cdn.xshoppy.shop/uploader/b42ddc9265a67f66e9bfd539e941b18d8b0c5381.jpg?x-oss-process=image/format,webp"
-              alt=""
-            />
-            <img
-              class="img-2"
-              src="https://cdn.xshoppy.shop/uploader/3f1e1e57a367b70ba98cbf692bed1d3c662414c8.jpg?x-oss-process=image/format,webp"
-              alt=""
-            />
-            <img class="img-3" src="../../static/phone.png" alt="" />
-          </div>
-        </div>
-      </div>
-    </div> -->
-
-    <!-- test -->
     <div class="infinite-list-wrapper">
       <div>
         <div class="inline-block"><h1>模版列表</h1></div>
@@ -172,27 +107,28 @@
       <ul
         class="temlist"
         v-infinite-scroll="load"
-        infinite-scroll-disabled="disabled"
+        infinite-scroll-disabled="isDisabled"
       >
-        <li class="item" v-for="item in templateList">
+        <li class="item" v-for="item in templateList" :key="item.id">
           <div class="header">
             <div class="left">
               <h3 class="sub-title2">{{ item.name }}</h3>
               <p class="sub-info">
-                {{ item.updateTime }}<span>模版ID：{{ item.id }}</span>
+                {{ item.updateTime | dataFormat
+                }}<span>模版ID：{{ item.id }}</span>
               </p>
             </div>
             <div class="right">
               <el-dropdown
                 split-button
                 trigger="click"
-                @click="editTemplate(item.id)"
+                @click="editTemplate(item)"
                 @command="changeOperateType"
               >
                 编辑
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item
-                    v-for="item2 in operateList2"
+                    v-for="item2 in $enums.operateList2()"
                     :key="item2.value"
                     :label="item2.label"
                     :value="item2.value"
@@ -207,7 +143,7 @@
             <!-- <img :src="item.pcImage" alt="" /> -->
             <img class="img-1" :src="item.pcImage || defaultPCImg" alt="" />
             <img class="img-2" :src="item.mobileImage || defaultMImg" alt="" />
-            <img class="img-3" src="../../static/phone.png" alt="" />
+            <img class="img-3" src="@/static/phone.png" alt="" />
           </div>
         </li>
       </ul>
@@ -218,21 +154,21 @@
     <!-- 创建副本--弹框 -->
     <default-dialog :visible.sync="showDialog0" @toConfirm="createCopy">
       <div class="dialog-content">
-        <span><img src="../../static/i.png" alt="" /></span
+        <span><img src="@/static/i.png" alt="" /></span
         >此操作将创建一个副本，是否继续？
       </div>
     </default-dialog>
     <!-- 发布--弹框 -->
     <default-dialog :visible.sync="showDialog1" @toConfirm="toPublish">
       <div class="dialog-content">
-        <span><img src="../../static/yellow-i.png" alt="" /></span
+        <span><img src="@/static/yellow-i.png" alt="" /></span
         >此操作将设置该模板为默认项，是否继续？
       </div>
     </default-dialog>
     <!-- 删除--弹框 -->
     <default-dialog :visible.sync="showDialog2" @toConfirm="toDelete">
       <div class="dialog-content">
-        <span><img src="../../static/yellow-i.png" alt="" /></span
+        <span><img src="@/static/yellow-i.png" alt="" /></span
         >此操作将永久删除该模版, 是否继续?
       </div>
     </default-dialog>
@@ -256,13 +192,9 @@
     >
       <el-row>
         <el-col :span="24">
-          <el-select
-            class="float-right"
-            v-model="langValue"
-            @change="filterLanguage"
-          >
+          <el-select v-model="langValue" @change="filterLanguage">
             <el-option
-              v-for="langItem in langList"
+              v-for="langItem in $enums.langList()"
               :key="langItem.value"
               :label="langItem.label"
               :value="langItem.value"
@@ -273,7 +205,9 @@
     </default-dialog>
   </div>
 </template>
+
 <script>
+import { commonMixin } from "@/mixins";
 import {
   getPublished,
   queryPage,
@@ -289,6 +223,7 @@ import VueQr from "vue-qr";
 const storeId = localStorage.getItem("storeId");
 export default {
   name: "DecorationManage",
+  mixins: [commonMixin],
   inject: ["reload"],
   components: {
     VueQr,
@@ -297,46 +232,6 @@ export default {
   data() {
     return {
       operateValue: "操作",
-      operateList: [
-        {
-          label: "线上店铺",
-          value: "onlineStore",
-        },
-        {
-          label: "编辑语言",
-          value: "editLanguage",
-        },
-        {
-          label: "重命名",
-          value: "rename",
-        },
-        {
-          label: "创建副本",
-          value: "createCopy",
-        },
-      ],
-      operateList2: [
-        {
-          label: "预览",
-          value: "preview",
-        },
-        {
-          label: "发布",
-          value: "release",
-        },
-        {
-          label: "删除",
-          value: "delete",
-        },
-        {
-          label: "重命名",
-          value: "rename",
-        },
-        {
-          label: "创建副本",
-          value: "createCopy",
-        },
-      ],
       typeValue: null,
       typeList: [
         {
@@ -405,42 +300,8 @@ export default {
         mobileLink: "https://www.xqkj.top/",
       }, // 已发布模板的信息
       langValue: "en",
-      langList: [
-        {
-          label: "英语",
-          value: "en",
-        },
-        {
-          label: "德语",
-          value: "de",
-        },
-        {
-          label: "法语",
-          value: "fr",
-        },
-        {
-          label: "葡萄牙语",
-          value: "pt",
-        },
-        {
-          label: "西班牙语",
-          value: "es",
-        },
-        {
-          label: "意大利语",
-          value: "it",
-        },
-        {
-          label: "繁体中文",
-          value: "zh-hk",
-        },
-        {
-          label: "日语",
-          value: "ja",
-        },
-      ],
       defaultPCImg: require("@/static/pc-default.png"),
-      defaultMImg: require("@/static/m-default.png")
+      defaultMImg: require("@/static/m-default.png"),
     };
   },
   computed: {
@@ -448,11 +309,24 @@ export default {
       //当起始页数大于总页数时停止加载
       return this.count >= this.totalPages - 1;
     },
-    disabled() {
+    isDisabled() {
       return this.loading || this.noMore;
     },
   },
   methods: {
+    handleRemove(file) {
+      this.$refs.clearFiles();
+    },
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
+    },
+    handleDownload(file) {
+      console.log(file);
+    },
+    /* handleChange(file, fileList) {
+      this.$refs.upload.clearFiles();
+    }, */
     load() {
       this.loading = true;
       this.count += 1; //页数+1
@@ -482,7 +356,9 @@ export default {
         });
     },
     toOperate(e) {
-      switch (e) {
+      this.myForm = {};
+      this.myForm = e.params;
+      switch (e.type) {
         case "onlineStore":
           // 线上店铺
           break;
@@ -492,9 +368,11 @@ export default {
           break;
         case "rename":
           // 重命名
+          this.showDialog3 = true;
           break;
         case "createCopy":
           // 创建副本
+          this.showDialog0 = true;
           break;
       }
     },
@@ -515,20 +393,20 @@ export default {
     },
     // 提交选择语言
     toChangeLang(e) {
-      let that = this; 
+      let that = this;
     },
     // 编辑模版
-    editTemplate(id) {
-      console.log("当前操作模块的内容：", id);
+    editTemplate(item) {
+      this.$router.push({path: '/decoration', query: {tempId: item.id, isPublished: item.status, isPreview: false}});
     },
     // 其他操作，比如预览，发布，删除，重命名，创建副本
     changeOperateType(item) {
       this.myForm = {};
       this.myForm = item.params;
-      console.log("操作类型：：：：", item);
       switch (item.type) {
         case "preview":
           // 预览
+          this.$router.push({path: '/decoration', query:{tempId: item.params.id, isPublished: item.status, isPreview: true}});
           break;
         case "release":
           // 发布
@@ -555,17 +433,13 @@ export default {
         storeId: parseInt(storeId),
       };
       getPublished(params)
-        .then((res) => { 
+        .then((res) => {
           this.publishedForm = res.data.data;
-          console.log("获取已发布模版：", res);
         })
         .catch((error) => {
           console.log(error);
         });
     },
-    /* async getQRCodeURL(text) {
-      return QRCode.toDataURL(text);
-    }, */
     // 创建副本
     createCopy() {
       let that = this;
@@ -595,9 +469,7 @@ export default {
             that.reload();
           }
         })
-        .catch((error) => {
-          debugger;
-        });
+        .catch((error) => {});
     },
     // 删除
     toDelete() {
@@ -661,6 +533,9 @@ h1 {
   font-size: 14px;
   color: #5e7185;
   margin-bottom: 20px;
+  span {
+    margin-left: 20px;
+  }
 }
 .img-size0 {
   width: 150px;

@@ -4,8 +4,8 @@
       <span>商品列表</span>
       <span style="font-size: 0">
         <el-button @click="showImport = true">导入</el-button>
-        <!-- <el-button @click="showExport=true">导出</el-button>
-        <el-button>Feed导出</el-button> -->
+        <el-button @click="showExport=true">导出</el-button>
+        <!-- <el-button>Feed导出</el-button> -->
         <el-button type="primary" @click="ToAddShop">添加商品</el-button>
       </span>
     </h1>
@@ -98,7 +98,7 @@
         <el-upload
           class="upload-demo"
           drag
-          action="https://jsonplaceholder.typicode.com/posts/"
+          :action="upUrl"
           multiple
         >
           <i class="el-icon-upload"></i>
@@ -124,7 +124,7 @@
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="showImport = false">取 消</el-button>
-        <el-button type="primary" @click="showImport = false">确 定</el-button>
+        <el-button type="primary" @click="ImportProduct">确 定</el-button>
       </span>
     </el-dialog>
     <!-- 导出 -->
@@ -134,7 +134,7 @@
     ></export-function>
   </div>
 </template>
-<script>
+<script> 
 import exportFunction from "@/components/exportFunction";
 import tableTem from "@/components/tableTem";
 import { delMany, onsaleAll } from "@/api/yxStoreProduct";
@@ -201,6 +201,7 @@ export default {
       showExport: false,
       showImport: false,
       checkImport: true,
+      upUrl:process.env.VUE_APP_BASE_API+'/api/yxStoreProduct/importProduct/'+localStorage.getItem('storeId')
     };
   },
   created() {
@@ -277,6 +278,9 @@ export default {
     Preview:function(params){
       let url = 'https://' + localStorage.getItem('storeUrl') + '/product-details.html?id=' +  params.params.id
       window.open(url, '_blank') 
+    },
+    ImportProduct:function(){
+
     }
   },
 };

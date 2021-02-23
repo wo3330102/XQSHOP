@@ -3,17 +3,18 @@ import ElementUI, { MessageBox } from 'element-ui';
 import App from './App.vue'
 import router from './router'
 import store from './store'
+import enums from './utils/enums'
 import 'element-ui/lib/theme-chalk/index.css';
 import './element-variables.scss'; 
 Vue.prototype.$ELEMENT = {
   size: 'medium'
-}; 
+};  
 localStorage.setItem('uploadUrl',process.env.VUE_APP_BASE_API)//'http://192.168.8.254:8001/admin')//)
 
 // 无限滚动（下拉加载）
 import infiniteScroll from "vue-infinite-scroll";
 Vue.use(infiniteScroll);
-
+Vue.prototype.$enums=enums
 // 强制保留两位小数
 Vue.prototype.$toDecimal2 = function (x) {
   var f = parseFloat(x);
@@ -88,5 +89,6 @@ Vue.prototype.currency = {
 new Vue({ 
   router,
   store,
+
   render: h => h(App)
 }).$mount('#app')
