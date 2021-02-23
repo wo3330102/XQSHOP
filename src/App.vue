@@ -27,6 +27,28 @@
   }
 } 
 
+.router-view {
+    flex: 1;
+    padding: 10px;
+    overflow: auto;
+    /*滚动条样式*/
+    &::-webkit-scrollbar {
+      /*滚动条整体样式*/
+      width: 6px;
+      margin-right: 2px;
+    }
+    &::-webkit-scrollbar-thumb {
+      /*滚动条里面小方块*/
+      border-radius: 5px;
+      background: #d5d5e6;
+    }
+    &::-webkit-scrollbar-track {
+      /*滚动条里面轨道*/
+      border-radius: 6px;
+      background: #f5f5f9;
+    }
+  }
+
 .container {
   padding: 10px;
   width: 1146px;

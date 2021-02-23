@@ -6,17 +6,6 @@ module.exports = {
         // 移除 preload 插件
         config.plugins.delete('preload');
     },
-    // qxj add by 2021-1-12
-    devServer: {
-        open: true,
-        port: "8080", // 代理端口
-        proxy: {
-            "/api": {
-                target: "https://admin.xqshopify.com/admin", // 开发接口--吕外冬
-                changeOrigin: true, // 开启代理，在本地创建一个虚拟服务端 
-            }
-        }
-    },
     configureWebpack: config => {
         // 生产环境下生效
         if (process.env.NODE_ENV === 'production') {
@@ -28,7 +17,7 @@ module.exports = {
             "element-ui": "ELEMENT",
             "vue-router": "VueRouter",
             vuex: "Vuex",
-            axios: 'axios',
+            axios: 'axios', 
         }
     }
 }

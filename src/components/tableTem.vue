@@ -154,6 +154,12 @@ export default {
       type: Number,
       default: 0,
     },
+    addTableData:{
+      type: Array,
+      default: function () {
+        return [];
+      },
+    }
   },
   data() {
     return {
@@ -175,8 +181,15 @@ export default {
       deep: true,
       immediate: true,
     },
-    tableData: function (val) {
-      this.data = val;
+    addTableData: function (val) {
+      console.log(this.data)
+      console.log(val);
+      if(this.data){
+        this.data.concat(val);
+      } else {
+        this.data = [...val]; 
+      }
+      
     },
     isRefresh: function (val) {
       this.selectItem = [];
@@ -207,8 +220,22 @@ export default {
         setTimeout(function () {
           that.loading = false;
         }, 200);
-        that.data = res.content;
-        that.total = res.totalElements; 
+        if(that.requestUrl == 'api/yxComposeProduct'){
+          console.log(res);
+          that.data = res.data.composeProducts;
+          that.total = res.data.totalElements; 
+        } else if(that.requestUrl == 'api/productLimit/limitedProductList'){
+          that.data = res.data.content.map(item=>{
+            item.isEdit = false;
+            item.editPrice = this.$IsNaN(item.preferentialPrice);
+            item.editNum = item.number;
+            return item;
+          }); 
+          that.total = res.data.totalElements; 
+        } else{
+          that.data = res.content;
+          that.total = res.totalElements; 
+        }    
         if (res.hasOwnProperty("cateList")) {
           that.$emit("GetCategory", res.cateList);
         } 
