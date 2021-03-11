@@ -748,8 +748,6 @@ export default {
     },
     // 关闭规格
     CloseOption: function (e) {
-      console.log(e);
-
       this.shopAttributeList.splice(e, 1);
       if (this.shopAttributeList.length == 0) {
         this.show = true;
@@ -777,13 +775,14 @@ export default {
         let detail = this.shopAttributeList[index].detail;
         if (detail.indexOf(val) > -1) {
           this.$message.error("已存在该标签");
+          this.shopAttributeList[index].inputValue = "";
           return false;
         } else {
           detail.push(val);
           this.showTable = true;
         }
         // 删除对应存在的规格值
-        delete this.shopAttributeList[index].inputValue;
+        this.shopAttributeList[index].inputValue = "";
         this.InitFormatAttr();
       } else {
         this.shopAttributeList[index].inputValue = "";
@@ -791,8 +790,8 @@ export default {
     },
     // 关闭规格值
     CloseTag: function (item, index) {
-      console.log("1111");
       let arr = this.shopAttributeList;
+      arr[index].inputValue = "";
       arr[index].detail.splice(arr[index].detail.indexOf(item), 1);
       this.InitFormatAttr();
     },
@@ -827,13 +826,69 @@ export default {
           });
           this.table = array;
         } else {
+          let table = [...this.table];
           r.value.map((v, i) => {
             v.index = i;
-            if (v.is_show == 1) {
+            if (v.is_show == 1) { 
+              table.map((item) => { 
+                if (v.hasOwnProperty("value2")) {
+                  // 判断新表单是否有第三规格
+                  if (v.hasOwnProperty("value3")) {
+                    // 若原表单不含第三规格，则为新增
+                    if (!item.hasOwnProperty("value3")) { 
+                      if (item.value1 + item.value2 == v.value1 + v.value2) {
+                        delete item.skuCode;  
+                        v = {
+                          ...v,
+                          ...item,
+                        };
+                      }
+                    } else { 
+                      // 若原表单含有第三规格，则为新增某一规格值
+                      if (
+                        (item.value1 + item.value2 + item.value3) == 
+                        (v.value1 + v.value2 + v.value3)
+                      ) { 
+                        delete item.skuCode;
+                        v = {
+                          ...v,
+                          ...item,
+                        };
+                      }
+                    }
+                  } else if(item.hasOwnProperty('value2')){  
+                    if ((v.value1 + v.value2) === (item.value1 + item.value2)) { 
+                      delete item.value3;
+                      delete item.skuCode;
+                      v = {
+                        ...v,
+                        ...item,
+                      };
+                    }
+                  } else{
+                    if(item.value1 == v.value1){
+                      delete item.skuCode; 
+                      v = {
+                        ...v,
+                        ...item,
+                      };
+                    }
+                  } 
+                } else{
+                  if(item.value1 == v.value1){
+                    delete item.skuCode; 
+                    delete item.value2;
+                    delete item.value3;
+                    v = {
+                      ...v,
+                      ...item,
+                    };
+                  }
+                }
+              });
               array.push(v);
             }
-          });
-          console.log(array);
+          }); 
           this.table = array;
         }
       });
@@ -925,10 +980,14 @@ export default {
     // 选择图片
     SelectPicture: function (index) {
       this.tableIndex = index;
-      if (this.table[index].pic) {
+      if(this.fileList.length>0){
+        if (this.table[index].pic) {
         this.showDelImage = true;
       }
       this.showDialog = true;
+      } else {
+        this.$message.warning('请先上传商品图片')
+      } 
     },
     // 提交图片
     SubImage: function () {
@@ -1073,7 +1132,7 @@ export default {
           } else {
             this.attr.ot_price = 0;
           }
-          if (arr[i].pic == ""){
+          if (arr[i].pic == "") {
             that.$message.error("请完善多规格表单，商品图片不能为空");
             return false;
           }
