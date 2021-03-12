@@ -20,7 +20,7 @@
             <div class="template-set">
               <label class="template-set-label">邮件主题：</label>
               <div class="template-set-info">
-                <el-input v-model="form.title" placeholder="请输入邮件主题"></el-input>
+                <el-input v-model="form.title" maxlength="255" placeholder="请输入邮件主题"></el-input>
               </div>
             </div>
             <div class="template-set">

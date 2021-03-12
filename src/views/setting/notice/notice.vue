@@ -161,7 +161,16 @@ export default {
     Save:function(){
       this.$refs['form'].validate((valid) => {
           if (valid) {
-            alert('submit!');
+            let par = {
+              account:this.form.email,
+              id:4,
+              isOpen:1
+            }
+            editNoticeStatus(par).then(res=>{
+              console.log(res);
+              this.changeEmail = false;
+              this.email = this.form.email;
+            })
           } 
         });
     },

@@ -76,7 +76,7 @@
                     <span>{{ scope.row.composeCount }}/2</span>
                   </template>
                   <template v-else-if="item.prop == 'option'">
-                    <span class="textBtn">预览</span>
+                    <span class="textBtn" @click.stop="Perview(scope.row.composeId)">预览</span>
                     <span class="textBtn">编辑</span>
                   </template>
                   <span v-else>{{ scope.row[item.prop] }}</span>
@@ -160,6 +160,12 @@ export default {
     };
   },
   methods: {
+    Perview:function(id){
+      if(this.status == 1){ 
+        let url = process.env.NODE_ENV == 'product'? 'https://':'http://'+ localStorage.getItem('storeUrl') + '/product-details.html?id=' + id
+            window.open(url, '_blank') 
+      }
+    },
     Init: function (e) {
       this.status = e.data.isOpen;
     },

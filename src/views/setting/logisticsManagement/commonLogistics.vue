@@ -391,6 +391,7 @@ export default {
     },
   },
   created() {
+    // localStorage.removeItem("logisticsPlan")  // 清除缓存
     (this.requestParams.tempId = this.$route.query.id),
       (this.status = this.$route.query.status);
     this.id = this.$route.query.id;
@@ -533,8 +534,9 @@ export default {
       });
     },
     // 编辑当前物流
-    EditPlan: function (item) {
-      localStorage.setItem("logisticsPlan", JSON.stringify(item));
+    EditPlan: function (item) {  
+      let jsonStr = JSON.stringify(item) 
+      localStorage.setItem("logisticsPlan", jsonStr);
       this.$router.push({
         path: "/settingLogistics",
         query: {

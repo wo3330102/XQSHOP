@@ -138,6 +138,14 @@ export default {
       secret: "",
     };
   },
+  watch:{
+    productType:function(val){
+      console.log(val);
+      if(val[0] == 1 || val[0] == 3){
+        this.productType = [];
+      }
+    }
+  },
   methods: {
     AddList: function (e) {
       this.list = [...e];

@@ -60,6 +60,14 @@ export default {
             "通过此应用设置限量优惠的商品，以达到引流、提高转化作用。",
           url: "/limitedProduct",
         },
+        {
+          id: 5,
+          image: url+"/static/img/applications/copyShop.svg",
+          title: "复制店铺",
+          desc:
+            "复制您的商品、评论、页面、物流设置及更多，更快的让您复制店铺，提高建站效率。",
+          url: "/copyStore",
+        },
       ],
     };
   },

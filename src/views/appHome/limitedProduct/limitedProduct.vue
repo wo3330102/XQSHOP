@@ -386,14 +386,10 @@ export default {
     },
     productList: {
       handler:function (val) { 
-        let newVal = JSON.stringify(val);
-        console.log(newVal);
-        console.log(listDetail);
-        if (newVal == listDetail) {
-          console.log(1);
+        let newVal = JSON.stringify(val); 
+        if (newVal == listDetail) { 
           this.addBtnDisabled = true;
-        } else {
-          console.log(2);
+        } else { 
           this.addBtnDisabled = false;
         }
       },
@@ -511,13 +507,11 @@ export default {
       });
     },
     // 选中当前商品
-    CheckMainProduct: function (e, index) {
-      console.log(e, index);
-      console.log(this.productList[index]);
+    CheckMainProduct: function (e, index) {   
       if (e) {
         this.productList[index].isSelect = true;
         this.productList[index].indeterminate = false;
-        this.activeArr.push(index);
+        this.activeArr.indexOf(index)>-1?'':this.activeArr.push(index); 
       } else {
         this.productList[index].isSelect = false;
       }

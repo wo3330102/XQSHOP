@@ -72,11 +72,11 @@
     >
       <div>
         <p>
-          您本次导入将会同步{{ detail.categoryCount }}个分类，{{
-            detail.productCount
-          }}个商品，{{ detail.repliesCount }}条商品评论，{{
-            detail.pageBoardCount
-          }}个自定义页面，{{ detail.shippingCount }}条物流设置。
+          您本次导入将会同步{{ detail.categoryCount||0 }}个分类，{{
+            detail.productCount||0
+          }}个商品，{{ detail.repliesCount||0 }}条商品评论，{{
+            detail.pageBoardCount||0
+          }}个自定义页面，{{ detail.shippingCount||0 }}条物流设置。
         </p>
         <p>本次同步覆盖您原有的所有物流设置和重复产品，是否执行导入？</p>
       </div>

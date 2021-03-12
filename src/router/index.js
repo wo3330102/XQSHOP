@@ -167,6 +167,14 @@ const routes = [{
         path: '/limitedProductOption',
         name: 'LimitedProductOption',
         component: () => import( /* webpackChunkName: "about" */ '../views/appHome/limitedProduct/limitedProductOption.vue'), 
+      },{
+        path: '/copyStore',
+        name: 'CopyStore',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/copyStore/copyStore.vue'), 
+      },{
+        path: '/copyDetail',
+        name: 'copyDetail',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/copyStore/copyDetail.vue'), 
       }
       
     ]

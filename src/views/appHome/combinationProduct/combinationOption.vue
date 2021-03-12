@@ -19,25 +19,27 @@
     <div>
       <el-row style="margin: 0 -10px">
         <el-col :span="16" style="padding-left: 10px; padding-right: 10px">
-          <div class="box"> 
+          <div class="box">
             <h3 class="title">
               组合商品显示位置
-              <span class="option" @click="shopDialog = true"
-                >效果预览</span
-              >
+              <span class="option" @click="shopDialog = true">效果预览</span>
             </h3>
             <el-radio-group v-model="form.location">
-              <p style="margin-bottom: 15px;">
-                <el-radio  :label="0">商品详情上方</el-radio>
+              <p style="margin-bottom: 15px">
+                <el-radio :label="0">商品详情上方</el-radio>
               </p>
               <p>
-                <el-radio  :label="1">商品详情下方</el-radio>
+                <el-radio :label="1">商品详情下方</el-radio>
               </p>
             </el-radio-group>
           </div>
           <div class="box">
-             <h3 class="title">标题修改</h3>
-             <el-input type="textarea" v-model="form.title" placeholder="在此输入标题"></el-input>
+            <h3 class="title">标题修改</h3>
+            <el-input
+              type="textarea"
+              v-model="form.title"
+              placeholder="在此输入标题"
+            ></el-input>
           </div>
         </el-col>
         <el-col :span="8">
@@ -45,7 +47,7 @@
             <p class="infoTip">信息提示</p>
             <p class="infoContent">
               1、组合商品的显示位置不同，可以提高加购和影响转化率。
-            </p> 
+            </p>
           </div>
         </el-col>
       </el-row>
@@ -53,35 +55,49 @@
         <el-button @click="$NavgitorTo('/combinationProduct')">取消</el-button>
         <el-button @click="Save" type="primary">保存</el-button>
       </div>
-    </div> 
+    </div>
+    <el-dialog title="效果预览" :top="'5vh'" :visible.sync="shopDialog">
+      <div class="img-box">
+        <div>
+          <img src="https://alligatoreel-fa.xshoppy.shop/static/img/toshop-top.04c6826.jpg" />
+        </div>
+        <img src="https://alligatoreel-fa.xshoppy.shop/static/img/m-photo.e4240ad.png" />
+      </div>
+      <p style="text-align:center;margin-bottom:10px"> 商品详情页上方</p>
+      <p style="text-align:center"><i class="el-icon-info"></i>上下拖动页面可以查看整个页面</p>
+    </el-dialog>
   </div>
 </template> 
-<script> 
-import { getOption,saveOption } from "@/api/yxComposeProduct";
+<script>
+import { getOption, saveOption } from "@/api/yxComposeProduct";
+import defaultDialog from "../../../components/defaultDialog.vue";
 
-export default { 
+export default {
+  components: {
+    defaultDialog,
+  },
   data() {
     return {
       form: {
-        location:1,
-        title:"FREQUENTLY BOUGHT TOGETHER",
-      },  
-      shopDialog: false, 
+        location: 1,
+        title: "FREQUENTLY BOUGHT TOGETHER",
+      },
+      shopDialog: false,
     };
   },
   created() {
-    getOption().then((res) => { 
+    getOption().then((res) => {
       this.form.title = res.data.title;
-      this.form.location = res.data.location
+      this.form.location = res.data.location;
     });
-  }, 
-  methods: { 
-    Save:function(){
-      saveOption(this.form).then(res=>{
-        this.$message.success('修改成功');
-        this.$router.push('/combinationProduct')
-      })
-    }
+  },
+  methods: {
+    Save: function () {
+      saveOption(this.form).then((res) => {
+        this.$message.success("修改成功");
+        this.$router.push("/combinationProduct");
+      });
+    },
   },
 };
 </script>
@@ -125,6 +141,26 @@ h1 {
     }
   }
 }
+.img-box {
+  width: 380px;
+  position: relative;
+  overflow: hidden;
+  margin: 0px auto;
+  & > div {
+    position: absolute;
+    top: 69px;
+    left: 38px;
+    height: 538px;
+    overflow: auto;
+    border-radius: 4px;
+    & > img {
+      width: 293px;
+    }
+  }
+  & > img {
+    width: 380px;
+  }
+}
 .mainProduct {
   .content {
     display: flex;
@@ -154,8 +190,8 @@ h1 {
   position: relative;
   .ellipsis {
     flex: 1;
-    padding-left: 13px; 
-        display: flex;
+    padding-left: 13px;
+    display: flex;
     align-items: center;
   }
   .options {

@@ -112,15 +112,16 @@
                     >
                       <td>{{ item.name }}</td>
                       <td>
-                        {{currency.s}}{{ item.minUnit ? $IsNaN(item.minUnit) : "0.00" }}
+                        {{ currency.s
+                        }}{{ item.minUnit ? $IsNaN(item.minUnit) : "0.00" }}
                         {{
                           Number(item.maxUnit) == 0 || !item.maxUnit
                             ? "and up"
-                            : "- " + $IsNaN(item.maxUnit)
+                            : "- "+ currency.s + $IsNaN(item.maxUnit)
                         }}
                       </td>
                       <td>
-                        {{ item.price ? currency.s + item.price : "免运费" }}
+                        {{ Number(item.price) != 0 ? currency.s + item.price : "免运费" }}
                       </td>
                       <td>
                         <span
@@ -166,15 +167,15 @@
                     >
                       <td>{{ item.name }}</td>
                       <td>
-                        {{currency.s}}{{ item.minUnit ? $IsNaN(item.minUnit) : "0.00" }}
+                        {{ item.minUnit ? $IsNaN(item.minUnit)+'kg' : "0.00 kg" }}
                         {{
                           Number(item.maxUnit) == 0 || !item.maxUnit
                             ? "and up"
-                            : "- " + $IsNaN(item.maxUnit)
+                            : "- " + $IsNaN(item.maxUnit) + 'kg'
                         }}
                       </td>
                       <td>
-                        {{ item.price ? currency.s + item.price : "免运费" }}
+                        {{ Number(item.price) != 0 ? currency.s + item.price : "免运费" }}
                       </td>
                       <td>
                         <span
@@ -401,10 +402,10 @@
                       logisticsPlanType == 1 ? "金额" : "重量"
                     }}</template
                   >
-                  <template v-if="logisticsPlanType === 1" slot="prefix"
-                    >{{currency.s}}</template
-                  >
-                  <template v-else slot="suffix">g</template>
+                  <template v-if="logisticsPlanType === 1" slot="prefix">{{
+                    currency.s
+                  }}</template>
+                  <template v-else slot="suffix">kg</template>
                 </el-input>
               </el-form-item>
               <el-form-item prop="maxUnit">
@@ -419,10 +420,10 @@
                       logisticsPlanType == 1 ? "金额" : "重量"
                     }}</template
                   >
-                  <template v-if="logisticsPlanType === 1" slot="prefix"
-                    >{{currency.s}}</template
-                  >
-                  <template v-else slot="suffix">g</template>
+                  <template v-if="logisticsPlanType === 1" slot="prefix">{{
+                    currency.s
+                  }}</template>
+                  <template v-else slot="suffix">kg</template>
                 </el-input>
               </el-form-item>
             </div>
@@ -442,7 +443,7 @@
               maxlength="100"
               @blur="form.price = $IsNaN(form.price)"
             >
-              <template slot="prefix">{{currency.s}}</template>
+              <template slot="prefix">{{ currency.s }}</template>
             </el-input>
           </el-form-item>
         </el-form>
@@ -512,8 +513,8 @@ export default {
     let detail = "";
     let storeId = localStorage.getItem("storeId");
     if (this.$route.query.id) {
-      this.id = this.$route.query.id;
-      detail = JSON.parse(localStorage.getItem("logisticsPlan"));
+      this.id = this.$route.query.id; 
+      detail = JSON.parse(localStorage.getItem("logisticsPlan")); 
       this.logisticsName = detail.shippingName;
       this.type = this.$route.query.type;
     }
@@ -521,13 +522,12 @@ export default {
     this.status = this.$route.query.status;
     // 获取历史物流方案名称
     getPlanName(storeId).then((res) => {
-      console.log(res); 
+      console.log(res);
       for (let i in res) {
         let par = {};
         par.value = res[i];
         planNameList.push(par);
       }
-
       // planNameList = [...res];
     });
     // 获取国家列表
@@ -608,9 +608,9 @@ export default {
     if (this.type == 1) {
       // 初始化物流条件
       detail.freeInfo.map((item) => {
-        item.maxUnit = item.maxUnit ? this.$IsNaN(item.maxUnit) : "0";
-        item.minUnit = this.$IsNaN(item.minUnit);
-        item.price = this.$IsNaN(item.price);
+        item.maxUnit = item.maxUnit ? item.maxUnit : "0.00";
+        item.minUnit = item.minUnit?item.minUnit:'0.00';
+        item.price =  item.price?item.price:'0.00'
         if (item.type == 1) {
           this.moneyOflogisticsList.push(item);
         } else {
@@ -746,13 +746,14 @@ export default {
       this.selectContryList.splice(index, 1);
     },
     // 编辑物流方案
-    EditPlan: function (item, index) { 
-      Number(item.maxUnit)?item.maxUnit:item.maxUnit = '';
+    EditPlan: function (item, index) {
+      console.log(item);  
+      Number(item.maxUnit) ? item.maxUnit : (item.maxUnit = "");
       console.log(item);
-      this.form = item;
+      this.form = {...item};
       this.editLogisticsPlan = true;
       this.editLogisticsPlanIndex = index;
-      this.showLogisticsPlan = true;
+      this.showLogisticsPlan = true; 
     },
     // 显示物流对话框
     AddPlan: function (e) {
@@ -780,33 +781,41 @@ export default {
         this.$refs["form"].validate((valid) => {
           if (valid) {
             console.log({ ...this.form });
-            this.form.isFree = Number(this.form.price) == 0 ? 1 : 0;
+            this.form.isFree = Number(this.form.price) == 0 ? 1 : 0; 
             if (!this.form.minUnit) {
               this.form.minUnit = "";
             }
             if (!this.form.maxUnit) {
               this.form.maxUnit = "";
-            }
-            if (this.logisticsPlanType == 1) {
-              this.form.type = 1;
-              if (this.editLogisticsPlan) {
-                this.moneyOflogisticsList[this.editLogisticsPlanIndex] = {
-                  ...this.form,
-                };
+            }  
+            // 判断是否为编辑
+            if(this.editLogisticsPlan){
+              if(this.form.type == 1){
+                this.moneyOflogisticsList[this.editLogisticsPlanIndex] = {...this.form};
               } else {
-                this.moneyOflogisticsList.push({ ...this.form });
+                this.weightOflogisticsList[this.editLogisticsPlanIndex] = {...this.form};
               }
             } else {
-              this.form.type = 2;
-              if (this.editLogisticsPlan) {
-                this.weightOflogisticsList[this.editLogisticsPlanIndex] = {
-                  ...this.form,
-                };
+              if (this.logisticsPlanType == 1) {
+                this.form.type = 1;
+                if (this.editLogisticsPlan) {
+                  this.moneyOflogisticsList[this.editLogisticsPlanIndex] = {
+                    ...this.form,
+                  };
+                } else {
+                  this.moneyOflogisticsList.push({ ...this.form });
+                }
               } else {
-                this.weightOflogisticsList.push({ ...this.form });
-              }
-            }
-            console.log(this.moneyOflogisticsList);
+                this.form.type = 2;
+                if (this.editLogisticsPlan) {
+                  this.weightOflogisticsList[this.editLogisticsPlanIndex] = {
+                    ...this.form,
+                  };
+                } else {
+                  this.weightOflogisticsList.push({ ...this.form });
+                }
+              } 
+            } 
             this.$refs["form"].resetFields();
             this.showLogisticsPlan = false;
           } else {
@@ -932,17 +941,23 @@ export default {
     },
     // 设置辅助输入列表(用法参照elementUI)
     QuerySearch: function (queryString, cb) {
-      var restaurants = planNameList;
-      console.log(restaurants);
       var results = queryString
-        ? restaurants.filter(CreateFilter(queryString))
-        : restaurants;
+        ? planNameList.filter(CreateFilter(queryString))
+        : planNameList;
+
+      clearTimeout(this.timeout);
+      this.timeout = setTimeout(() => {
+        cb(results);
+      }, 3000 * Math.random());
+
       // 调用 callback 返回建议列表的数据
       cb(results);
       function CreateFilter(queryString) {
-        return (
-            restaurant.toLowerCase().indexOf(queryString.toLowerCase()) === 0
+        return (state) => {
+          return (
+            state.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0
           );
+        };
       }
     },
   },

@@ -23,6 +23,7 @@
         <h3 class="title">邮件主题</h3>
         <el-input
           v-model="title"
+          maxlength="255"
           placeholder="Complete your Purchase!"
         ></el-input>
       </div>
@@ -184,6 +185,7 @@
       </div>
     </div>
     <div class="pageSaveBtn">
+      <el-button @click="privacyPolicy = defaultStr">恢复默认</el-button>
       <el-button type="primary" @click="Save">保存</el-button>
     </div>
   </div>
@@ -200,7 +202,7 @@ export default {
       title: "",
       defaultTitle: "Order {{ name }} confirmed",
       privacyPolicy: "",
-      default:
+      defaultStr:
         '<p style="color: #333333; font-size: 24px; line-height: 33px; height: 33px; margin-bottom: 16px;">Thank you for your purchase!</p><p style="color: #666666; line-height: 20px;">Hi {{first_name}}, we\'re getting your order ready to be shipped. We will notify you when it has been sent.1</p>',
       id: 0,
     };
@@ -208,11 +210,11 @@ export default {
   created() {
     getDetial(this.$route.query.id).then((res) => {
       if (res) {
-        this.title = res.title;
-        this.privacyPolicy = res.content;
-        this.id = res.id;
+        this.title = res.data.title;
+        this.privacyPolicy = res.data.content;
+        this.id = res.data.id;
       } else {
-        this.privacyPolicy = this.default;
+        this.privacyPolicy = this.defaultStr;
         this.title = this.defaultTitle;
       }
     });

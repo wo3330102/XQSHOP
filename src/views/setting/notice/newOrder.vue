@@ -85,11 +85,7 @@ export default {
       discountList: [],
       privacyPolicy: "",
     };
-  },
-  methods: {},
-  updated() {
-    console.log("更新");
-  },
+  }, 
 };
 </script>
 <style lang="scss" scoped>

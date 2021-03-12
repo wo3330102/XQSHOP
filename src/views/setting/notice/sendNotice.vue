@@ -22,6 +22,7 @@
       <div class="box">
         <h3 class="title">邮件主题</h3>
         <el-input
+          maxlength="255"
           v-model="email"
           placeholder="Complete your Purchase!"
         ></el-input>

@@ -209,9 +209,13 @@ export default {
     SelectItem: function (e) {
       this.selectItem = e;
     },
-    CheckSelectItem: function () {
-      this.$emit("update:visible", false);
-      this.$emit("selectItem", this.selectItem);
+    CheckSelectItem: function () { 
+      if(this.selectItem.length>1){
+        this.$emit("update:visible", false);
+        this.$emit("selectItem", this.selectItem);  
+      } else {
+        this.$message.warning('请选择数据')
+      } 
     },
     // 加载更多
     load: function () {
