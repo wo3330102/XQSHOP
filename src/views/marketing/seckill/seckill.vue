@@ -1,103 +1,252 @@
 <template>
   <div class="container">
     <h1 class="title">
-      <span>秒杀产品</span>
-      <el-button
-        @click="AddCategory"
-        style="color: #fff; background-color: #34395d; border-color: #34395d"
-        >创建秒杀</el-button
-      >
+      <span>秒杀</span> 
     </h1>
     <div class="content">
-      <div class="conditions">
+      <div class="tab">
+        <div
+          v-for="(item,index) in nav"
+          :key="item.id"
+          :class="acitve == index?'active':''"
+          @click="ChangeActive(index)"
+        >{{item.label}}</div>
+      </div>
+      <div class="conditions" v-if="false">
+        <!-- 分类 -->
+        <el-select
+          v-model="requestParams.isSubscribe"
+          clearable
+          placeholder="订阅状态"
+          @change="ChangeSelect"
+          style="margin-right: 10px;width:140px"
+        >
+          <el-option
+            v-for="item in subscribeTypeList"
+            :key="item.id"
+            :label="item.label"
+            :value="item.id"
+          ></el-option>
+        </el-select>
+        <!-- 时间选择 -->
+        <el-date-picker
+          v-model="date"
+          type="daterange"
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          @change="ChangeSelect"
+          format="yyyy/MM/dd"
+          value-format="yyyy-MM-dd"
+          style="width:230px;margin-right: 10px;"
+          :picker-options="endOptions"
+        ></el-date-picker>
+        <!-- 标签 -->
+        <!-- <el-select
+          v-model="countryType"
+          clearable
+          placeholder="国家/地区"
+          @change="ChangeSelect"
+          style="margin-right: 10px;width:164px"
+        >
+          <el-option
+            v-for="item in countryTypeList"
+            :key="item.id"
+            :label="item.label"
+            :value="item.id"
+          ></el-option>
+        </el-select> -->
         <div class="search-box">
-          <el-input v-model="searchVal" placeholder="搜索秒杀产品名称 ">
-            <el-button slot="append" @click="requestParams.title = searchVal">搜索</el-button>
+          <el-input v-model="searchVal" placeholder="请输入姓名、邮箱、手机">
+            <el-button slot="append" @click="Search">搜索</el-button>
           </el-input>
         </div>
+        <div style="line-height:36px; align-self: center; margin-left: 20px;">
+          <el-dropdown style="cursor:pointer" trigger="click">
+            <span class="el-dropdown-link">
+              更多筛选
+              <i class="el-icon-arrow-down el-icon--right"></i>
+            </span>
+            <el-dropdown-menu slot="dropdown">
+              <div class="filter-box">
+                <h4>筛选条件</h4>
+                <div class="item">
+                  <div class="inp-number">
+                    <span class="inp-number-prepend">最小金额</span>
+                    <el-input v-model="minMoney" placeholder></el-input>
+                  </div>
+                  <span style="margin: 0px 10px;">-</span>
+                  <div class="inp-number">
+                    <span class="inp-number-prepend">最大金额</span>
+                    <el-input v-model="maxMoney" placeholder></el-input>
+                  </div>
+                </div>
+                <div class="item">
+                  <div class="inp-number">
+                    <span class="inp-number-prepend">最小订单</span>
+                    <el-input v-model="minOrder" placeholder></el-input>
+                  </div>
+                  <span style="margin: 0px 10px;">-</span>
+                  <div class="inp-number">
+                    <span class="inp-number-prepend">最大订单</span>
+                    <el-input v-model="maxOrder" placeholder></el-input>
+                  </div>
+                </div>
+                <div class="option-btn">
+                  <el-button @click="Screen">筛选</el-button>
+                </div>
+              </div>
+            </el-dropdown-menu>
+          </el-dropdown>
+        </div>
       </div>
-      <table-tem
-        :show-img="true"
-        :option="'操作（预览）'" 
-        :optionList="['删除']" 
-        :requestUrl="'api/yxStoreTag'"
+      <table-tem 
+        :requestUrl="nav[active].url"
         :requestParams="requestParams"
-        :tableHeader="tableHeader" 
-        @rowClick="RowClick"
-        @BatchOption="Del"
-        @SelectionChange="SelectItem"
-      ></table-tem> 
-    </div>
+        :optionList="['删除']" 
+        :tableHeader="tableHeader"
+        :isRefresh="isRefresh"
+        @rowClick="toDetail"
+        @BatchOption="BatchOption" 
+        ></table-tem>
+    </div> 
   </div>
 </template>
 <script> 
-import {del} from '@/api/yxStoreCategory'
-import tableTem from '@/components/tableTem'
-export default { 
-  components:{
-    tableTem
-  },
+import tableTem from "@/components/tableTem";
+import {del} from '@/api/yxUser'
+export default {
+  components: { 
+    tableTem,
+  }, 
   data() {
     return {
-      isActive:false,
-      optionList:['删除'],
-      searchVal: "",
-      tableHeader: [
+      requestParams:{
+        page: 0,
+        size: 30,  
+        beginTime:'',
+        endTime:'',
+        keyword:'',
+        minOrder:'',
+        maxOrder:'',
+        minMoney:'',
+        maxMoney:'',
+        notStoreId:true,
+      },
+      showExport: false,
+      nav: [
         {
-          prop: "pic",
+          id: 1,
+          label: "商品秒杀",
+          url:'',
         },
         {
-          prop: "title",
-          label: "分类名称", 
-          width: 303,
-        }, 
-        {
-          prop: "categoryType",
-          label: "分类类型",
-          align:'center',
-          width: 240,
+          id: 2,
+          label: "过期商品秒杀",
         },
         {
-          prop: "count",
-          label: "商品数量",
-          sortable: true,
-          width: 120,
+          id: 3,
+          label: "秒杀历史",
         },
       ],
-      requestParams: {
-        page: 0,
-        size: 10,
-        sort: "sort,desc",
-        isRefresh:0,
-        title:'',
+      acitve: 0, 
+      subscribeTypeList: [
+        {
+          id: 1,
+          label: "已订阅",
+        },
+        {
+          id: 0,
+          label: "未订阅",
+        },
+      ],
+      // countryType: "",
+      // countryTypeList: [
+      //   {
+      //     id: 1,
+      //     label: "中国",
+      //   },
+      // ],
+      date: "",
+      searchVal: "",
+      minMoney: "",
+      maxMoney: "",
+      minOrder: "",
+      maxOrder: "",
+      tableData: [],
+      isRefresh:0,
+      tableHeader: [
+        {
+          width: 263,
+          label: "姓名",
+          prop:'nickname',
+        },
+        {
+          width: 261,
+          label: "地区",
+          prop:'addres',
+        },
+        {
+          width: 261,
+          label: "已购订单",
+          sortable: true,
+          prop:'payCount',
+        },
+        {
+          width: 261,
+          label: "总金额",
+          sortable: true,
+          prop:'sumMoney',
+        },
+      ],
+      currentPage: 1, 
+      endOptions:{
+        disabledDate(time) {
+          return time.getTime() > new Date().getTime() ;
+        },
       },
-      data:[],
-      currentPage: 1,
-      selectItem:[],
-      loading:true, 
     };
   }, 
-  methods: { 
-    AddCategory: function () {
-      this.$router.push("/addCategory");
+  methods: {
+    ChangeActive: function (index) {
+      this.acitve = index;
     },
-    SelectItem:function(e){
-      this.selectItem = e;
-    },
-    RowClick: function (e) { 
-      this.$router.push("/editCategory");
-      localStorage.setItem('categoryDetail',JSON.stringify(e))
+    ChangeSelect: function (newVal) {
+      if(newVal){
+        this.requestParams.beginTime = newVal[0];
+        this.requestParams.endTime = newVal[1];
+      } else {
+        this.requestParams.beginTime = ''
+        this.requestParams.endTime = ''
+      }
     }, 
-    Del:function(){  
+    toDetail:function(e){ 
+      localStorage.setItem('customerDetail',JSON.stringify(e))
+      this.$router.push('/customerDetail')
+    },
+    // 批量操作
+    BatchOption:function(e,selectItem){
+      let that = this;
       let par = [];
-      this.selectItem.map(i=>{ 
-        par.push(i.id)
-      }) 
-      del(par).then(res=>{ 
-        this.$message.success('删除成功'); 
-        this.requestParams.isRefresh += 1; 
+      selectItem.map(i=>{
+        par.push(i.uid);
       })
-    }
+      this.$DelTip(function(){
+        del(par).then(()=>{
+          that.isRefresh += 1;
+          that.$message.success('删除成功')
+        })
+      })
+    },
+    Screen:function(){ 
+      this.requestParams.minOrder = this.minOrder
+      this.requestParams.maxOrder = this.maxOrder
+      this.requestParams.minMoney = this.minMoney
+      this.requestParams.maxMoney = this.maxMoney
+    },
+    Search:function(){
+      this.requestParams.keyword = this.searchVal
+    },
   },
 };
 </script>
@@ -112,9 +261,14 @@ export default {
   justify-items: center;
   justify-content: space-between;
   flex: 1;
-  .el-button {
-    height: 36px;
+  /deep/.el-button,
+  .el-button--medium {
     padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 4px;
+  }
+  /deep/.el-button + .el-button {
+    margin-left: 20px !important;
   }
 }
 .content {
@@ -152,10 +306,10 @@ export default {
     .search-box {
       display: flex;
       flex: 1;
-      /deep/.el-input-group__append {
-        background: #fff;
-        color: #000000;
-      }
+    }
+    /deep/.el-input-group__append {
+      background: #fff;
+      color: #000000;
     }
     /deep/ .el-button {
       height: 36px;
@@ -166,11 +320,51 @@ export default {
     padding: 14px 0;
     text-align: center;
   }
-}   
-</style>
-<style lang="scss" scoped>
-.show {
-  width: 100% !important;
+}
+.filter-box {
+  padding: 10px 20px;
+  .item {
+    margin-top: 20px;
+    .inp-number {
+      display: inline-table;
+      font-size: 13px;
+      line-height: normal;
+      width: 200px;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-top-left-radius: 4px;
+      border-bottom-left-radius: 4px;
+      border-right: none;
+      .inp-number-prepend,
+      .inp-number-append {
+        border-top-left-radius: 4px;
+        border-bottom-left-radius: 4px;
+        border-right: none;
+        border: 1px solid #dcdfe6;
+        padding: 0 15px;
+        color: #1a1d2c;
+        display: table-cell;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        width: 1px;
+        white-space: nowrap;
+        background: #fff;
+      }
+      /deep/ .el-input > input,
+      .el-input__inner > input {
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+        border-left: 0;
+      }
+    }
+    & > span {
+      margin: 0px 10px;
+    }
+  }
+  .option-btn {
+    margin: 30px 0 10px;
+    text-align: center;
+  }
 }
 .table {
   position: relative;
@@ -185,7 +379,7 @@ export default {
     box-sizing: border-box;
     z-index: 1;
     position: absolute;
-    left: 8px;
+    left: 0;
     top: 8px;
     .checkContent {
       width: 100%;
@@ -196,52 +390,17 @@ export default {
       border: 1px solid #dcdfe6;
       color: #273a8a;
       i {
+        float: right;
         line-height: 36px;
-        margin-left: 24px;
+        margin-right: 4px;
         cursor: pointer;
         color: #c0c4cc;
       }
     }
-    .item {
-      padding: 10px;
-      font-size: 13px;
-      cursor: pointer;
-    }
-    .disable {
-      pointer-events: none;
-      cursor: not-allowed;
-      color: #c0c4cc;
-    }
   }
-}
-// .small-img {
-//   display: inline-block;
-//   vertical-align: middle;
-//   width: 50px;
-//   height: 50px;
-//   border-radius: 4px;
-//   border: 1px solid #dadde4;
-//   background-color: #f7f8fd;
-//   background-origin: content-box;
-//   background-position: 50% 50%;
-//   background-size: contain;
-//   background-repeat: no-repeat;
-//   overflow: hidden;
-// }
-.textBtn {
-  padding: 10px 0;
-  color: #273a8a;
-  font-size: 14px;
-  cursor: pointer;
-  display: inline-block;
-  font-weight: 400;
-  margin-left: 10px;
-} 
-// 调整表格头部选框位置
-/deep/ .el-checkbox:last-of-type {
-  margin-left: 13px;
-}
-/deep/ .el-loading-mask {
-  background: #fff;
+}  
+/deep/ .el-table--enable-row-transition .el-table__body td{
+  height: 70px;
 }
 </style>
+

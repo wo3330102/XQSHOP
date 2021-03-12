@@ -114,6 +114,10 @@ const routes = [{
       path: '/editShare',
       name: 'EditShare',
       component: () => import( /* webpackChunkName: "about" */ '../views/marketing/share/editShare.vue'),
+    }, {
+      path: '/coupon',
+      name: 'Coupon',
+      component: () => import( /* webpackChunkName: "about" */ '../views/marketing/coupon/coupon.vue'),
     }, ]
   }, {
     path: 'appHome',

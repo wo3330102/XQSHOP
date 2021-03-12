@@ -63,7 +63,8 @@
               <el-menu-item index="/activity">优惠活动</el-menu-item>
               <el-menu-item index="/discount">梯度优惠</el-menu-item>
               <el-menu-item index="/share">激励分享</el-menu-item>
-              <!-- <el-menu-item index="/seckill">秒杀产品</el-menu-item> -->
+              <el-menu-item index="/coupon">优惠券</el-menu-item>
+              <el-menu-item index="/seckill">秒杀产品</el-menu-item>
             </el-menu-item-group>
           </el-submenu>
           <el-menu-item index="/appHome">
@@ -76,7 +77,7 @@
               <span>店铺管理</span>
             </template>
             <el-menu-item-group>
-              <el-menu-item index="/decorationManage">店铺装修</el-menu-item>
+              <!-- <el-menu-item index="/decorationManage">店铺装修</el-menu-item> -->
               <el-menu-item index="/homeSwiper">首页轮播图</el-menu-item>
               <el-menu-item index="/pageManage">页面管理</el-menu-item>
               <el-menu-item index="/menuManage">菜单栏</el-menu-item>
