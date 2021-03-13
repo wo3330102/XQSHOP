@@ -20,11 +20,18 @@
         label-width="150px"
         label-position="left"
         :rules="rules"
+        ref="form"
       >
         <el-form-item label="活动名称" prop="activityName">
           <el-input
             v-model="detail.activityName"
             placeholder="请输入活动名称"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="优惠券名称" prop="title">
+          <el-input
+            v-model="detail.title"
+            placeholder="请输入优惠券名称"
           ></el-input>
         </el-form-item>
         <el-form-item label="所属会员组">
@@ -50,8 +57,8 @@
             v-model="detail.couponStartTime"
             type="date"
             placeholder="请选择活动开始时间"
-            format="yyyy/MM/dd"
-            value-format="timestamp"
+            format="yyyy-MM-dd"
+            value-format="yyyy-MM-dd"
             :picker-options="timeOptions"
           ></el-date-picker>
         </el-form-item>
@@ -62,8 +69,8 @@
             v-model="detail.couponEndTime"
             type="date"
             placeholder="不填则永久有效"
-            format="yyyy/MM/dd"
-            value-format="timestamp"
+            format="yyyy-MM-dd"
+            value-format="yyyy-MM-dd"
             :picker-options="timeOptions"
           ></el-date-picker>
         </el-form-item>
@@ -89,7 +96,7 @@
             <el-radio :label="1">私人券（每人单独）</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="优惠券号码">
+        <el-form-item label="优惠券号码" prop="couponNo">
           <el-input
             style="width: 600px"
             v-model="detail.couponNo"
@@ -120,29 +127,82 @@
             <el-row>
               <el-col :span="12">
                 <el-form-item>
-                  <el-radio-group v-model="ruleVo" class="rule-box">
-                    <el-radio :label="1" style="display:flex">
-                      买满
-                      <div>
-                        <el-input v-model="minPrice" class="small" size="mini" placeholder="最低金额"></el-input> -
-                        <el-input v-model="maxPrice" class="small" size="mini" placeholder="最高金额"></el-input>
+                  <el-radio-group
+                    v-model="detail.ruleVo.ruleType"
+                    class="rule-box"
+                  >
+                    <el-radio :label="1">
+                      <div class="rule-box-item">
+                        <span>买满</span>
+                        <div>
+                          <el-input
+                            v-model="ruleForm.minPrice"
+                            class="small"
+                            size="mini"
+                            placeholder="最低金额"
+                          ></el-input>
+                          -
+                          <el-input
+                            v-model="ruleForm.maxPrice"
+                            class="small"
+                            size="mini"
+                            placeholder="最高金额"
+                          ></el-input>
+                        </div>
                       </div>
                     </el-radio>
                     <el-radio :label="2">
-                      买满
-                      <div>
-                        <el-input v-model="minPrice" class="small" placeholder="最低金额"></el-input> -
-                        <el-input v-model="maxPrice" class="small" placeholder="最高金额"></el-input> 件
+                      <div class="rule-box-item">
+                        <span>买满</span>
+                        <div>
+                          <el-input
+                            v-model="ruleForm.minNum"
+                            class="small"
+                            size="mini"
+                            placeholder="最低件数"
+                          ></el-input>
+                          -
+                          <el-input
+                            v-model="ruleForm.maxNum"
+                            class="small"
+                            size="mini"
+                            placeholder="最高件数"
+                          ></el-input>
+                          件
+                        </div>
                       </div>
                     </el-radio>
-                    <el-radio :label="0"></el-radio>
+                    <el-radio :label="0">无需条件</el-radio>
                   </el-radio-group>
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item>
-                  <el-radio-group v-model="detail.couponType">
-                    <el-radio label=""></el-radio>
+                  <el-radio-group v-model="detail.couponType" class="rule-box">
+                    <el-radio :label="0">
+                      <div class="rule-box-item">
+                        <span>减金额 减</span>
+                        <el-input
+                          v-model="detail.couponPrice"
+                          class="small"
+                          size="mini"
+                          placeholder="最低金额"
+                        ></el-input>
+                      </div>
+                    </el-radio>
+                    <el-radio :label="1">
+                      <div class="rule-box-item">
+                        <span>打折扣 打</span>
+                        <el-input
+                          v-model="detail.couponDiscount"
+                          class="small"
+                          size="mini"
+                          placeholder="最低件数"
+                        ></el-input>
+                      </div>
+                    </el-radio>
+                    <el-radio :label="2">送礼物</el-radio>
+                    <el-radio :label="3">包邮</el-radio>
                   </el-radio-group>
                 </el-form-item>
               </el-col>
@@ -155,7 +215,7 @@
             <el-radio :label="0">关闭</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="前台列表是否显示" prop="isShow">
+        <el-form-item label="前台列表是否显示">
           <el-radio-group v-model="detail.isShow">
             <el-radio :label="1">开启</el-radio>
             <el-radio :label="0">关闭</el-radio>
@@ -172,30 +232,152 @@
     </div>
     <div class="pageSaveBtn">
       <el-button @click="$NavgitorTo('/share')">取消</el-button>
-      <el-button type="primary" @click="Save">保存</el-button>
+      <el-button type="primary" @click="Save" v-loading="disabled" :disabled="disabled">保存</el-button>
     </div>
   </div>
 </template> 
 <script>
-import { getLevels, getShare, edit, add } from "@/api/coupon";
+import { getLevels, addCoupon, editCoupon } from "@/api/coupon";
 export default {
   data() {
     return {
-      detail: {},
+      detail: {
+        type: 0,
+        firstOrderType: 0,
+        conditionType: 0,
+        status: 1,
+        isShow: 1,
+        ruleVo: {
+          ruleType: 1,
+        },
+        couponType: 0,
+      },
+      rules: {
+        title: [
+          {
+            required: true,
+            message: "请输入优惠券名称",
+            trigger: ["change", "blur"],
+          },
+        ],
+        activityName: [
+          {
+            required: true,
+            message: "请输入活动名称",
+            trigger: ["change", "blur"],
+          },
+        ],
+        couponStartTime: [
+          {
+            required: true,
+            message: "请选择开始时间",
+            trigger: ["change", "blur"],
+          },
+        ],
+        couponEndTime: [
+          {
+            required: true,
+            message: "请选择结束时间",
+            trigger: ["change", "blur"],
+          },
+        ],
+        couponNo:[
+          {
+            required: true,
+            message: "请输入优惠券号码",
+            trigger: ["change", "blur"],
+          },
+        ],
+      },
       groupIdList: [], // 会员分组
+      ruleForm: {}, // 优惠券规则左边数据
       timeOptions: {
         disabledDate(time) {
           return time.getTime() < new Date().getTime() - 8.64e7;
         },
       },
+      disabled:false,
     };
   },
   created() {
+    if (localStorage.getItem("couponDetail")) {
+      let detail = JSON.parse(localStorage.getItem("couponDetail"));
+      if (detail.ruleVo.ruleType == 1) {
+        this.ruleForm.minPrice = Object(detail.ruleVo).minValue;
+        this.ruleForm.maxPrice = Object(detail.ruleVo).maxValue;
+      } else if (detail.ruleVo.ruleType == 2) {
+        this.ruleForm.minNum = detail.ruleVo.minValue;
+        this.ruleForm.maxNum = detail.ruleVo.maxValue;
+      }
+      this.detail = detail;
+    }
     getLevels().then((res) => {
       this.groupIdList = res.data;
     });
   },
-  methods: {},
+  methods: {
+    Save: function () {
+      this.disabled = true
+      this.$refs.form.validate((e) => { 
+        if (e) {
+          // 判断优惠券规则 0-无需条件 1-金额限制 2-数量限制
+          if (this.detail.ruleVo.ruleType == 1) {
+            if (this.ruleForm.minPrice || this.ruleForm.maxPrice) {
+              this.detail.ruleVo.minValue = this.ruleForm.minPrice || "";
+              this.detail.ruleVo.maxValue = this.ruleForm.maxPrice || "";
+            } else {
+              this.$message.warning("请设置优惠最低或最高所需金额");
+              this.disabled = false;
+              return false;
+            }
+          } else if (this.detail.ruleVo.ruleType == 2) {
+            if (this.ruleForm.minNum || this.ruleForm.maxNum) {
+              this.detail.ruleVo.minValue = this.ruleForm.minNum || "";
+              this.detail.ruleVo.maxValue = this.ruleForm.maxNum || "";
+            } else {
+              this.$message.warning("请设置优惠最低或最高所需件数");
+              this.disabled = false;
+              return false;
+            }
+          } else {
+            this.detail.ruleVo.minValue = "";
+            this.detail.ruleVo.maxValue = "";
+          }
+          // 判断优惠类型:0-满减 1-折扣 2-赠品 3-包邮
+          if (this.detail.couponType == 0) {
+            this.detail.couponDiscount = "";
+          } else if (this.detail.couponType == 1) {
+            this.detail.couponPrice = "";
+          } else {
+            this.detail.couponDiscount = "";
+            this.detail.couponPrice = "";
+          }
+          if (this.detail.id) {
+            // 修改
+            editCoupon(this.detail).then((res) => {
+              this.$message.success("修改成功");
+              this.disabled = false;
+              this.$router.push("/coupon");
+            }).catch(()=>{
+               this.disabled = false;
+            });
+          } else {
+            // 新增
+            addCoupon(this.detail).then((res) => {
+              this.$message.success("新增成功");
+              this.disabled = false;
+              this.$router.push("/coupon");
+            }).catch(()=>{
+               this.disabled = false;
+            });
+          }
+        } else {
+          this.$message.error('请完善表单数据');
+          this.disabled = false;
+        }
+      });
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
@@ -218,11 +400,23 @@ h1 {
     0 0 0 1px rgba(67, 67, 145, 0.05);
   overflow: hidden;
 }
-.rule-box{
-  
+.rule-box {
+  .rule-box-item {
+    display: flex;
+    align-items: center;
+    & > span {
+      margin-right: 10px;
+    }
+  }
+  /deep/.el-radio {
+    margin-bottom: 10px;
+    display: flex;
+    min-height: 28px;
+    align-items: center;
+  }
 }
-.small{
-  width:90px !important;
+.small {
+  width: 110px !important;
 }
 /deep/.el-form-item__label {
   color: #000000;

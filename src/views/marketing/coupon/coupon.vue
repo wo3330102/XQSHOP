@@ -265,7 +265,9 @@ export default {
         case "edit":
           if(this.active == 0){
             // 编辑优惠券
-            this.$router.push('/editCoupon',e.id)
+            let couponDetail = JSON.stringify(e);
+            localStorage.setItem('couponDetail',couponDetail)
+            this.$router.push('/editCoupon')
           } else {
             // 编辑优惠券事件
             this.$router.push('/editCouponEvent',e.id)
