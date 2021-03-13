@@ -350,7 +350,7 @@
                   </div>
                   <input
                     class="edit-inp"
-                    v-model.number="scope.row[item.slot]"
+                    v-model="scope.row[item.slot]"
                     @blur="BlurSet(item.slot, scope.row)"
                     v-else-if="
                       item.slot == 'skuCode' ||
@@ -894,14 +894,13 @@ export default {
       });
     },
     // 判断多规格数据是否需要转小数点
-    BlurSet: function (key, data) {
-      console.log(key, data);
-      console.log(data[key]);
-      if (key == "skuCode") {
-      } else if (key !== "skuCode" && key !== "stock") {
+    BlurSet: function (key, data) { 
+      if (key == "skuCode") {  
+        return false;
+      } else if (key !== "stock") {  
         data[key] = data[key] ? this.$IsNaN(data[key].toString()) : "0.00";
-      } else {
-        data[key] = Number(data[key]);
+      } else { 
+        isNaN(Number(data[key]))?data[key] = 0:''; 
       }
     },
     // 选择批量操作数据

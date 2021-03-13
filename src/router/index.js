@@ -118,6 +118,14 @@ const routes = [{
       path: '/coupon',
       name: 'Coupon',
       component: () => import( /* webpackChunkName: "about" */ '../views/marketing/coupon/coupon.vue'),
+    }, {
+      path: '/editCoupon',
+      name: 'EditCoupon',
+      component: () => import( /* webpackChunkName: "about" */ '../views/marketing/coupon/editCoupon.vue'),
+    }, {
+      path: '/editCouponEvent',
+      name: 'EditCouponEvent',
+      component: () => import( /* webpackChunkName: "about" */ '../views/marketing/coupon/editCouponEvent.vue'),
     }, ]
   }, {
     path: 'appHome',

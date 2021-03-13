@@ -6,3 +6,11 @@ export function addCoupon(data){
     data
   })
 }
+
+// 获取会员分组
+export function getLevels(){
+  return request({
+    url:'api/coupon/getLevels',
+    method:'get', 
+  })
+}

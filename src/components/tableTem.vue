@@ -33,7 +33,7 @@
         @select-all="SelectionChange"
         @row-click="rowClick"
         :row-style="rowIsClick ? { cursor: 'pointer' } : { cursor: 'initial' }" 
-        row-key="id"
+        :row-key="'id'"
       >
         <!-- 是否需要选框 -->
         <el-table-column
@@ -187,6 +187,9 @@ export default {
       deep: true,
       immediate: true,
     }, 
+    // tableHeader:function(val){
+    //   this.getData();
+    // },
     addTableData: function (val) { 
       if(this.data){
         this.data.concat(val);
@@ -237,7 +240,8 @@ export default {
           }); 
           that.total = res.data.totalElements; 
         } else if(this.isNewApi){ 
-          that.data = res.data.content  
+          that.data = res.data.content
+          
           that.total = res.data.totalElements; 
         } else {
           that.data = res.content;
