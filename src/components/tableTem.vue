@@ -32,7 +32,8 @@
         @select="SelectionChange"
         @select-all="SelectionChange"
         @row-click="rowClick"
-        :row-style="rowIsClick ? { cursor: 'pointer' } : { cursor: 'initial' }"
+        :row-style="rowIsClick ? { cursor: 'pointer' } : { cursor: 'initial' }" 
+        row-key="id"
       >
         <!-- 是否需要选框 -->
         <el-table-column
@@ -49,7 +50,7 @@
             :prop="item.prop ? item.prop : ''"
             :label="item.label ? item.label : ''"
             :align="item.align ? item.align : ''"
-            :sortable="item.sortable"
+            :sortable="item.sortable" 
           >
             <template slot-scope="scope">
               <template
@@ -159,6 +160,10 @@ export default {
       default: function () {
         return [];
       },
+    },
+    isNewApi:{
+      type:Boolean,
+      default:false,
     }
   },
   data() {
@@ -170,9 +175,10 @@ export default {
       selectItem: [], // 选中的表单数据
       loading: true, // 加载中 
       total: 0, // 总条目数 
+      needRefresh:true,
     };
   },
-  watch: {
+  watch: { 
     requestParams: {
       handler: function (val) { 
         this.params = { ...val };
@@ -180,16 +186,13 @@ export default {
       },
       deep: true,
       immediate: true,
-    },
-    addTableData: function (val) {
-      console.log(this.data)
-      console.log(val);
+    }, 
+    addTableData: function (val) { 
       if(this.data){
         this.data.concat(val);
       } else {
         this.data = [...val]; 
-      }
-      
+      } 
     },
     isRefresh: function (val) {
       this.selectItem = [];
@@ -217,6 +220,7 @@ export default {
           that.requestUrl + "?" + qs.stringify(that.params, { indices: false }),
         method: "get",
       }).then((res) => {
+        this.needRefresh = true;
         setTimeout(function () {
           that.loading = false;
         }, 200);
@@ -232,10 +236,13 @@ export default {
             return item;
           }); 
           that.total = res.data.totalElements; 
-        } else{
+        } else if(this.isNewApi){ 
+          that.data = res.data.content  
+          that.total = res.data.totalElements; 
+        } else {
           that.data = res.content;
           that.total = res.totalElements; 
-        }    
+        } 
         if (res.hasOwnProperty("cateList")) {
           that.$emit("GetCategory", res.cateList);
         } 
@@ -265,7 +272,9 @@ export default {
     },
     // 单行点击事件
     rowClick: function (row) {
-      this.$emit("rowClick", row);
+      if(this.rowIsClick){
+        this.$emit("rowClick", row);
+      }
     },
     Jump: function (e) {
       console.log(e);
