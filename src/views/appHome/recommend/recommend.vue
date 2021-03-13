@@ -19,20 +19,17 @@
         <span
           class="sail-app-status-tag"
           :class="
-            detail.status == 1
+            detail.isOpen == 1
               ? 'sail-app-status-tag-open'
               : 'sail-app-status-tag-close'
           "
-          >{{ detail.status == 1 ? "已开启" : "未开启" }}</span
+          >{{ detail.isOpen == 1 ? "已开启" : "未开启" }}</span
         >
       </span>
       <span class="options">
         <el-button
-          @click="
-            detail.status = detail.status === 1 ? 0 : 1;
-            Save();
-          "
-          >{{ detail.status === 1 ? "关闭" : "开启" }}</el-button
+          @click="ChangeStatus()"
+          >{{ detail.isOpen === 1 ? "关闭" : "开启" }}</el-button
         >
         <el-button @click="$NavgitorTo('/recommendOption')">配置</el-button>
       </span>
@@ -140,16 +137,7 @@
                 </template>
               </el-table-column>
               <el-table-column prop="storeName" label=""></el-table-column>
-              <el-table-column label="次数" align="right" width="100">
-                <template slot-scope="scope">
-                  <span>{{
-                    active === 0
-                      ? Number(scope.row.browseNum)
-                      : active === 1
-                      ? Number(scope.row.toCartNum)
-                      : Number(scope.row.buyNum)
-                  }}</span>
-                </template>
+              <el-table-column prop="totalNum" label="次数" align="right" width="100"> 
               </el-table-column>
             </el-table>
             <el-pagination
@@ -266,7 +254,7 @@
 import elTableInfiniteScroll from "el-table-infinite-scroll";
 import { getCates } from "@/api/yxStoreCategory";
 import { get } from "@/api/yxStoreProduct";
-import { getlist, getInfo, edit } from "@/api/yxStoreProductRecommend";
+import { getlist, getInfo, edit, editStatus } from "@/api/yxStoreProductRecommend";
 // import { get}
 export default {
   data() {
@@ -342,6 +330,7 @@ export default {
         page: 0,
         count: 0,
         click: 0,
+        countType:0,
       },
       currentPage:0,
       total:0,
@@ -365,8 +354,7 @@ export default {
     this.Init();
     getCates().then((res) => {
       this.shopCategoryList = res.content;
-    });
-
+    });  
     let time = new Date().toLocaleDateString();
     this.date = [
       // '2020-10-11 00:00:00',
@@ -383,27 +371,29 @@ export default {
     ChangeType: function (e) {
       this.table = [];
       this.active = e;
+      this.requestParams.countType = e;
       this.requestParams.count = e;
       this.requestParams.click = 0;
       this.GetList();
     },
     GetList: function () {
       getlist(this.requestParams).then((res) => {
-        this.data.push(res.browseNumList);
-        this.data.push(res.toCartNumList);
-        this.data.push(res.buyNumList);
-        console.log(this.active)
-        switch (this.active){
-          case 0:
-            this.total = res.browseNum;
-            break;
-          case 1:
-            this.total = res.toCartNum;
-            break;
-          case 2:
-            this.total = res.buyNum;
-            break;
-        }
+        this.data[0] = res.browseNumList
+        this.data[1] = res.toCartNumList
+        this.data[2] = res.buyNumList 
+        console.log(this.data)
+        this.total = res.totalElements;
+        // switch (this.active){
+        //   case 0:
+        //     this.total = res.totalElements;
+        //     break;
+        //   case 1:
+        //     this.total = res.totalElements;
+        //     break;
+        //   case 2:
+            
+        //     break;
+        // }
         // this.total = res.
       });
     },
@@ -448,16 +438,7 @@ export default {
     },
     // 确认选中
     CheckSelectItem: function () {
-      this.shopDialog = false;
-      // let arr = [];
-      // this.selectItem.map((i) => {
-      //   let obj = {
-      //     id: i.id,
-      //     image: i.image,
-      //     title: i.storeName,
-      //   };
-      //   arr.push(obj);
-      // });
+      this.shopDialog = false; 
       if (
         this.detail.productRecommendInfoVo &&
         this.detail.productRecommendInfoVo.length > 0
@@ -484,6 +465,17 @@ export default {
         this.detail.productRecommendInfoVo.splice(index, 1);
       });
     },
+    // 控制当前应用是否开启
+    ChangeStatus:function(){ 
+      let par = {
+        storeId:localStorage.getItem('storeId'), 
+      } 
+      this.detail.isOpen === 1?par.isOpen = 0:par.isOpen = 1; 
+      editStatus(par).then((res)=>{
+        this.$message.success("修改成功");
+        this.Init(); 
+      })
+    },  
     Save: function () {
       let that = this;
       let arr = [];

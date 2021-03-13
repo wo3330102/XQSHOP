@@ -189,7 +189,8 @@ export default {
     UploadSuccess: function (res, file) {
       this.imageUrl = [{ url: res.link }];
     },
-    RemoveImg: function (e) {
+    RemoveImg: function (e) { 
+      this.imageUrl = ''; 
       this.showUpload = false;
     },
     Save: function () {

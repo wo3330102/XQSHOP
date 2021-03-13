@@ -168,13 +168,13 @@
                   style="width: 210px"
                   :maxlength="8"
                   :disabled="disabled" 
-                  @blur="item.consumption = $IsNaN(item.consumption)"
+                  @blur="detail.terms1 == 1?item.consumption = $IsNaN(item.consumption):''"
                 >
                   <template
                     slot="prefix"
                     v-if="detail.terms1 == 1"
                     style="line-height: 36px; margin-left: 3px"
-                    >$</template
+                    >{{currency.s}}</template
                   >
                 </el-input>
                 <span
@@ -191,7 +191,7 @@
                     slot="prefix"
                     v-if="detail.terms2 === 0"
                     style="line-height: 36px; margin-left: 3px"
-                    >$</template
+                    >{{currency.s}}</template
                   >
                   <template
                     slot="suffix"
@@ -387,13 +387,13 @@
                 {{
                   detail.terms1 === 0
                     ? item.consumption + "件"
-                    : "$" + item.consumption
+                    : currency.s + $IsNaN(item.consumption)
                 }}，
                 {{ appliedObjectList[detail.applyObject].label }}
                 减免
                 {{
                   detail.terms2 === 0
-                    ? "$" + item.reduction
+                    ? currency.s + item.reduction
                     : item.reduction + "%"
                 }}
               </p>
@@ -408,12 +408,12 @@
               </dl>
               <dl>
                 <dt>
-                  ${{ detail.discountTotal ? detail.discountTotal : "0.00" }}
+                  {{currency.s+ (detail.discountTotal ? $IsNaN(detail.discountTotal) : "0.00") }}
                 </dt>
                 <dd>优惠金额</dd>
               </dl>
               <dl>
-                <dt>${{ detail.saleTotal ? detail.saleTotal : "0.00" }}</dt>
+                <dt>{{currency.s+ (detail.saleTotal ? $IsNaN(detail.saleTotal) : "0.00" )}}</dt>
                 <dd>销售总额</dd>
               </dl>
             </div>
@@ -431,16 +431,15 @@
                   {{
                     detail.terms1 === 0
                       ? item.consumption + "件"
-                      : "$" + item.consumption
+                      : currency.s + $IsNaN(item.consumption)
                   }}，
                   {{ appliedObjectList[detail.applyObject].label }}
                   减免
                   {{
                     detail.terms2 === 0
-                      ? "$" + item.reduction
+                      ? currency.s + item.reduction
                       : item.reduction + "%"
-                  }}</p
-                >
+                  }}</p>
               </p>
               <p>
                 <span class="title">使用次数：</span>
@@ -449,15 +448,15 @@
               <p>
                 <span class="title">优惠金额：</span>
                 <span class="text"
-                  >${{
-                    detail.discountTotal ? detail.discountTotal : "0.00"
+                  >{{
+                    currency.s + (detail.discountTotal ? $IsNaN(detail.discountTotal) : "0.00")
                   }}</span
                 >
               </p>
               <p>
                 <span class="title">销售金额：</span>
                 <span class="text"
-                  >${{ detail.saleTotal ? detail.saleTotal : "0.00" }}</span
+                  >{{currency.s+ (detail.saleTotal ? $IsNaN(detail.saleTotal) : "0.00") }}</span
                 >
               </p>
             </div>
@@ -644,8 +643,8 @@ import { add, edit, changeMenuBarStatus, del } from "@/api/yxStoreGradient";
 import { get } from "@/api/yxStoreProduct";
 import { getCates } from "@/api/yxStoreCategory";
 export default {
-  components:{
-    addMenuCom
+  components: {
+    addMenuCom,
   },
   data() {
     return {
@@ -744,8 +743,8 @@ export default {
       },
       endOptions: {},
       showStatistics: false,
-      showAddMenu:false,
-      index:'',
+      showAddMenu: false,
+      index: "",
     };
   },
   directives: {
@@ -782,7 +781,7 @@ export default {
     // 判断是否为编辑优惠
     if (this.$route.query.hasOwnProperty("id")) {
       this.id = this.$route.query.id;
-      let detail = JSON.parse(localStorage.getItem("discountDetail")); 
+      let detail = JSON.parse(localStorage.getItem("discountDetail"));
       detail.list = [];
       switch (detail.applyObject) {
         // 商品分类
@@ -792,12 +791,12 @@ export default {
           }
           break;
         // 商品
-        case 2: 
+        case 2:
           if (detail.prodIds) {
             detail.list = JSON.parse(detail.prodIds);
           }
           break;
-      } 
+      }
       let arr = [];
       detail.yxStoreGradientItems.map((i) => {
         let par = {
@@ -807,10 +806,10 @@ export default {
         if (i.reduceDiscount) {
           par.reduction = i.reduceDiscount;
         } else {
-          par.reduction = i.reduceMoney;
+          par.reduction = this.$IsNaN(i.reduceMoney);
         }
         if (i.specMoney) {
-          par.consumption = i.specMoney;
+          par.consumption = this.$IsNaN(i.specMoney);
         } else {
           par.consumption = i.specNums;
         }
@@ -823,7 +822,7 @@ export default {
     getCates(this.requestParams).then((res) => {
       console.log(res);
       this.shopCategoryList = res.content;
-    }); 
+    });
   },
   methods: {
     // 活动操作
@@ -846,12 +845,10 @@ export default {
         case 2:
           // 删除
           let pars = [this.id];
-          this.$DelTip(function(){
-            del(pars).then(() => {
+          del(pars).then(() => {
             that.$message.success("删除成功");
             that.$router.push("/discount");
           });
-          })
           break;
       }
     },
@@ -860,7 +857,7 @@ export default {
       this.requestParams = {
         size: 30,
         page: 0,
-      }; 
+      };
       this.shopDialog = true;
       this.table = [];
       this.initData();
@@ -887,13 +884,13 @@ export default {
       );
     },
     // 加载表单数据
-    initData: function () { 
-      let type = this.detail.applyObject; 
+    initData: function () {
+      let type = this.detail.applyObject;
       switch (type) {
         // 1为商品分类  2为商品
         case 1:
-          getCates(this.requestParams).then((res) => { 
-            let arr = this.table.concat(res.content); 
+          getCates(this.requestParams).then((res) => {
+            let arr = this.table.concat(res.content);
             if (arr.length <= res.totalElements) {
               // this.table = arr;
               this.table.push(...res.content);
@@ -920,43 +917,43 @@ export default {
     SelectItem: function (e) {
       this.selectItem = e;
     },
-    SetPage:function(e){
+    SetPage: function (e) {
       console.log(e);
-      this.$nextTick(()=>{ 
+      this.$nextTick(() => {
         this.detail.menuItem = JSON.stringify(e);
-      })
+      });
     },
     CheckSelectItem: function (res) {
-      this.shopDialog = false;  
-      let arr = []; 
+      this.shopDialog = false;
+      let arr = [];
       switch (this.detail.applyObject) {
-          // 商品分类
-          case 1:
-            this.selectItem.map((i) => {
-              let obj = {
-                id: i.id,
-                image: i.pic,
-                title: i.title,
-              };
-              arr.push(obj);
-            }); 
-            break;
-          // 商品
-          case 2:
-            this.selectItem.map((i) => {
-              let obj = {
-                id: i.id,
-                image: i.image,
-                title: i.storeName,
-              };
-              arr.push(obj);
-            }); 
-            break;
-        } 
+        // 商品分类
+        case 1:
+          this.selectItem.map((i) => {
+            let obj = {
+              id: i.id,
+              image: i.pic,
+              title: i.title,
+            };
+            arr.push(obj);
+          });
+          break;
+        // 商品
+        case 2:
+          this.selectItem.map((i) => {
+            let obj = {
+              id: i.id,
+              image: i.image,
+              title: i.storeName,
+            };
+            arr.push(obj);
+          });
+          break;
+      }
       if (this.detail.list && this.detail.list.length > 0) {
-        arr.map(i => {
-          let bool = true; 
-          this.detail.list.map((j) => { 
+        arr.map((i) => {
+          let bool = true;
+          this.detail.list.map((j) => {
             if (JSON.stringify(i) == JSON.stringify(j)) {
               bool = false;
             }
@@ -967,9 +964,9 @@ export default {
         });
       } else {
         this.detail.list = arr;
-      }  
+      }
     },
-    Del: function (index) { 
+    Del: function (index) {
       this.$nextTick(() => {
         this.detail.list.splice(index, 1);
       });
@@ -999,8 +996,12 @@ export default {
         this.$message.error("请选择活动开始时间");
         return false;
       }
-      if(this.detail.pageType === 1){
-        if(this.detail.menuItem == null || this.detail.menuItem == '' || this.detail.menuItem == undefined){
+      if (this.detail.pageType === 1) {
+        if (
+          this.detail.menuItem == null ||
+          this.detail.menuItem == "" ||
+          this.detail.menuItem == undefined
+        ) {
           this.$message.error("请选择按钮跳转页面");
           return false;
         }
@@ -1028,53 +1029,59 @@ export default {
           that.$message.error("请完善详情设置");
           return false;
         } else {
-          let j = Number(i)+1; 
-          if(j < that.shopDetailSettingList.length){ 
-            if(Number(that.shopDetailSettingList[j].consumption)<Number(that.shopDetailSettingList[i].consumption)){ 
-              console.log(that.shopDetailSettingList[j])
-              console.log(that.shopDetailSettingList[i])
-              this.$message.warning('操作失败，请将消费梯度按照从小到大的顺序排列')
-              return false
+          let j = Number(i) + 1;
+          if (j < that.shopDetailSettingList.length) {
+            if (
+              Number(that.shopDetailSettingList[j].consumption) <
+              Number(that.shopDetailSettingList[i].consumption)
+            ) {
+              console.log(that.shopDetailSettingList[j]);
+              console.log(that.shopDetailSettingList[i]);
+              this.$message.warning(
+                "操作失败，请将消费梯度按照从小到大的顺序排列"
+              );
+              return false;
             }
-            let par = {}; 
+            let par = {};
             par[consumption] = that.shopDetailSettingList[i].consumption;
             par[reduction] = that.shopDetailSettingList[i].reduction;
             arr.push(par);
           } else {
-            let par = {}; 
+            let par = {};
             par[consumption] = that.shopDetailSettingList[i].consumption;
             par[reduction] = that.shopDetailSettingList[i].reduction;
-            arr.push(par); 
+            arr.push(par);
           }
         }
-      }   
-      this.detail.yxStoreGradientItems = arr; 
+      }
+      this.detail.yxStoreGradientItems = arr;
       // 处理详情设置结束
       if (this.detail.endTime) {
         this.detail.endTime = this.detail.endTime + 24 * 60 * 60 * 1000 - 1000;
       }
       // 处理适用对象开始
-      if(this.detail.applyObject !== 0){
-        if (this.detail.list && this.detail.list.length > 0) {   
+      if (this.detail.applyObject !== 0) {
+        if (this.detail.list && this.detail.list.length > 0) {
           switch (this.detail.applyObject) {
-          // 商品分类
-          case 1: 
-            this.detail.tagIds = JSON.stringify([...this.detail.list]);
-            delete this.detail.list;
-            break;
-          // 商品
-          case 2: 
-            this.detail.prodIds = JSON.stringify([...this.detail.list]);
-            delete this.detail.list;
-            break;
-        }} else {
-          this.$message.warning('请选择适用对象')
+            // 商品分类
+            case 1:
+              this.detail.tagIds = JSON.stringify([...this.detail.list]);
+              delete this.detail.list;
+              break;
+            // 商品
+            case 2:
+              this.detail.prodIds = JSON.stringify([...this.detail.list]);
+              delete this.detail.list;
+              break;
+          }
+        } else {
+          this.$message.warning("请选择适用对象");
           return false;
         }
       } else {
         this.detail.prodIds = "";
         this.detail.tagIds = "";
-      }  
+      }
       // 处理适用对象结束
       if (this.id) {
         // 修改
@@ -1325,25 +1332,25 @@ h1 {
   border-radius: 3px;
   border: 1px solid transparent;
   color: #273a8a;
-  .close{
+  .close {
     width: 20px;
     height: 20px;
     font-size: 20px;
     line-height: 20px;
-    text-align: center; 
+    text-align: center;
     position: absolute;
     top: -10px;
     right: -10px;
     display: none;
-    cursor: pointer;  
+    cursor: pointer;
   }
 }
-.href { 
+.href {
   cursor: pointer;
   color: #273a8a;
   line-height: 20px;
   text-decoration: underline;
-  .close{
+  .close {
     display: block;
   }
 }
@@ -1444,21 +1451,21 @@ h1 {
     position: absolute;
     border-top: 1px solid #eee;
   }
-} 
-.small-img {
-  display: inline-block;
-  vertical-align: middle;
-  width: 50px;
-  height: 50px;
-  border-radius: 4px;
-  border: 1px solid #dadde4;
-  background-color: #f7f8fd;
-  background-origin: content-box;
-  background-position: 50% 50%;
-  background-size: contain;
-  background-repeat: no-repeat;
-  overflow: hidden;
 }
+// .small-img {
+//   display: inline-block;
+//   vertical-align: middle;
+//   width: 50px;
+//   height: 50px;
+//   border-radius: 4px;
+//   border: 1px solid #dadde4;
+//   background-color: #f7f8fd;
+//   background-origin: content-box;
+//   background-position: 50% 50%;
+//   background-size: contain;
+//   background-repeat: no-repeat;
+//   overflow: hidden;
+// }
 /deep/.el-input-group__prepend {
   background: #fff;
 }

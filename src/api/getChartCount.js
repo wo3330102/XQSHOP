@@ -8,4 +8,11 @@ export function getChartCount(params) {
     })
   } 
 
+export function getHotProduct(params){
+  return request({
+    url: 'api/yxStoreProduct/hot',
+    method: 'get',
+    params
+  })
   
+}

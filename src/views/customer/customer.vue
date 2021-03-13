@@ -166,6 +166,7 @@ export default {
         maxOrder:'',
         minMoney:'',
         maxMoney:'',
+        notStoreId:true,
       },
       showExport: false,
       nav: [

@@ -113,7 +113,7 @@
 </template>
 <script>
 import { getCodeImg, login } from "@/api/login";
-import { encrypt } from "@/utils/rsaEncrypt";
+import { encrypt } from "@/utils/rsaEncrypt"; 
 export default {
   data() {
     return {
@@ -162,14 +162,17 @@ export default {
           )
             .then((res) => {
               localStorage.setItem("token", res.token);
-              this.$router.push("/"); 
+              localStorage.setItem('uploadUrl',process.env.VUE_APP_BASE_API)
               this.showLoading = false;
+              
+              this.$router.push("/"); 
             })
             .catch((res) => {
               that.GetCode();
               this.showLoading = false;
             });
         } else {
+          this.showLoading = false;
           return false;
         }
       });

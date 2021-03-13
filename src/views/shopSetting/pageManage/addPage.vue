@@ -27,7 +27,7 @@
             </div>
             <h3 class="otherTitle">内容</h3>
             <div>
-              <tinymce-editor ref="editor" v-model="detail.content"></tinymce-editor>
+              <wangeditor ref="editor" v-model="detail.content"></wangeditor>
             </div>
           </div> 
         </el-col>
@@ -61,11 +61,11 @@
   </div>
 </template> 
 <script>
-import tinymceEditor from "@/components/tinymce-editor";
+import wangeditor from "@/components/wangeditor";
 import {add,edit} from '@/api/yxStorePageBoard'
 export default {
   components: {
-    tinymceEditor, 
+    wangeditor, 
   },
   data() { 
     return {

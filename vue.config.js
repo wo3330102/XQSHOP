@@ -5,5 +5,19 @@ module.exports = {
         config.plugins.delete('prefetch');
         // 移除 preload 插件
         config.plugins.delete('preload');
-    }, 
+    },
+    configureWebpack: config => {
+        // 生产环境下生效
+        if (process.env.NODE_ENV === 'production') {
+            // 配置删除 console.log
+            config.optimization.minimizer[0].options.terserOptions.compress.drop_console = true
+        }
+        config.externals = {
+            vue: "Vue",
+            "element-ui": "ELEMENT",
+            "vue-router": "VueRouter",
+            vuex: "Vuex",
+            axios: 'axios', 
+        }
+    }
 }

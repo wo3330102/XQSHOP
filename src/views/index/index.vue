@@ -26,7 +26,7 @@
             />
           </dt>
           <dd class="value">
-            ${{ navData.totalMoney ? navData.totalMoney : "0.00" }}
+            {{currency.s}}{{ navData.totalMoney ? navData.totalMoney : "0.00" }}
           </dd>
           <dd class="desc">总销售额</dd>
         </dl>
@@ -203,7 +203,7 @@ export default {
   data() {
     return {
       userName: "admin",
-      failInit: false,
+      failInit: true,
       stepList: [
         {
           icon:
@@ -220,7 +220,7 @@ export default {
           title: "装修店铺",
           tip: "选择适合您的模板，打造个性店铺。",
           btn: "装修",
-          url: "/themeShop",
+          url: "/decorationManage",
         },
         {
           icon:

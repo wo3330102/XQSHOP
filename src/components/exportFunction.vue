@@ -3,7 +3,7 @@
     <el-dialog
       title="导出订单"
       width="40%"
-      :visible="showExport"
+      :visible.sync="showExport"
       :close-on-press-escape="false"
       :close-on-click-modal="false"
       :before-close="CloseDialog"

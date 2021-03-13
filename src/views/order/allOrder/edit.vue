@@ -77,17 +77,17 @@
                   </td>
                   <td class="spec">1</td>
                   <td class="price">
-                    ${{ item.cartInfoMap.truePrice }} *
+                    {{currency.s}}{{ $IsNaN(item.cartInfoMap.truePrice) }} *
                     {{ item.cartInfoMap.cartNum }}
                   </td>
                   <td class="totalPrice">
-                    ${{
-                      $toDecimal2(
+                    {{
+                      currency.s+$IsNaN(
                         item.cartInfoMap.truePrice * item.cartInfoMap.cartNum
                       )
                     }}
                   </td>
-                  <td class="discount">$0.00</td>
+                  <td class="discount">{{currency.s}}{{detail.discount?$IsNaN(detail.discount):'0.00'}}</td>
                 </tr>
               </tbody>
             </table>
@@ -99,27 +99,34 @@
               <div class="left">小计</div>
               <div class="right">
                 <span>{{ detail.totalNum }}项</span>
-                <span class="num">${{ detail.totalPrice }}</span>
+                <span class="num">{{currency.s}} {{ $IsNaN(detail.totalPrice) }}</span>
               </div>
             </div>
             <div class="item">
               <div class="left">折扣</div>
               <div class="right">
                 <span>折扣金额</span>
-                <span class="num">${{ detail.deductionPrice }}</span>
+                <span class="num">{{currency.s}} {{ detail.discount?$IsNaN(detail.discount):'0.00' }}</span>
               </div>
             </div>
             <div class="item">
               <div class="left">运费</div>
               <div class="right">
                 <span>Standard Shipping</span>
-                <span class="num">${{ detail.payPostage }}</span>
+                <span class="num">{{currency.s}} {{ (detail.payPostage?$IsNaN(detail.payPostage):'0.00') }}</span>
               </div>
+            </div>
+            <div class="item">
+              <div class="left">运费险</div>
+              <div class="right">
+                <span></span>
+                <span class="num">{{currency.s}} {{ (detail.freightPrice?$IsNaN(detail.freightPrice):'0.00') }}</span>
+              </div> 
             </div>
             <div class="item">
               <div class="left">总计</div>
               <div class="right">
-                <span class="num">${{ detail.payPrice }}</span>
+                <span class="num">{{currency.s}} {{ detail.payPrice }}</span>
               </div>
             </div>
           </div>
@@ -168,14 +175,14 @@
               </p>
               <p class="amount">
                 <span>订单总额：</span>
-                <span class="content">${{ detail.payPrice }}</span>
+                <span class="content">{{ currency.s + detail.payPrice }}</span>
               </p>
             </div>
             <div class="order">
               <p>
                 <span>订单编号：</span>
                 <span>{{ detail.orderId }}</span>
-              </p>
+              </p> 
               <p>
                 <span>支付编号：</span>
                 <span>{{ detail.payType }}</span>
@@ -217,10 +224,10 @@
           </div> -->
         </el-col>
       </el-row>
-      <div class="pageSaveBtn">
-        <el-button>取消</el-button>
+      <!-- <div class="pageSaveBtn">
+        <el-button @click="$NavgitorTo('/order')">取消</el-button>
         <el-button type="primary">保存</el-button>
-      </div>
+      </div> -->
     </div>
     <el-dialog title="录入快递" :visible.sync="showDialog"> 
       <el-input v-model="deliveryId" placeholder="请输入快递单号"></el-input>
@@ -343,20 +350,20 @@ h1 {
       .img {
         padding-left: 0;
         width: 60px;
-        .small-img {
-          display: inline-block;
-          vertical-align: middle;
-          width: 50px;
-          height: 50px;
-          border-radius: 4px;
-          border: 1px solid #dadde4;
-          background-color: #f7f8fd;
-          background-origin: content-box;
-          background-position: 50% 50%;
-          background-size: contain;
-          background-repeat: no-repeat;
-          overflow: hidden;
-        }
+        // .small-img {
+        //   display: inline-block;
+        //   vertical-align: middle;
+        //   width: 50px;
+        //   height: 50px;
+        //   border-radius: 4px;
+        //   border: 1px solid #dadde4;
+        //   background-color: #f7f8fd;
+        //   background-origin: content-box;
+        //   background-position: 50% 50%;
+        //   background-size: contain;
+        //   background-repeat: no-repeat;
+        //   overflow: hidden;
+        // }
       }
       .desc {
         .main {

@@ -195,10 +195,10 @@ export default {
     if (this.$route.query.hasOwnProperty("id")) {
       this.id = this.$route.query.id;
     }
-    get().then((res) => {
-      this.codeList = res;
-    });
-    getShare().then((res) => {
+    get().then((data) => {
+      this.codeList = data;
+      getShare().then((res) => {
+      console.log(res);
       if (this.id) {
         let bool = false;
         this.codeList.map(i=>{
@@ -215,6 +215,7 @@ export default {
           this.InitTable(res.content[0].yxStorePromotions);
         }
         }
+        console.log(res);
         this.detail = res.content[0]; 
         this.$nextTick(() => {
           this.command = res.content[0].status;
@@ -222,6 +223,7 @@ export default {
         
       }
     });
+    }); 
   },
   methods: {
     CheckSwitch: function (e) {
@@ -434,21 +436,7 @@ h1 {
   width: 100%;
   line-height: 23px;
   .img {
-    width: 60px;
-    .small-img {
-      display: inline-block;
-      vertical-align: middle;
-      width: 50px;
-      height: 50px;
-      border-radius: 4px;
-      border: 1px solid #dadde4;
-      background-color: #f7f8fd;
-      background-origin: content-box;
-      background-position: 50% 50%;
-      background-size: contain;
-      background-repeat: no-repeat;
-      overflow: hidden;
-    }
+    width: 60px; 
   }
   .text {
     padding-left: 12px;

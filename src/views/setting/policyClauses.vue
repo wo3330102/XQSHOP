@@ -15,28 +15,29 @@
           <div class="box">
             <h3 class="title">退款政策（Refund policy）</h3>
             <div class="sub-title">当您保存政策后，它们会作为链接显示在结账页的页脚中。</div>
-            <tinymce-editor ref="editor" v-model="refundPolicy"></tinymce-editor>
+            <wangeditor ref="editor" v-model="refundPolicy"></wangeditor>
+
             <el-button style="margin-top:12px;float:right;">使用模板</el-button>
           </div>
           <!-- 隐私政策 -->
           <div class="box">
             <h3 class="title">隐私政策（Privacy policy）</h3>
             <div class="sub-title">当您保存政策后，它们会作为链接显示在结账页的页脚中。</div>
-            <tinymce-editor ref="editor" v-model="privacyPolicy"></tinymce-editor>
+            <wangeditor ref="editor" v-model="privacyPolicy"></wangeditor>
             <el-button style="margin-top:12px;float:right;">使用模板</el-button>
           </div>
           <!-- 服务条款 -->
           <div class="box">
             <h3 class="title">服务条款（Terms of service）</h3>
             <div class="sub-title">当您保存政策后，它们会作为链接显示在结账页的页脚中。</div>
-            <tinymce-editor ref="editor" v-model="termsOfService"></tinymce-editor>
+            <wangeditor ref="editor" v-model="termsOfService"></wangeditor>
             <el-button style="margin-top:12px;float:right;">使用模板</el-button>
           </div>
           <!-- 物流政策 -->
           <div class="box">
             <h3 class="title">物流政策（Shipping policy）</h3>
             <div class="sub-title">当您保存政策后，它们会作为链接显示在结账页的页脚中。</div>
-            <tinymce-editor ref="editor" v-model="shippingPolicy"></tinymce-editor>
+            <wangeditor ref="editor" v-model="shippingPolicy"></wangeditor>
           </div>
         </el-col>
         <el-col :span="8">
@@ -50,16 +51,16 @@
       </el-row>
       <div class="pageSaveBtn">
         <el-button @click="$NavgitorTo('/pageManage')">取消</el-button>
-        <el-button type="primary" :disabled="save">保存</el-button>
+        <el-button type="primary" :disabled="save" @>保存</el-button>
       </div>
     </div>
   </div>
 </template> 
 <script>
-import tinymceEditor from "@/components/tinymce-editor";
+import wangeditor from '@/components/wangeditor' 
 export default {
   components: {
-    tinymceEditor,
+    wangeditor,
   },
   data() {
     return {

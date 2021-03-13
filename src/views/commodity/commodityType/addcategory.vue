@@ -33,7 +33,8 @@
             </div>
             <h3 class="otherTitle">分类描述</h3>
             <div>
-              <tinymce-editor ref="editor" v-model="form.desc"></tinymce-editor>
+              <wangeditor ref="editor" v-model="form.desc"></wangeditor>
+
             </div> 
           </div>
           <div class="box image">
@@ -127,7 +128,7 @@
                       type="number"
                       v-if="formItem.shopAttributeValue == 3"
                     >
-                      <el-button slot="append">USD</el-button>
+                      <el-button slot="append">{{currency.n}}</el-button>
                     </el-input>
                     <el-input
                       v-model.number="formItem.value"
@@ -135,7 +136,7 @@
                       type="number"
                       v-if="formItem.shopAttributeValue == 4"
                     >
-                      <el-button slot="append">USD</el-button>
+                      <el-button slot="append">{{currency.n}}</el-button>
                     </el-input>
                     <el-input
                       v-model.number="formItem.value"
@@ -290,11 +291,11 @@
 </template> 
 <script>
 
-import { add, getCates } from "@/api/yxStoreCategory";
-import tinymceEditor from "@/components/tinymce-editor";
+import { add, getCates } from "@/api/yxStoreCategory"; 
+import wangeditor from '@/components/wangeditor'
 export default {
   components: {
-    tinymceEditor,
+    wangeditor,
   },
   data() {
     var validatePass = (rule, value, callback, options) => {

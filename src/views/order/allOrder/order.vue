@@ -379,6 +379,7 @@ export default {
     },
     // 选中的数据
     SelectionChange: function (e) {
+      console.log(e)
       this.exportParams.listContent = [];
       e.map((i) => {
         this.exportParams.listContent.push(i.orderId);

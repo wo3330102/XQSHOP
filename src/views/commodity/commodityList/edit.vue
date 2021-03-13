@@ -41,14 +41,14 @@
           <div class="item-margin" v-if="show">
             <span class="text-span">售价</span>
             <el-input
-              class="box-item-entry" 
+              class="box-item-entry"
               v-model="attr.price"
               maxlength="8"
               size="medium"
               placeholder="请输入商品现价"
               @blur="attr.price = $IsNaN(attr.price)"
             >
-              <span slot="append">USD</span>
+              <span slot="append">{{ currency.n }}</span>
             </el-input>
           </div>
           <div class="item-margin" v-if="show">
@@ -60,10 +60,15 @@
               maxlength="8"
               placeholder="请输入商品库存"
             ></el-input>
-          </div> 
+          </div>
           <div class="item-margin" v-if="show">
             <span class="text-span">商品SKU</span>
-            <el-input class="box-item-entry" v-model="detail.shopSku" size="medium" placeholder="请输入商品SKU"></el-input>
+            <el-input
+              class="box-item-entry"
+              v-model="detail.skuCode"
+              size="medium"
+              placeholder="请输入商品SKU"
+            ></el-input>
           </div>
           <!-- <div class="item-margin">
             <span class="text-span">库存方式</span>
@@ -119,20 +124,20 @@
           <div class="item-margin" v-if="show">
             <span class="text-span">原价</span>
             <el-input
-              class="box-item-entry" 
+              class="box-item-entry"
               v-model="attr.ot_price"
               maxlength="8"
               size="medium"
               placeholder="请输入商品原价"
               @blur="attr.ot_price = $IsNaN(attr.ot_price)"
             >
-              <span slot="append">USD</span>
+              <span slot="append">{{ currency.n }}</span>
             </el-input>
           </div>
           <div class="item-margin" v-if="show">
             <span class="text-span">商品重量</span>
             <el-input
-              class="box-item-entry" 
+              class="box-item-entry"
               v-model="attr.weight"
               maxlength="8"
               @blur="attr.weight = $IsNaN(attr.weight)"
@@ -175,10 +180,7 @@
       <div class="box">
         <h3 class="title">商品详情</h3>
         <div>
-          <tinymce-editor
-            ref="editor"
-            v-model="detail.description"
-          ></tinymce-editor>
+          <wangeditor ref="editor" v-model="detail.description"></wangeditor>
         </div>
       </div>
       <div class="box image">
@@ -192,10 +194,18 @@
             "
             >（{{ fileList.length }}/250）</span
           >
+          <span
+            style="
+              font-weight: normal;
+              font-size: 14px;
+              color: rgb(162, 163, 172);
+            "
+            >推荐尺寸 800 * 800</span
+          >
         </h3>
         <div class="content">
           <el-upload
-            :action="url+'/api/upload'"
+            :action="url + '/api/upload'"
             :headers="{
               Authorization: token,
             }"
@@ -263,6 +273,7 @@
                   ref="saveTagInput"
                   size="medium"
                   placeholder="请在此输入内容并按回车键"
+                  @blur="item.inputValue = ''"
                   @keyup.enter.native="InputConfirm(index)"
                 ></el-input>
               </div>
@@ -338,14 +349,15 @@
                     </el-image>
                   </div>
                   <input
-                    class="edit-inp" 
-                    v-model.number="scope.row[item.slot]"
-                    @blur="scope.row[item.slot] = $IsNaN(scope.row[item.slot])"
+                    class="edit-inp"
+                    v-model="scope.row[item.slot]"
+                    @blur="BlurSet(item.slot, scope.row)"
                     v-else-if="
-                      item.title == '售价' ||
-                      item.title == '原价' ||
-                      item.title == '库存' ||
-                      item.title == '重量(KG)'
+                      item.slot == 'skuCode' ||
+                      item.slot == 'price' ||
+                      item.slot == 'ot_price' ||
+                      item.slot == 'stock' ||
+                      item.slot == 'weight'
                     "
                   />
                   <span v-else>{{ scope.row[item.slot] }}</span>
@@ -371,11 +383,14 @@
             <div class="jh-seo-preview">
               <p class="seo-title" v-html="detail.seoTitle"></p>
               <p
-                class="seo-link mt8" 
+                class="seo-link mt8"
                 v-html="
-                  detail.linkUrl?detail.linkUrl.lastIndexOf('/') == detail.linkUrl.length - 1
-                    ? detail.linkUrl + detail.seoLink
-                    : detail.linkUrl + '/' + detail.seoLink:''
+                  detail.linkUrl
+                    ? detail.linkUrl.lastIndexOf('/') ==
+                      detail.linkUrl.length - 1
+                      ? detail.linkUrl + detail.seoLink
+                      : detail.linkUrl + '/' + detail.seoLink
+                    : ''
                 "
               ></p>
               <p class="seo-desc mt8" v-html="detail.seo_info"></p>
@@ -413,9 +428,12 @@
               <div>
                 <el-input v-model="detail.seoLink" placeholder="请输入SEO链接">
                   <template slot="prepend">{{
-                    detail.linkUrl?detail.linkUrl.lastIndexOf("/") == detail.linkUrl.length - 1
-                      ? detail.linkUrl
-                      : detail.linkUrl + "/":''
+                    detail.linkUrl
+                      ? detail.linkUrl.lastIndexOf("/") ==
+                        detail.linkUrl.length - 1
+                        ? detail.linkUrl
+                        : detail.linkUrl + "/"
+                      : ""
                   }}</template>
                 </el-input>
               </div>
@@ -477,21 +495,20 @@
   </div>
 </template> 
 <script>
-
-import tinymceEditor from "@/components/tinymce-editor";
+import wangeditor from "@/components/wangeditor";
 import tableTem from "@/components/tableTem";
 import { add, edit, getInfo, isFormatAttr } from "@/api/yxStoreProduct";
 import { getCates } from "@/api/yxStoreCategory";
 export default {
   components: {
-    tinymceEditor,
     tableTem,
+    wangeditor,
   },
   data() {
     return {
-      url:localStorage.getItem('uploadUrl'),
+      url: localStorage.getItem("uploadUrl"),
       id: "",
-      isFirst:true,
+      isFirst: true,
       token: "",
       isGrounding: true,
       price: "",
@@ -557,19 +574,15 @@ export default {
       specifications: "", // 规格设置
       detail: {
         store_name: "",
-        description: "", 
-        linkUrl:'',
-        seoTitle:'',
-        seo_info:'',
+        description: "",
+        linkUrl: "",
+        seoTitle: "",
+        seo_info: "",
       },
       // 表格变量
       isActive: false, // 批量操作按钮是否可以点击
       optionIndex: 0, // 批量修改类型
       optionList: [
-        {
-          label: "删除",
-          value: 1,
-        },
         {
           label: "修改价格",
           value: 2,
@@ -589,6 +602,14 @@ export default {
         {
           label: "修改重量",
           value: 6,
+        },
+        {
+          label: "修改商品SKU",
+          value: 7,
+        },
+        {
+          label: "删除",
+          value: 1,
         },
       ],
       requestParams: {},
@@ -636,38 +657,32 @@ export default {
       };
       getInfo(par).then((res) => {
         if (that.id === 0) {
-          console.log(1)
-          // this.detail = { ...res.productInfo };
-          this.temp_id = ""; 
+          this.temp_id = "";
         } else {
-          console.log(2)
+          console.log(res.productInfo);
           that.detail = { ...res.productInfo };
           that.tagIds = res.tagList;
           if (res.productInfo.classIds) {
-            that.classList = res.productInfo.classIds.split(","); 
-          } 
+            that.classList = res.productInfo.classIds.split(",");
+          }
           that.attr = res.productInfo.attr;
-          if (res.productInfo.attr.weight === 0) {
-            that.attr.weight = "";
-          }
-          if (res.productInfo.attr.ot_price === 0) {
-            that.attr.ot_price = "";
-          }
-          if (res.productInfo.attr.stock === 0) {
-            that.attr.stock = "";
-          }
+          res.productInfo.attr.price == 0
+            ? (that.attr.price = "")
+            : (that.attr.price = this.$IsNaN(res.productInfo.attr.price));
+          res.productInfo.attr.weight == 0
+            ? (that.attr.weight = "")
+            : (that.attr.weight = this.$IsNaN(res.productInfo.attr.weight));
+          res.productInfo.attr.ot_price == 0
+            ? (that.attr.ot_price = "")
+            : (that.attr.ot_price = this.$IsNaN(res.productInfo.attr.ot_price));
+          res.productInfo.attr.stock === 0 ? (that.attr.stock = "") : "";
           that.detail.cate_id = Number(that.detail.cate_id);
-          // that.weight = res.productInfo.attr.weight;
-          // // 判断是否有标签
-          // if (res.productInfo.classIds) {
-          //   that.classIds = res.productInfo.classIds;
-          // }
           // 判断是否上架
           that.detail.is_show == Number(that.isGrounding);
           // 判断是单规格还是多规格
           if (res.productInfo.spec_type == 1) {
             // 多规格
-            that.shopAttributeList = res.productInfo.items; 
+            that.shopAttributeList = res.productInfo.items;
             that.InitFormatAttr();
             this.show = false;
           }
@@ -733,37 +748,41 @@ export default {
     },
     // 关闭规格
     CloseOption: function (e) {
-      console.log(e);
       this.shopAttributeList.splice(e, 1);
+      if (this.shopAttributeList.length == 0) {
+        this.show = true;
+      }
       this.InitFormatAttr();
     },
     // 判断属性名称是否一样
-    CheckAttrName:function(index){ 
-      let val = this.shopAttributeList[index].value; 
+    CheckAttrName: function (index) {
+      let val = this.shopAttributeList[index].value;
       console.log(val);
-      for(var i in this.shopAttributeList){
-        if(this.shopAttributeList[i].value == val && index != i){ 
-          this.$message.warning('重复属性')
-          this.shopAttributeList[index].value = '';
-          return false
+      for (var i in this.shopAttributeList) {
+        if (this.shopAttributeList[i].value == val && index != i) {
+          this.$message.warning("重复属性");
+          this.shopAttributeList[index].value = "";
+          return false;
         }
       }
     },
     // 新增规格值
     InputConfirm: function (index) {
+      this.show = false;
       let val = this.shopAttributeList[index].inputValue;
       val = val.replace(/(^\s*)|(\s*$)/g, ""); // 使用正则去除首尾空格
       if (val) {
         let detail = this.shopAttributeList[index].detail;
         if (detail.indexOf(val) > -1) {
           this.$message.error("已存在该标签");
+          this.shopAttributeList[index].inputValue = "";
           return false;
         } else {
           detail.push(val);
           this.showTable = true;
         }
         // 删除对应存在的规格值
-        delete this.shopAttributeList[index].inputValue;
+        this.shopAttributeList[index].inputValue = "";
         this.InitFormatAttr();
       } else {
         this.shopAttributeList[index].inputValue = "";
@@ -772,6 +791,7 @@ export default {
     // 关闭规格值
     CloseTag: function (item, index) {
       let arr = this.shopAttributeList;
+      arr[index].inputValue = "";
       arr[index].detail.splice(arr[index].detail.indexOf(item), 1);
       this.InitFormatAttr();
     },
@@ -791,36 +811,96 @@ export default {
         let headerData = [...r.header];
         let arr = [];
         r.header.map((v, i) => {
-          if (
-            v.slot !== "cost" &&
-            v.slot !== "volume" &&
-            v.slot !== "bar_code" &&
-            v.slot !== "action"
-          ) {
+          if (v.slot !== "cost" && v.slot !== "volume" && v.slot !== "action") {
             arr.push(v);
           }
         });
         this.tableHeader = arr;
         let array = [];
-        if (this.id !== "" && this.detail.spec_type == 1 && this.isFirst) {  
+        if (this.id !== "" && this.detail.spec_type == 1 && this.isFirst) {
           this.isFirst = false;
-          this.detail.attrs.map(i=>{
-            if(i.is_show == 1){
+          this.detail.attrs.map((i) => {
+            if (i.is_show == 1) {
               array.push(i);
             }
-          })
-          this.table = array; 
-        } else {  
+          });
+          this.table = array;
+        } else {
+          let table = [...this.table];
           r.value.map((v, i) => {
-            v.index = i; 
-            if(v.is_show == 1){
+            v.index = i;
+            if (v.is_show == 1) { 
+              table.map((item) => { 
+                if (v.hasOwnProperty("value2")) {
+                  // 判断新表单是否有第三规格
+                  if (v.hasOwnProperty("value3")) {
+                    // 若原表单不含第三规格，则为新增
+                    if (!item.hasOwnProperty("value3")) { 
+                      if (item.value1 + item.value2 == v.value1 + v.value2) {
+                        delete item.skuCode;  
+                        v = {
+                          ...v,
+                          ...item,
+                        };
+                      }
+                    } else { 
+                      // 若原表单含有第三规格，则为新增某一规格值
+                      if (
+                        (item.value1 + item.value2 + item.value3) == 
+                        (v.value1 + v.value2 + v.value3)
+                      ) { 
+                        delete item.skuCode;
+                        v = {
+                          ...v,
+                          ...item,
+                        };
+                      }
+                    }
+                  } else if(item.hasOwnProperty('value2')){  
+                    if ((v.value1 + v.value2) === (item.value1 + item.value2)) { 
+                      delete item.value3;
+                      delete item.skuCode;
+                      v = {
+                        ...v,
+                        ...item,
+                      };
+                    }
+                  } else{
+                    if(item.value1 == v.value1){
+                      delete item.skuCode; 
+                      v = {
+                        ...v,
+                        ...item,
+                      };
+                    }
+                  } 
+                } else{
+                  if(item.value1 == v.value1){
+                    delete item.skuCode; 
+                    delete item.value2;
+                    delete item.value3;
+                    v = {
+                      ...v,
+                      ...item,
+                    };
+                  }
+                }
+              });
               array.push(v);
             }
-          });
-          console.log(array);
+          }); 
           this.table = array;
         }
       });
+    },
+    // 判断多规格数据是否需要转小数点
+    BlurSet: function (key, data) { 
+      if (key == "skuCode") {
+      } else if (key !== "stock") {
+        data[key] = data[key] ? this.$IsNaN(data[key].toString()) : "0.00";
+      } else {
+        isNaN(Number(data[key]))?data[key]=0:''
+      }
     },
     // 选择批量操作数据
     SelectionChange: function (e) {
@@ -837,9 +917,12 @@ export default {
         let arr = [];
         item.map((i) => {
           table.map((item, inx) => {
-            if (item.index == i.index) {   
-              if(this.shopAttributeList.length === 1){ 
-                this.shopAttributeList[0].detail.splice(this.shopAttributeList[0].detail.indexOf(table[inx].value1),1) 
+            if (item.index == i.index) {
+              if (this.shopAttributeList.length === 1) {
+                this.shopAttributeList[0].detail.splice(
+                  this.shopAttributeList[0].detail.indexOf(table[inx].value1),
+                  1
+                );
               }
               table.splice(inx, 1);
               item.is_show = 0;
@@ -858,7 +941,7 @@ export default {
       console.log(that.batchValue);
       let item = this.selectItem;
       let table = this.table;
-      // 1 删除; 2 修改价格; 3 修改原价; 4 修改库存; 5 修改重量
+      // 1 删除; 2 修改价格; 3 修改原价; 4 修改图片; 5 修改库存; 6 修改重量; 7 商品SKU
       switch (this.optionIndex + 1) {
         case 2:
           ChangeTable("price");
@@ -866,11 +949,14 @@ export default {
         case 3:
           ChangeTable("ot_price");
           break;
-        case 4:
+        case 5:
           ChangeTable("stock");
           break;
-        case 5:
+        case 6:
           ChangeTable("weight");
+          break;
+        case 7:
+          ChangeTable("skuCode");
           break;
       }
       function ChangeTable(e) {
@@ -878,32 +964,51 @@ export default {
         item.map((i) => {
           table.map((item, inx) => {
             if (item.index == i.index) {
-              item[e] = that.batchValue;
+              item[e] =
+                e == "stock" || e == "skuCode"
+                  ? that.batchValue
+                  : that.$IsNaN(that.batchValue);
             }
           });
         });
+        that.isActive = false;
         that.batchOperation = false;
       }
     },
     // 选择图片
     SelectPicture: function (index) {
       this.tableIndex = index;
-      if (this.table[index].pic) {
+      if(this.fileList.length>0){
+        if (this.table[index].pic) {
         this.showDelImage = true;
       }
       this.showDialog = true;
+      } else {
+        this.$message.warning('请先上传商品图片')
+      } 
     },
     // 提交图片
     SubImage: function () {
       let that = this;
+      let item = this.selectItem;
       if (that.fileList[that.active].url.indexOf("blob:") === 0) {
         that.fileList[that.active].url =
           that.fileList[that.active].response.link;
       }
       if (that.tableIndex === "") {
-        that.table.map((i) => {
-          i.pic = that.fileList[that.active].url;
-        });
+        if (item.length > 0) {
+          item.map((i) => {
+            that.table.map((val, inx) => {
+              if (val.index == i.index) {
+                val.pic = that.fileList[that.active].url;
+              }
+            });
+          });
+        } else {
+          that.table.map((i) => {
+            i.pic = that.fileList[that.active].url;
+          });
+        }
       } else {
         that.table[that.tableIndex].pic = that.fileList[that.active].url;
       }
@@ -937,11 +1042,11 @@ export default {
         that.$message.error("请输入商品名称");
         return false;
       }
-      // 判断是否选择分类
-      if (!this.tagIds || this.tagIds.length === 0) {
-        that.$message.error("请选择商品分类");
-        return false;
-      }
+      // // 判断是否选择分类
+      // if (!this.tagIds || this.tagIds.length === 0) {
+      //   that.$message.error("请选择商品分类");
+      //   return false;
+      // }
       // 判断是否有标签
       console.log(this.classList);
       if (this.classList) {
@@ -978,19 +1083,28 @@ export default {
       }
       // 判断是否为多规格数据控制库存
       if (this.table.length === 0) {
+        // 单规格
         // 判断用户是否输入售价
         if (this.attr.price == "" || this.attr.price == 0) {
           that.$message.error("商品售价不能为0");
           return false;
         }
         // 判断是否输入原价
-        if (this.attr.ot_price > 0) { 
-          if (Number(this.attr.price) > Number(this.attr.ot_price)) { 
+        if (this.attr.ot_price > 0) {
+          if (Number(this.attr.price) > Number(this.attr.ot_price)) {
             that.$message.error("商品售价不能大于商品原价");
             return false;
           }
         } else {
           this.attr.ot_price = 0;
+        }
+        // 判断是否有商品SKU
+        if (!this.detail.skuCode) {
+          that.$message.error("请输入商品Sku");
+          return false;
+        } else {
+          console.log(this.detail.skuCode);
+          this.attr.skuCode = this.detail.skuCode;
         }
         // 判断用户是否输入库存，默认为空
         if (this.attr.stock == "") {
@@ -1001,7 +1115,6 @@ export default {
           this.attr.weight = 0;
         }
       } else {
-        console.log("多商品");
         let arr = this.table;
         for (let i in arr) {
           if (arr[i].price == 0 || arr[i].price == "") {
@@ -1009,19 +1122,27 @@ export default {
             return false;
           }
           // 判断是否输入原价
-        if (arr[i].ot_price > 0) { 
-          if (Number(arr[i].price) > Number(arr[i].ot_price)) { 
-            that.$message.error("商品售价不能大于商品原价");
+          if (arr[i].ot_price > 0) {
+            if (Number(arr[i].price) > Number(arr[i].ot_price)) {
+              that.$message.error("商品售价不能大于商品原价");
+              return false;
+            }
+          } else {
+            this.attr.ot_price = 0;
+          }
+          if (arr[i].pic == "") {
+            that.$message.error("请完善多规格表单，商品图片不能为空");
             return false;
           }
-        } else {
-          this.attr.ot_price = 0;
-        } 
           if (arr[i].stock == "") {
             arr[i].stock = 0;
           }
           if (arr[i].weight == "") {
             arr[i].weight = 0;
+          }
+          if (arr[i].skuCode == "") {
+            that.$message.error("请完善多规格表单，商品SKU不能为空");
+            return false;
           }
         }
       }
@@ -1043,11 +1164,14 @@ export default {
         this.detail.spec_type = 0;
         this.detail.header = [];
         this.detail.items = [];
+        console.log(this.attr);
         this.detail.attrs = [this.attr];
         this.detail.attr = this.attr;
       }
       this.detail.is_show = Number(this.isGrounding);
+
       this.detail.tagIds = this.tagIds.toString();
+
       // 基础参数
       let data = {
         ficti: 0,
@@ -1070,9 +1194,9 @@ export default {
         store_info: "",
         temp_id: 0,
         unit_name: "",
+        skuCode: this.detail.skuCode || "",
         ...this.detail,
       };
-      console.log(that.fileList);
       if (that.id === 0) {
         if (this.table.length > 0) {
           // 多规格
@@ -1087,7 +1211,7 @@ export default {
             cost: 0,
             ot_price: that.attr.ot_price || 0,
             stock: that.attr.stock,
-            bar_code: "",
+            skuCode: "",
             weight: that.attr.weight,
             volume: 0,
             brokerage: 0,
@@ -1102,7 +1226,7 @@ export default {
               cost: 0,
               ot_price: that.attr.ot_price || 0,
               stock: that.attr.stock || 0,
-              bar_code: "",
+              skuCode: that.attr.skuCode || "",
               weight: that.attr.weight || 0,
               volume: 0,
               brokerage: 0,
@@ -1241,7 +1365,7 @@ h1 {
   padding: 0 -10px;
   /deep/.el-input--suffix {
     width: 70px !important;
-  } 
+  }
 }
 /deep/.el-input-group__append {
   background: #fff;
@@ -1315,12 +1439,19 @@ h1 {
         margin-left: 24px;
         cursor: pointer;
         color: #c0c4cc;
+        width: 24px;
+        font-size: 16px;
+        text-align: center;
       }
     }
     .item {
       padding: 10px;
       font-size: 13px;
       cursor: pointer;
+      &:first-child {
+        padding-left: 0;
+        margin-left: 10px;
+      }
     }
     .disable {
       pointer-events: none;

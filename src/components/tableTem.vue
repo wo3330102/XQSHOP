@@ -84,7 +84,7 @@
               >
               <span v-else-if="item.label.indexOf('金额') > -1">
                 {{
-                  scope.row[item.prop] ? "$" + scope.row[item.prop] : "$0.00"
+                  scope.row[item.prop] ? currency.s + scope.row[item.prop] : currency.s+"0.00"
                 }}
               </span>
               <span v-else-if="item.prop == 'categoryType'">手动分类</span>
@@ -154,6 +154,12 @@ export default {
       type: Number,
       default: 0,
     },
+    addTableData:{
+      type: Array,
+      default: function () {
+        return [];
+      },
+    }
   },
   data() {
     return {
@@ -175,8 +181,15 @@ export default {
       deep: true,
       immediate: true,
     },
-    tableData: function (val) {
-      this.data = val;
+    addTableData: function (val) {
+      console.log(this.data)
+      console.log(val);
+      if(this.data){
+        this.data.concat(val);
+      } else {
+        this.data = [...val]; 
+      }
+      
     },
     isRefresh: function (val) {
       this.selectItem = [];
@@ -207,21 +220,37 @@ export default {
         setTimeout(function () {
           that.loading = false;
         }, 200);
-        that.data = res.content;
-        that.total = res.totalElements;
+        if(that.requestUrl == 'api/yxComposeProduct'){
+          console.log(res);
+          that.data = res.data.composeProducts;
+          that.total = res.data.totalElements; 
+        } else if(that.requestUrl == 'api/productLimit/limitedProductList'){
+          that.data = res.data.content.map(item=>{
+            item.isEdit = false;
+            item.editPrice = this.$IsNaN(item.preferentialPrice);
+            item.editNum = item.number;
+            return item;
+          }); 
+          that.total = res.data.totalElements; 
+        } else{
+          that.data = res.content;
+          that.total = res.totalElements; 
+        }    
         if (res.hasOwnProperty("cateList")) {
           that.$emit("GetCategory", res.cateList);
         } 
         if(that.requestUrl === 'api/getYxStoreProductReplyList'){ 
           this.$emit('GetData',res);
         }
-
+        that.$emit('resultData',res);
       });
     },
     // 选择单条数据
     SelectionChange: function (e, row) {
       this.selectItem = e;  
       this.isActive = true;
+      // 用于导出数据
+      this.$emit('SelectionChange',e)
     },
     // 批量操作
     DispachSelect: function (e) {

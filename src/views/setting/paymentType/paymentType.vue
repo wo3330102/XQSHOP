@@ -15,7 +15,7 @@
     </router-link>
     <h1>
       收款方式
-      <el-button style="float: right">配置</el-button>
+      <!-- <el-button style="float: right">配置</el-button> -->
     </h1>
     <div>
       <el-row>
@@ -90,7 +90,7 @@
                 v-model="payOption.currencyCode"
                 placeholder="请选择货币类型"
               >
-                <el-option label="USD" value="USD"></el-option>
+                <el-option :label="currency.n" value="currency.n"></el-option>
                 <el-option label="CNY" value="CNY"></el-option>
               </el-select>
             </el-form-item>
@@ -119,10 +119,7 @@
                 >保存</el-button
               >
               <el-button
-                @click="
-                  showPay = false;
-                  payOption = {};
-                "
+                @click="$NavgitorTo('/setting')"
                 >取消</el-button
               >
             </el-form-item>
@@ -357,10 +354,7 @@ export default {
         if (valid) { 
           this.payOption.storeId = storeId;
           EditPay(this.payOption).then((res) => { 
-            Notification.success({
-              title: "编辑成功",
-              duration: 5000,
-            });
+            this.$message.success('编辑成功') 
             that.showPay = false;
           });
         } else {

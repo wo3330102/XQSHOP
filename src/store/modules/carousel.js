@@ -1,0 +1,27 @@
+export default {
+    state: {
+      param:{
+        imageLoop:[],
+        link:'',
+        linkType: '',
+        linkName: '',
+        linkTitle: '',
+        linkIndex: null, // 链接列表中的id，用于回显
+        originalTitle: '', 
+      }
+    },
+    mutations: {
+      setImgList (state, payload) {
+        // 变更状态
+        if(typeof payload==='object'){
+          state.param = Object.assign(state.param, payload)
+        }else{
+          state.param[payload] = payload
+        }
+        
+      }
+    },
+    actions: {
+      
+    }
+  }

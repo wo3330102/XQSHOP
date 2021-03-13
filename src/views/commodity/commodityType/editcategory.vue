@@ -33,7 +33,7 @@
             </div>
             <h3 class="otherTitle">分类描述</h3>
             <div>
-              <tinymce-editor ref="editor" v-model="form.content"></tinymce-editor>
+              <wangeditor ref="editor" v-model="form.desc"></wangeditor>
             </div>
             <!-- <h3 class="otherTitle">上级分类</h3>
             <div> 
@@ -132,7 +132,7 @@
                       type="number"
                       v-if="formItem.shopAttributeValue == 3"
                     >
-                      <el-button slot="append">USD</el-button>
+                      <el-button slot="append">{{currency.n}}</el-button>
                     </el-input>
                     <el-input
                       v-model.number="formItem.value"
@@ -140,7 +140,7 @@
                       type="number"
                       v-if="formItem.shopAttributeValue == 4"
                     >
-                      <el-button slot="append">USD</el-button>
+                      <el-button slot="append">{{currency.n}}</el-button>
                     </el-input>
                     <el-input
                       v-model.number="formItem.value"
@@ -294,14 +294,12 @@
   </div>
 </template> 
 <script> 
+import wangeditor from '@/components/wangeditor'
 import { edit, getCates } from "@/api/yxStoreCategory";
-import tinymceEditor from "@/components/tinymce-editor";
-// import Treeselect from '@riophae/vue-treeselect'
 import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 export default {
-  components: {
-    tinymceEditor,
-    // Treeselect
+  components: { 
+    wangeditor
   },
   data() {
     var validatePass = (rule, value, callback, options) => {

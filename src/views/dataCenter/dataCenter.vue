@@ -83,13 +83,16 @@
             </el-table>
           </div>
           <div class="box">
-            <h3 class="title">页面排行</h3>
+            <h3 class="title">页面浏览排行</h3>
             <el-table :data="pageTopList" empty-text="暂无数据">
-              <el-table-column prop="contry" label="页面地址"></el-table-column>
+              <el-table-column
+                prop="linkUrl"
+                label="页面地址"
+              ></el-table-column>
               <el-table-column
                 width="100"
                 align="right"
-                prop="people"
+                prop="uv"
                 label="访问次数"
               ></el-table-column>
             </el-table>
@@ -226,45 +229,60 @@
         <el-table-column
           align="center"
           width="55"
-          prop="no"
+          prop="productId"
           label="序号"
         ></el-table-column>
-        <el-table-column align="center" width="84" prop="no"></el-table-column>
+        <el-table-column align="center" width="84" prop="image">
+          <template slot-scope="scope">
+            <span
+              class="small-img"
+              :style="{ backgroundImage: 'url(' + scope.row.image + ')' }"
+            ></span>
+          </template>
+        </el-table-column>
         <el-table-column
           width="290"
-          prop="no"
+          prop="productName"
           label="产品名称"
         ></el-table-column>
         <el-table-column
           align="center"
           width="100"
-          prop="no"
+          prop="cartNum"
           label="加购商品数"
         ></el-table-column>
         <el-table-column
           align="center"
           width="110"
-          prop="no"
+          prop="sales"
           label="销量"
         ></el-table-column>
         <el-table-column
-          prop="no"
+          prop="netSalesPrice"
           width="120"
           label="净销售额"
         ></el-table-column>
         <el-table-column
-          prop="no"
+          prop="totalSalesPrice"
           width="184"
           label="总销售额"
         ></el-table-column>
-        <el-table-column prop="no" label="操作"></el-table-column>
+        <el-table-column label="操作">
+          <template slot-scope="scope">
+            <span
+              @click="$NavgitorTo('/dataCenterDetail', { id: scope.row.id })"
+              class="textBtn"
+              >查看报告</span
+            >
+          </template>
+        </el-table-column>
       </el-table>
     </div>
   </div>
 </template>
 <script>
 var color = ["#E8E6F0", "#412B92"];
-import { getChartCount } from "@/api/getChartCount";
+import { getChartCount, getHotProduct } from "@/api/getChartCount";
 import ECharts from "vue-echarts";
 import "echarts/lib/chart/line";
 import "echarts/lib/chart/pie";
@@ -277,7 +295,6 @@ export default {
   },
   watch: {
     dateList: function (val) {
-      console.log(val);
       this.Init();
     },
   },
@@ -343,7 +360,7 @@ export default {
       new Date().toLocaleDateString(),
       new Date().toLocaleDateString(),
     ];
-    this.Init();
+    // this.Init();
     // 店铺分享统计
     this.shareOptions = {
       tooltip: {
@@ -376,7 +393,6 @@ export default {
       ],
     };
   },
-  mounted() {},
   methods: {
     Init: function () {
       let colors = ["#E8E6F0", "#412B92"];
@@ -387,15 +403,15 @@ export default {
       };
       getChartCount(par).then((res) => {
         let that = this;
-        // 总销售额
         this.detail = res;
-        this.ChartsOptions(res.chartPrice, "totalSalesOptions");
+        // 总销售额
+        this.ChartsOptions(res.orderPriceList, "totalSalesOptions");
         // 访客量
-        this.ChartsOptions(res.userNum, "totalVisitorsOption");
+        this.ChartsOptions(res.userNumList, "totalVisitorsOption");
         // 订单量
-        this.ChartsOptions(res.chartOrder, "totalOrderOptions");
+        this.ChartsOptions(res.orderNumList, "totalOrderOptions");
         // 客单价
-        this.ChartsOptions(res.chartPrice, "priceOption");
+        this.ChartsOptions(res.orderPriceList, "priceOption");
         // 访客转化率
         this.paySuccessRate = that.Rate(res.visitorRateDto.paySuccessRate);
         this.visitorConversionRate = [
@@ -429,6 +445,13 @@ export default {
         this.payData = res.PayTypeList;
         // 复购率
         this.repurchaseRateDto = [res.repurchaseRateDto];
+        // 页面浏览排行
+        this.pageTopList = res.storeLinkUvs;
+      });
+      // 获取热销商品分析
+      getHotProduct(par).then((res) => {
+        this.hotShopData = res;
+        console.log(res);
       });
     },
     ChartsOptions: function (obj, el) {
@@ -575,6 +598,14 @@ h1 {
       font-weight: 700;
     }
   }
+}
+.textBtn {
+  padding: 10px 0;
+  color: #273a8a;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: 400;
 }
 .rate {
   width: 100%;

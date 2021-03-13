@@ -21,7 +21,8 @@
           <el-table :data="mainDomainForm">
             <el-table-column prop="domain" label="域名">
               <template slot-scope="scope">
-                <a :href="scope.row.domain">{{ scope.row.domain }}</a> 
+                <a :href="'https://' +scope.row.domain">{{ scope.row.domain }}</a> 
+                <span class=""></span>
               </template>
             </el-table-column>
             <el-table-column prop="status" label="状态"></el-table-column>
@@ -37,8 +38,8 @@
         <div>
           <el-table :data="domainForm">
             <el-table-column prop="url" label="域名">
-              <template slot-scope="scope">
-                <a style="color: #273a8a;" :href="scope.row.url">{{ scope.row.url }}</a> 
+              <template slot-scope="scope"> 
+                <a :href="'https://' +scope.row.domain">{{ scope.row.domain }}</a> 
               </template>
             </el-table-column>
             <el-table-column label="状态">
@@ -120,7 +121,9 @@ export default {
     },
     Remove: function (e) { 
       this.detail.linkUrlList.splice(e, 1);
+      this.detail.linkUrls = '';
       edit(this.detail).then((res) => {
+        this.$message.success('移除成功')
         this.domainForm.splice(e, 1);
       });
     },
@@ -150,7 +153,7 @@ export default {
         this.init();
       });
 
-    },
+    }, 
   },
   updated() {
     console.log("更新");

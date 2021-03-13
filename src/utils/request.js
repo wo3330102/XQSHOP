@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { 
+import {
   MessageBox,
   Message
 } from 'element-ui'
@@ -9,7 +9,7 @@ axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 // 创建axios实例
 const service = axios.create({
   // axios中请求配置有baseURL选项，表示请求URL公共部分
-  baseURL: process.env.NODE_ENV === 'production' ? process.env.VUE_APP_BASE_API:process.env.VUE_APP_BASE_API,//'https://admin.xqshopify.com',
+  baseURL: process.env.NODE_ENV === 'production' ? process.env.VUE_APP_BASE_API : process.env.VUE_APP_BASE_API, //'https://admin.xqshopify.com',
   // baseURL: 'https://api.xqshopify.com',
   // 超时
   timeout: 1000000
@@ -18,31 +18,48 @@ const service = axios.create({
 service.interceptors.request.use(config => {
   // 是否需要设置 token 
   config.headers['Authorization'] = getToken() // 让每个请求携带自定义token 请根据实际情况自行修改
-  const storeId = localStorage.getItem('storeId') 
-  if ((config.method === 'post' || config.method === 'put') && config.url.indexOf('api/yxStoreProductReply')<0 && config.url.indexOf('api/yxStorePromotions/mod')<0) {
-    config.data = {
-      storeId: storeId,
-      ...config.data
+  const storeId = localStorage.getItem('storeId')
+  if ((config.method === 'post' || config.method === 'put') && config.url.indexOf('api/yxStoreProductReply') < 0 && config.url.indexOf('api/yxStorePromotions/mod') < 0) {
+    // 判断post,put是否需要增加storeId
+    console.log(config.data)
+    if(config.data){
+      if (!config.data.notStoreId && !(config.data instanceof Array)) {
+        config.data = {
+          storeId: storeId,
+          ...config.data
+        }
+      }
     }
   } else if (config.method === 'get') {
     config.params = {
       storeId: storeId,
       ...config.params
     }
-  } 
+  }
   // 去除参数
-  if(config.url.indexOf('api/yxSystemStore/storeId')>-1){
+  if (config.url.indexOf('api/yxSystemStore/storeId') > -1) {
     delete config.params.storeId
   }
 
-  if(config.url.indexOf('onStatus') >-1){  
+  if (config.url.indexOf('onStatus') > -1) {
     if (config.method === 'post' || config.method === 'put') {
       delete config.data.storeId
     } else if (config.method === 'get') {
-      delete config.params.storeId 
+      delete config.params.storeId
     }
-  } 
-  return config
+  }
+
+  if (config.method === 'delete') {
+    return MessageBox.confirm('是否确认删除?', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }).then(() => {
+      return config
+    }) 
+  } else {
+    return config
+  }
 }, error => {
   console.log(error)
   Promise.reject(error)
@@ -53,7 +70,7 @@ function getToken() {
   if (token) {
     return token
   } else {
-    return false 
+    return false
   }
 }
 let pass = true;
@@ -74,22 +91,23 @@ service.interceptors.response.use(res => {
       return Promise.reject(new Error(msg))
     } else {
       return res.data
-    }  
-    console.log(res); 
+    }
+    console.log(res);
   },
   error => {
     let {
       message
-    } = error;  
+    } = error;
+    console.log(message)
     if (message == 'Request failed with status code 401') {
-      // let token = localStorage.getItem('token');
-      // if(token){
-      //   message = '登入过期，请重新登入' 
-      // } else {
-      //   message = '尚未登入，请登入'
-      // }
-      // router.push('/login') 
-      if(pass){ 
+      let token = localStorage.getItem('token');
+      if(token){
+        message = '登入过期，请重新登入' 
+      } else {
+        message = '尚未登入，请登入'
+      }
+      router.push('/login') 
+      if (pass) {
         pass = false;
         // MessageBox.confirm(
         //   '登录状态已过期，您可以继续留在该页面，或者重新登录',
@@ -103,31 +121,34 @@ service.interceptors.response.use(res => {
         //     router.push('/login')
         // })
         localStorage.clear();
-            router.push('/login')
-      } else {
-        setTimeout(function(){
+        router.push('/login')
+        setTimeout(function () {
           pass = true;
-        },2000)
+        }, 2000)
+      } else {
+        setTimeout(function () {
+          pass = true;
+        }, 2000)
       }
-      
+
     } else if (message == "Network Error") {
       message = "后端接口连接异常";
     } else if (message.includes("timeout")) {
       message = "系统接口请求超时";
     } else if (message.includes("Request failed with status code")) {
-      if(error.response.data.message){
+      if (error.response.data.message) {
         message = error.response.data.message
       } else {
         message = "系统接口" + message.substr(message.length - 3) + "异常";
-      } 
+      }
     }
-    if(pass){
+    if (pass) {
       Message({
         message: message,
         type: 'error',
         duration: 5 * 1000
       })
-    } 
+    }
     return Promise.reject(error)
   }
 )

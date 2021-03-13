@@ -19,16 +19,16 @@
         <span
           class="sail-app-status-tag"
           :class="
-            status == 1
+            plugStatus == 1
               ? 'sail-app-status-tag-open'
               : 'sail-app-status-tag-close'
           "
-          >{{ status == 1 ? "已开启" : "未开启" }}</span
+          >{{ plugStatus == 1 ? "已开启" : "未开启" }}</span
         >
       </span>
       <span class="options">
-        <el-button>关闭</el-button>
-        <el-button>配置</el-button>
+        <el-button @click.stop="IsOpen">{{plugStatus == 1 ? "关闭" : "开启"}}</el-button>
+        <!-- <el-button>配置</el-button> -->
       </span>
     </h1>
     <div class="content">
@@ -69,8 +69,9 @@
           </div>
         </template>
         <!-- 筛选星级 -->
-        <template v-else>
+        <template v-else >
           <span
+            @change="CheckAll"
             ><el-checkbox
               :indeterminate="!isCheckAll"
               v-model="isCheckAll"
@@ -114,6 +115,7 @@
         :default-sort="{ prop: 'num', order: 'descending' }"
         @rowClick="ToDetail"
         @BatchOption="BatchOption"
+        @resultData="InitStatus"
       >
         <el-table-column
           v-for="(item, index) in tableHeader"
@@ -192,11 +194,11 @@
             <!-- 操作 -->
             <template v-else-if="item.prop == 'option'">
               <template v-if="requestUrl == '/api/yxStoreProductReplyAll'">
-                <span
+                <!-- <span
                   class="textBtn"
                   @click.stop="Option(scope.row, 'important')"
                   >速卖通导入</span
-                >
+                > -->
                 <span class="textBtn" @click.stop="Option(scope.row, 'review')"
                   >预览</span
                 >
@@ -325,14 +327,14 @@
 <script>
 import tableTem from "@/components/tableTem";
 import { edit, getCates } from "@/api/yxStoreCategory";
-import { reviewComment, del, editMainStatus } from "@/api/comment";
+import { reviewComment, del, editMainStatus,isOpen } from "@/api/comment";
 export default {
   components: {
     tableTem,
   },
   data() {
     return {
-      status: 1,
+      plugStatus: 1,
       nav: [
         {
           id: 0,
@@ -435,13 +437,30 @@ export default {
         },
       ],
     };
-  },
-  created() {},
+  }, 
   methods: {
+    // 控制当前店铺评论状态
+    IsOpen:function(){
+      let status = this.plugStatus == 1?0:1
+      let par = {
+        isOpen:status
+      }
+      isOpen(par).then(res=>{ 
+        this.$message.success('修改成功')
+        this.plugStatus == 1?this.plugStatus = 0:this.plugStatus = 1
+      })
+    },
+    // 查看当前店铺评论状态
+    InitStatus:function(res){ 
+      if(this.active == 0){
+        this.plugStatus = Number(res.isOpen)
+      }
+    },
     // 查询评论类别
     ChangeActive: function (index) {
       this.active = index;
-      this.requestParams.status = this.nav[index].id;
+      this.requestParams.status = this.nav[index].id; 
+      console.log(this.plugStatus)
       switch (index) {
         case 0:
           this.requestUrl = "/api/yxStoreProductReplyAll";
@@ -592,7 +611,7 @@ export default {
     // 单个评论操作
     Option: function (detail, status) {
       let that = this;
-      this.itemDetail = detail;
+      this.itemDetail = detail; 
       if (this.requestUrl == "/api/yxStoreProductReplyAll") {
         let type = status;
         switch (type) {
@@ -601,6 +620,8 @@ export default {
             break;
           case "review":
             // 跳转到预览链接
+            let url = 'https://' + localStorage.getItem('storeUrl') + '/product-details.html?id=' +  detail.id
+            window.open(url, '_blank') 
             break;
           case "status":
             let par = {
@@ -627,12 +648,10 @@ export default {
             });
             break;
           case "del":
-            this.$DelTip(function () {
-              del([par]).then((res) => {
-                this.$message.success("操作成功");
-                  this.isRefresh += 1;
+            del([par]).then((res) => {
+                that.$message.success("操作成功");
+                  that.isRefresh += 1;
               });
-            });
             break;
         }
       }

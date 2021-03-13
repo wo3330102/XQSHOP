@@ -3,27 +3,22 @@ import ElementUI, { MessageBox } from 'element-ui';
 import App from './App.vue'
 import router from './router'
 import store from './store'
+import enums from './utils/enums'
 import 'element-ui/lib/theme-chalk/index.css';
-import './element-variables.scss';
-Vue.use(ElementUI)
+import './element-variables.scss'; 
 Vue.prototype.$ELEMENT = {
   size: 'medium'
-}; 
+};  
 localStorage.setItem('uploadUrl',process.env.VUE_APP_BASE_API)//'http://192.168.8.254:8001/admin')//)
-// Vue.prototype.$msgbox = MessageBox;
-// Vue.prototype.$alert = MessageBox.alert;
-// Vue.prototype.$confirm = MessageBox.confirm;
-// Vue.prototype.$message = Message;
-// Vue.prototype.$loading = Loading.service;
 
 // 无限滚动（下拉加载）
 import infiniteScroll from "vue-infinite-scroll";
 Vue.use(infiniteScroll);
-
+Vue.prototype.$enums=enums
 // 强制保留两位小数
 Vue.prototype.$toDecimal2 = function (x) {
   var f = parseFloat(x);
-  if (isNaN(f)) {
+  if (isNaN(f) || f<0) {
     return false;
   }
   var f = Math.round(x * 100) / 100;
@@ -39,11 +34,10 @@ Vue.prototype.$toDecimal2 = function (x) {
   return s;
 };
 // 判断是否为数字类型
-Vue.prototype.$IsNaN = function (e) {
-  console.log(e);
+Vue.prototype.$IsNaN = function (e) { 
   if(e){
-    if (isNaN(e)) {
-      return e = '';
+    if (isNaN(e) || e<0) {
+      return e = '0.00';
     } else {
       var f = parseFloat(e);
       if (isNaN(f)) {
@@ -64,8 +58,15 @@ Vue.prototype.$IsNaN = function (e) {
   }
 }
 // 全局跳转
-Vue.prototype.$NavgitorTo = function (path) {
-  this.$router.push(path)
+Vue.prototype.$NavgitorTo = function (path,par = false) {
+  if(par){
+    router.push({
+    path:path,
+    query:par
+    })
+  } else {
+    router.push(path)
+  }
 }
 // 删除操作的提示
 Vue.prototype.$DelTip = function(cb){ 
@@ -79,9 +80,15 @@ Vue.prototype.$DelTip = function(cb){
     return false;
   });
 }
+// 货币符号
+Vue.prototype.currency = {
+  s:'₱',
+  n:'PHP'
+} 
 
-new Vue({
+new Vue({ 
   router,
   store,
+
   render: h => h(App)
 }).$mount('#app')

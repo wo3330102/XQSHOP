@@ -74,13 +74,13 @@
                 @change="DiscountPrice"
                 v-if="detail.discountType === 0"
                 size="medium" 
-                
+                @blur="detail.discountMoney = $IsNaN(detail.discountMoney)"
                 :maxlength="discountTypeValueOfInfomation[0].maxlength"
                 :placeholder="discountTypeValueOfInfomation[0].placeholder"
                 style="flex: 1"
               >
                 <span slot="prefix" style="line-height: 36px; margin-left: 3px"
-                  >$</span
+                  >{{currency.s}}</span
                 >
                 <span slot="prepend">{{
                   discountTypeValueOfInfomation[0].prepend
@@ -182,7 +182,7 @@
                   <span
                     slot="prefix"
                     style="line-height: 36px; margin-left: 3px"
-                    >$</span
+                    >{{currency.s}}</span
                   >
                 </el-input>
                 <span
@@ -287,9 +287,9 @@
                       v-if="detail.discountMoney || detail.discountQuota"
                     >
                       <template v-if="detail.discountType === 0">
-                        减免${{ detail.discountMoney }}
+                        减免{{currency.s+ detail.discountMoney }}
                         <span class="en"
-                          >(${{ detail.discountMoney }} off)</span
+                          >({{ currency.s + detail.discountMoney }} off)</span
                         >
                       </template>
                       <template v-if="detail.discountType === 1">
@@ -309,9 +309,9 @@
                 <p style="margin-bottom: 22px" v-show="detail.effectMoney">
                   <span class="title">生效条件</span>
                   <span class="text">
-                    最低消费金额$ {{ detail.effectMoney }}
+                    最低消费金额 {{currency.s+ detail.effectMoney }}
                     <span class="en"
-                      >(Mininum purchase of ${{ detail.effectMoney }})</span
+                      >(Mininum purchase of {{currency.s+ detail.effectMoney }})</span
                     >
                   </span>
                 </p>
@@ -340,11 +340,11 @@
                 <dd>使用次数</dd>
               </dl>
               <dl>
-                <dt>${{ detail.discountTotal || 0.0 }}</dt>
+                <dt>{{currency.s}}{{$IsNaN(detail.discountTotal) || '0.00' }}</dt>
                 <dd>优惠金额</dd>
               </dl>
               <dl>
-                <dt>${{ detail.saleTotal || 0.0 }}</dt>
+                <dt>{{currency.s}}{{$IsNaN(detail.saleTotal) ||'0.00' }}</dt>
                 <dd>销售总额</dd>
               </dl>
             </div>
@@ -662,6 +662,9 @@ export default {
       } else {
         this.isAutoApplyOffers = true;
       }
+      console.log(detail)
+      detail.discountMoney = this.$IsNaN(detail.discountMoney)
+      detail.effectMoney = this.$IsNaN(detail.effectMoney)
       this.detail = detail;
       this.disabled = true;
     }
@@ -1103,20 +1106,20 @@ h1 {
   display: flex;
   justify-content: space-between;
 }
-.small-img {
-  display: inline-block;
-  vertical-align: middle;
-  width: 50px;
-  height: 50px;
-  border-radius: 4px;
-  border: 1px solid #dadde4;
-  background-color: #f7f8fd;
-  background-origin: content-box;
-  background-position: 50% 50%;
-  background-size: contain;
-  background-repeat: no-repeat;
-  overflow: hidden;
-}
+// .small-img {
+//   display: inline-block;
+//   vertical-align: middle;
+//   width: 50px;
+//   height: 50px;
+//   border-radius: 4px;
+//   border: 1px solid #dadde4;
+//   background-color: #f7f8fd;
+//   background-origin: content-box;
+//   background-position: 50% 50%;
+//   background-size: contain;
+//   background-repeat: no-repeat;
+//   overflow: hidden;
+// }
 /deep/.el-input-group__prepend {
   background: #fff;
 }

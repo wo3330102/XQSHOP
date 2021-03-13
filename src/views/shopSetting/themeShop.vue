@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <h1 class="title">
-      <span>设置</span>
+      <span>模版商城</span>
     </h1>
     <div class="themeList" v-if="show">
       <dl
@@ -11,7 +11,7 @@
         class="theme"
       >
         <dt class="img"> 
-          <img :src="item.pcImage || ''" class="web" />
+          <img :src="item.pcImage" class="web img-scale" />
         </dt>
         <dd class="desc">
           <h3>{{ item.name }}</h3>
@@ -34,7 +34,7 @@
             />
             <img
               class="phone"
-              src="https://ddd.xshoppy.shop/static/img/phone.png"
+              src="@/static/small-phone.png"
             />
           </div>
         </div>
@@ -72,6 +72,7 @@ import { getStoreTemplate } from "@/api/home.js";
 import {getShopById,changeTem} from '@/api/yxSystemStore';
 
 export default {
+  name: "ThemeShop",
   data() {
     return {
       themeList: [{
@@ -87,16 +88,16 @@ export default {
       title: "",
       index: 0,
       detail:{},
-      show:false
+      show:false,
     };
   },
   created() {
     let id = localStorage.getItem('storeId');
     let that = this;
     getStoreTemplate().then((obj) => {
-      let object = obj.content;
+      let object = obj.data.content;
       that.show = true; 
-      getShopById(id).then(res=>{ 
+      getShopById(id).then(res=>{
       if(res.tempId){
         object.map(i=>{ 
           if(i.id == res.tempId){ 
@@ -136,6 +137,13 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.img-scale {
+  transform: scale(1);
+  transition: transform 1s ease 0s;
+}
+.img-scale:hover {
+  transform: scale(1.14);
+} 
 h1 {
   font-size: 24px;
   margin: 0 0 12px;

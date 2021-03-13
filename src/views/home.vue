@@ -19,7 +19,7 @@
           active-text-color="#8b99f0"
           unique-opened
           router
-          style="overflow:auto"
+          style="overflow: auto"
         >
           <el-menu-item index="/">
             <i class="el-icon-s-home"></i>
@@ -63,7 +63,8 @@
               <el-menu-item index="/activity">优惠活动</el-menu-item>
               <el-menu-item index="/discount">梯度优惠</el-menu-item>
               <el-menu-item index="/share">激励分享</el-menu-item>
-              <!-- <el-menu-item index="/seckill">秒杀产品</el-menu-item> -->
+              <!-- <el-menu-item index="/coupon">优惠券</el-menu-item>
+              <el-menu-item index="/seckill">秒杀产品</el-menu-item> -->
             </el-menu-item-group>
           </el-submenu>
           <el-menu-item index="/appHome">
@@ -76,7 +77,7 @@
               <span>店铺管理</span>
             </template>
             <el-menu-item-group>
-              <el-menu-item index="/themeShop">店铺装修</el-menu-item>
+              <!-- <el-menu-item index="/decorationManage">店铺装修</el-menu-item> -->
               <el-menu-item index="/homeSwiper">首页轮播图</el-menu-item>
               <el-menu-item index="/pageManage">页面管理</el-menu-item>
               <el-menu-item index="/menuManage">菜单栏</el-menu-item>
@@ -150,10 +151,12 @@
 </template>
 <script>
 import { getInfo } from "@/api/login";
-import { getShop,getShopId } from "@/api/yxSystemStore"; 
+import { getShop, getShopId } from "@/api/yxSystemStore";
+let loadin;
 export default {
   name: "home",
   data() {
+    
     return {
       userName: "admin",
       transitionName: "fade",
@@ -163,32 +166,47 @@ export default {
       storeId: "",
       storeList: [],
       isRouterAlive: true,
-      pageLoading:false,
+      pageLoading: false, 
     };
-  },  
+  },
   watch: {
-    "$store.state.url"(val) { 
+    "$store.state.url"(val) {
       this.openUrl = val;
       this.reload();
     },
     "$store.state.reflash"(val) {
-      if(val){
-        this.$store.commit("isRefresh", false); 
+      if (val) {
+        this.$store.commit("isRefresh", false);
         this.reload();
       }
     },
-
+  },
+  beforeCreate() {
+    loadin = this.$loading({
+      lock: true,
+      text: "Loading",
+      spinner: "el-icon-loading",
+      background: "rgba(0, 0, 0, 0.7)",
+    });
   },
   created() {
     // 获取用户信息
-    getInfo()
+    console.log('第一次加载')
+
+    if(localStorage.getItem('token')){
+      getInfo()
       .then((res) => {
+        loadin.close();
         this.pageLoading = true;
         this.userName = res.username;
       })
       .catch(() => {
+        loadin.close();
         // this.$router.push("/login");
       });
+    } else {
+      loadin.close();
+    }
     // 获取店铺
     const storeId = localStorage.getItem("storeId");
     // getShop().then((res) => {
@@ -204,15 +222,16 @@ export default {
     //     this.storeId = res.content[0].name;
     //   }
     // });
-    getShopId().then(res=>{
-      this.storeId = res.storeID
-      localStorage.setItem("storeId", res.storeID);
-      localStorage.setItem("storeUrl",res.storeUrl);
-    }).catch(res=>{
-      localStorage.clear();
-      this.$router.push('/login')
-
-    })
+    getShopId()
+      .then((res) => {
+        this.storeId = res.storeID;
+        localStorage.setItem("storeId", res.storeID);
+        localStorage.setItem("storeUrl", res.storeUrl);
+      })
+      .catch((res) => {
+        localStorage.clear();
+        this.$router.push("/login");
+      });
     // 设置当前路由
     let path = localStorage.getItem("router-path");
     if (path) {
@@ -225,23 +244,25 @@ export default {
       switch (index) {
         case "2":
           // this.$store.commit("setUrl", "/order");
-          this.openUrl = '/order';
+          this.openUrl = "/order";
           this.$router.push("/order");
           break;
         case "3":
           // this.$store.commit("setUrl", "/commodityList");
-          this.openUrl = '/commodityList';
+          this.openUrl = "/commodityList";
           this.$router.push("/commodityList");
           break;
         case "4":
           // this.$store.commit("setUrl", "/activity");
-          this.openUrl = '/activity';
+          this.openUrl = "/activity";
           this.$router.push("/activity");
           break;
         case "5":
           // this.$store.commit("setUrl", "/themeShop");
-          this.openUrl = '/themeShop';
-          this.$router.push("/themeShop");
+          // this.openUrl = '/decorationManage';
+          // this.$router.push("/decorationManage");
+          this.openUrl = "/homeSwiper";
+          this.$router.push("/homeSwiper");
       }
     },
     Command: function (e) {
@@ -258,7 +279,7 @@ export default {
       this.reload();
     },
     reload() {
-      this.isRouterAlive = false; 
+      this.isRouterAlive = false;
       this.$nextTick(function () {
         this.isRouterAlive = true;
       });
@@ -350,28 +371,7 @@ export default {
     .avatar {
       margin-right: 10px;
     }
-  }
-  .router-view {
-    flex: 1;
-    padding: 10px;
-    overflow: auto;
-    /*滚动条样式*/
-    &::-webkit-scrollbar {
-      /*滚动条整体样式*/
-      width: 6px;
-      margin-right: 2px;
-    }
-    &::-webkit-scrollbar-thumb {
-      /*滚动条里面小方块*/
-      border-radius: 5px;
-      background: #d5d5e6;
-    }
-    &::-webkit-scrollbar-track {
-      /*滚动条里面轨道*/
-      border-radius: 6px;
-      background: #f5f5f9;
-    }
-  }
+  } 
 }
 .fade-enter-active,
 .fade-leave-active {

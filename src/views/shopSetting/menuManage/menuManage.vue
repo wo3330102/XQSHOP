@@ -93,7 +93,11 @@ export default {
       };
       changeMenuBarStatus(par).then((res) => {
         this.init();
-        this.$message.success('修改成功')
+        if(res.status == 5101){
+          this.$message.warning(res.msg)
+        } else {
+          this.$message.success('修改成功')
+        }
       }).catch(res=>{
         this.init(); 
       });

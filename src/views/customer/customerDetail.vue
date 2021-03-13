@@ -64,7 +64,7 @@
             <div class="item">
               <div class="left">总花费</div>
               <div class="right">
-                <span>{{ detail.sumMoney ? "$" + detail.sumMoney : "$0.00" }}</span>
+                <span>{{ detail.sumMoney ? currency.s + detail.sumMoney : currency.s+"0.00" }}</span>
               </div>
             </div>
           </div>
@@ -114,11 +114,11 @@
                       </td>
                       <td width="110">{{ item.cartInfo[0].cartNum }}</td>
                       <td width="100" align="right">
-                        {{ "$" + item.cartInfo[0].truePrice }} *
+                        {{ currency.s + item.cartInfo[0].truePrice }} *
                         {{ item.cartInfo[0].cartNum }}
                       </td>
                       <td width="80" align="right" style="padding-right: 0px">
-                        {{ "$" + item.payPrice }}
+                        {{ currency.s + item.payPrice }}
                       </td>
                     </tr>
                   </tbody>
@@ -390,20 +390,20 @@ h1 {
         vertical-align: top;
         color: #1c1f32;
         border-collapse: collapse;
-        .small-img {
-          display: inline-block;
-          vertical-align: middle;
-          width: 50px;
-          height: 50px;
-          border-radius: 4px;
-          border: 1px solid #dadde4;
-          background-color: #f7f8fd;
-          background-origin: content-box;
-          background-position: 50% 50%;
-          background-size: contain;
-          background-repeat: no-repeat;
-          overflow: hidden;
-        }
+        // .small-img {
+        //   display: inline-block;
+        //   vertical-align: middle;
+        //   width: 50px;
+        //   height: 50px;
+        //   border-radius: 4px;
+        //   border: 1px solid #dadde4;
+        //   background-color: #f7f8fd;
+        //   background-origin: content-box;
+        //   background-position: 50% 50%;
+        //   background-size: contain;
+        //   background-repeat: no-repeat;
+        //   overflow: hidden;
+        // }
       }
     }
   }

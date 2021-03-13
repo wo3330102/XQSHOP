@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-
 Vue.use(VueRouter)
 const routes = [{
   path: '/',
@@ -81,6 +80,10 @@ const routes = [{
       path: '/dataCenter',
       name: 'DataCenter',
       component: () => import( /* webpackChunkName: "about" */ '../views/dataCenter/dataCenter.vue'),
+    }, {
+      path: '/dataCenterDetail',
+      name: 'DataCenterDetail',
+      component: () => import( /* webpackChunkName: "about" */ '../views/dataCenter/dataCenterDetail.vue'),
     }]
   }, {
     path: 'discount',
@@ -111,82 +114,126 @@ const routes = [{
       path: '/editShare',
       name: 'EditShare',
       component: () => import( /* webpackChunkName: "about" */ '../views/marketing/share/editShare.vue'),
+    }, {
+      path: '/coupon',
+      name: 'Coupon',
+      component: () => import( /* webpackChunkName: "about" */ '../views/marketing/coupon/coupon.vue'),
     }, ]
   }, {
     path: 'appHome',
     name: '应用管理',
     component: () => import( /* webpackChunkName: "home" */ '../views/Main.vue'),
     children: [{
-      path: '/appHome',
-      name: 'AppHome',
-      component: () => import( /* webpackChunkName: "about" */ '../views/appHome/appHome.vue'),
-    }, {
-      path: '/comment',
-      name: 'Comment',
-      component: () => import( /* webpackChunkName: "about" */ '../views/appHome/comment/comment.vue'),
-    }, {
-      path: '/commentDetail',
-      name: 'CommentDetail',
-      component: () => import( /* webpackChunkName: "about" */ '../views/appHome/comment/commentDetail.vue'),
-    }, {
-      path: '/shippingInsurance',
-      name: 'ShippingInsurance',
-      component: () => import( /* webpackChunkName: "about" */ '../views/appHome/shippingInsurance.vue'),
-    }, {
-      path: '/recommend',
-      name: 'Recommend',
-      component: () => import( /* webpackChunkName: "about" */ '../views/appHome/recommend/recommend.vue'),
-    }, {
-      path: '/recommendOption',
-      name: 'RecommendOption',
-      component: () => import( /* webpackChunkName: "about" */ '../views/appHome/recommend/recommendOption.vue'),
-    }]
+        path: '/appHome',
+        name: 'AppHome',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/appHome.vue'),
+      }, {
+        path: '/comment',
+        name: 'Comment',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/comment/comment.vue'),
+      }, {
+        path: '/commentDetail',
+        name: 'CommentDetail',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/comment/commentDetail.vue'),
+      }, {
+        path: '/shippingInsurance',
+        name: 'ShippingInsurance',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/shippingInsurance.vue'),
+      }, {
+        path: '/recommend',
+        name: 'Recommend',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/recommend/recommend.vue'),
+      }, {
+        path: '/recommendOption',
+        name: 'RecommendOption',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/recommend/recommendOption.vue'),
+      }, {
+        path: '/facebookPixel',
+        name: 'FacebookPixel',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/facebookPixel.vue'),
+      }, {
+        path: '/combinationProduct',
+        name: 'CombinationProduct',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/combinationProduct/combinationProduct.vue'),
+      },{
+        path: '/combinationDetail',
+        name: 'CombinationDetail',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/combinationProduct/combinationDetail.vue'),
+      },{
+        path: '/combinationOption',
+        name: 'CombinationOption',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/combinationProduct/combinationOption.vue'),
+      },{
+        path: '/limitedProduct',
+        name: 'LimitedProduct',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/limitedProduct/limitedProduct.vue'),
+      },{
+        path: '/limitedProductOption',
+        name: 'LimitedProductOption',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/limitedProduct/limitedProductOption.vue'), 
+      },{
+        path: '/copyStore',
+        name: 'CopyStore',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/copyStore/copyStore.vue'), 
+      },{
+        path: '/copyDetail',
+        name: 'copyDetail',
+        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/copyStore/copyDetail.vue'), 
+      }
+      
+    ]
   }, {
     path: 'shopSetting',
     name: '店铺管理',
-    redirect: '/themeShop',
+    redirect: '/decorationManage',
     component: () => import( /* webpackChunkName: "home" */ '../views/Main.vue'),
     children: [{
-      path: '/themeShop',
-      name: 'ThemeShop',
-      component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/themeShop.vue'),
-    }, {
-      path: '/pageManage',
-      name: 'PageManage',
-      component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/pageManage/pageManage.vue'),
-    }, {
-      path: '/addPage',
-      name: 'AddPage',
-      component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/pageManage/addPage.vue'),
-    }, {
-      path: '/menuManage',
-      name: 'MenuManage',
-      component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/menuManage/menuManage.vue'),
-    }, {
-      path: '/addMenu',
-      name: 'AddMenu',
-      component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/menuManage/addMenu.vue'),
-    }, {
-      path: '/trackSettings',
-      name: 'TrackSettings',
-      component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/trackSettings.vue'),
-    }, {
-      path: '/domainSettings',
-      name: 'DomainSettings',
-      component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/domainSettings.vue'),
-    }, {
-      path: '/homePageSeo',
-      name: 'HomePageSeo',
-      component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/homePageSeo.vue'),
-    }, {
-      path: '/homeSwiper',
-      name: 'HomeSwiper',
-      component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/homeSwiper/homeSwiper.vue'),
-    }, {
-      path: '/editHomeSwiper',
-      name: 'EditHomeSwiper',
-      component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/homeSwiper/editHomeSwiper.vue'),
-    }, ]
+        path: '/decorationManage',
+        name: 'DecorationManage',
+        component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/decorationManage.vue'),
+      },
+      {
+        path: '/themeShop',
+        name: 'ThemeShop',
+        component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/themeShop.vue'),
+      }, {
+        path: '/pageManage',
+        name: 'PageManage',
+        component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/pageManage/pageManage.vue'),
+      }, {
+        path: '/addPage',
+        name: 'AddPage',
+        component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/pageManage/addPage.vue'),
+      }, {
+        path: '/menuManage',
+        name: 'MenuManage',
+        component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/menuManage/menuManage.vue'),
+      }, {
+        path: '/addMenu',
+        name: 'AddMenu',
+        component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/menuManage/addMenu.vue'),
+      }, {
+        path: '/trackSettings',
+        name: 'TrackSettings',
+        component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/trackSettings.vue'),
+      }, {
+        path: '/domainSettings',
+        name: 'DomainSettings',
+        component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/domainSettings.vue'),
+      }, {
+        path: '/homePageSeo',
+        name: 'HomePageSeo',
+        component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/homePageSeo.vue'),
+      }, {
+        path: '/homeSwiper',
+        name: 'HomeSwiper',
+        component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/homeSwiper/homeSwiper.vue'),
+      }, {
+        path: '/editHomeSwiper',
+        name: 'EditHomeSwiper',
+        component: () => import( /* webpackChunkName: "about" */ '../views/shopSetting/homeSwiper/editHomeSwiper.vue'),
+      },
+    ]
   }, {
     path: 'setting',
     name: '设置',
@@ -208,6 +255,10 @@ const routes = [{
       path: '/settingLogistics',
       name: 'SettingLogistics',
       component: () => import( /* webpackChunkName: "about" */ '../views/setting/logisticsManagement/settingLogistics.vue'),
+    }, {
+      path: '/commonLogistics',
+      name: 'CommonLogistics',
+      component: () => import( /* webpackChunkName: "about" */ '../views/setting/logisticsManagement/commonLogistics.vue'),
     }, {
       path: '/notice',
       name: 'Notice',
@@ -245,18 +296,20 @@ const routes = [{
       name: 'PolicyClauses',
       component: () => import( /* webpackChunkName: "about" */ '../views/setting/policyClauses.vue'),
     }]
-  },
-   {
-    path: '/test',
-    name: 'Test',
-    component: () => import( /* webpackChunkName: "about" */ '../views/test.vue'),
-  }
-]
+  }]
+}, {
+  path: '/test',
+  name: 'Test',
+  component: () => import( /* webpackChunkName: "about" */ '../views/test.vue'),
 }, {
   path: '/login',
   name: 'Login',
   component: () => import( /* webpackChunkName: "about" */ '../views/login.vue'),
-}]
+}, {
+  path: '/decoration',
+  name: 'decoration',
+  component: () => import( /* webpackChunkName: "decoration" */ '../views/shopSetting/decoration/index'),
+}, ]
 
 const router = new VueRouter({
   mode: 'history',
@@ -276,13 +329,13 @@ router.beforeEach((to, from, next) => {
     next();
     return
   }
+  next();
   // 判断当前是否含有token
-  if (token) {
-    localStorage.setItem('router-path', to.path)
-    next();
-  } else {
-    next('/login') // 否则全部重定向到登录页 
-  }
+  // if (token) {
+  //   localStorage.setItem('router-path', to.path)
+  //   next();
+  // } else {
+  //   // next('/login') // 否则全部重定向到登录页 
+  // }
 })
-
 export default router

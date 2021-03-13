@@ -41,7 +41,7 @@
             }}</span>
             <span v-else-if="item.prop == 'discountType'">{{
               scope.row.discountType === 0
-                ? "减免$" + scope.row.discountMoney
+                ? "减免"+currency.s + scope.row.discountMoney
                 : scope.row.discountType === 1
                 ? "减" + scope.row.discountQuota + "%"
                 : "免运费"

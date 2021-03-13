@@ -1,58 +1,6 @@
 $--color-primary: #34395d;
 $--font-path: '~element-ui/lib/theme-chalk/fonts';
-@import "~element-ui/packages/theme-chalk/src/index";
-
-// .el-button--primary {
-//     color: #fff;
-//     background-color: #34395d;
-//     border-color: #34395d;
-// }
-
-// .el-button:focus,
-// .el-button:hover {
-//     color: #34395d;
-//     border-color: #c2c4ce;
-//     background-color: #ebebef;
-// }
-
-// .el-button--primary:hover {
-//     color: #f2f3fa;
-//     background-color: #2d3259;
-//     border-color: #2d3259;
-// }
-
-// .el-radio__input.is-checked+.el-radio__label {
-//     color: #34395d;
-// }
-
-// .el-button--primary.is-disabled,
-// .el-button--primary.is-disabled:active,
-// .el-button--primary.is-disabled:focus,
-// .el-button--primary.is-disabled:hover {
-//     color: hsla(0, 0%, 100%, .7);
-//     background-color: #b0b7e6;
-//     border-color: #b0b7e6;
-// }  
-
-// .el-dialog,
-// .el-message-box {
-//     width: 640px !important;
-// }
-
-
-
-// .el-input-group__append,
-// .el-input-group__prepend {
-//     padding: 0 14px;
-// }
-
-// .el-input-group__append button.el-button {
-//     color: #000;
-// }
-
-// .el-input--prefix .el-input__inner {
-//     padding-left: 20px;
-// }
+@import "~element-ui/packages/theme-chalk/src/index"; 
 
 .el-input__inner {
     padding: 0 8px;
@@ -70,7 +18,7 @@ $--font-path: '~element-ui/lib/theme-chalk/fonts';
     position: absolute;
     top: 0;
     left: 0;
-}
+} 
 
 .el-message-box .el-message-box__content {
     padding: 40px;
@@ -91,6 +39,10 @@ $--font-path: '~element-ui/lib/theme-chalk/fonts';
 .el-table--enable-row-transition .el-table__body td{
     height: 70px;
     box-sizing: border-box;
+}
+
+.el-dialog{
+    width: 640px;
 }
 
 .el-dialog__body,
@@ -121,9 +73,10 @@ $--font-path: '~element-ui/lib/theme-chalk/fonts';
     background-color: #ffffff;
 }
 
-.el-input-group__append {
-    background: #fff;
-    color: #000000;
+.el-input-group__append,.el-input-group__prepend{
+    background: #fff !important;
+    color: #000000 !important;
+    padding: 0 15px;
 }
 
 .el-checkbox__inner::after {

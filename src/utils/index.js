@@ -405,3 +405,44 @@ export function downloadFile(obj, name, suffix) {
   link.click()
   document.body.removeChild(link)
 }
+
+//判断字符串是否为空
+export function isEmpty(str){
+  if(typeof str == "undefined" || str == null || str == ""){
+      return true
+  }else{
+      return false
+  }
+}
+
+//判断字符串是否是json格式
+export function isJSON(str) {
+  if (typeof str == 'string') {
+      try {
+          var obj = JSON.parse(str)
+          if(typeof obj == 'object' && obj ){
+              return true;
+          }else{
+              return false;
+          }
+
+      } catch(e) {
+          return false;
+      }
+  }
+  
+  return false;
+}
+
+// 判断是否为空对象
+export function isEmptyObj(obj) {
+  for (var i in obj) { // 如果不为空，则会执行到这一步，返回true
+    return false
+  }
+  return true 
+}
+// 合法的url
+export function validateURL() {
+  const urlregex = /^(https|http|ftp)?:\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
+  return urlregex.test(textval);
+} 

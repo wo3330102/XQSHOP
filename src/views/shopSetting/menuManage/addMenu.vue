@@ -107,9 +107,7 @@ export default {
       this.id = this.$route.query.id
       this.detail = JSON.parse(localStorage.getItem('menuDetail'))
       this.selectData = this.detail.menuItems
-    } else {
-      
-    }
+    } 
   },
   methods: { 
     DelMenu:function(index){   
@@ -139,17 +137,15 @@ export default {
         this.$message.error('请选择菜单项')
         return false
         
-      }
-      console.log(this.selectData)
-      this.detail.menuItems = this.selectData
-      console.log(this.detail)
+      } 
+      this.detail.menuItem = JSON.stringify(this.selectData);
+      this.detail.menuItems = this.selectData 
       if(this.id){
         edit(this.detail).then(res=>{
           this.$message.success('修改成功')
           this.$router.push('/menuManage')
         })
-      } else {
-        console.log('新增')
+      } else { 
         add(this.detail).then(res=>{
           this.$message.success('新增成功'),
           this.$router.push('/menuManage')

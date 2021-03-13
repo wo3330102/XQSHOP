@@ -14,10 +14,8 @@
     </div> 
   </div>
 </template>
-<script>
-import pic1 from '@/assets/img/settings/accout.png' 
-export default {
-	
+<script> 
+export default { 
   data() {
     let url = "http://ddd.xshoppy.shop";
     // let url = "@/assets/img/settings"; 
@@ -25,7 +23,7 @@ export default {
       settingList: [
         {
           id: 1,
-          icon: pic1,
+          icon: url + '/static/img/settings/accout.png',
           title: "基础信息",
           tip: "设置店铺的基础信息",
           url: "/userInfo",
@@ -44,13 +42,13 @@ export default {
           tip: "自动发送给客户通知",
           url: "/notice",
         },
-        {
-          id: 4,
-          icon: url + "/static/img/settings/accout.png",
-          title: "账户管理",
-          tip: "管理你的登录密码",
-          url: "/updataPassword",
-        },
+        // {
+        //   id: 4,
+        //   icon: url + "/static/img/settings/accout.png",
+        //   title: "账户管理",
+        //   tip: "管理你的登录密码",
+        //   url: "/updataPassword",
+        // },
         {
           id: 5,
           icon: url + "/static/img/settings/mode_of_payment.png",
@@ -58,27 +56,27 @@ export default {
           tip: "可同时支持Paypal和信用卡供顾客选择",
           url: "/paymentType",
         },
-        {
-          id: 6,
-          icon: url + "/static/img/settings/checkout-setting.png",
-          title: "结账设置",
-          tip: "自定义客人结账时的流程",
-          url: "/checkoutSetting",
-        },
-        {
-          id: 7,
-          icon: url + "/static/img/settings/paid-bills.png",
-          title: "账单",
-          tip: "支持查看你的店铺出账，绑定自动续费，核对账单信息",
-          url: "",
-        },
-        {
-          id: 8,
-          icon: url + "/static/img/settings/employees.svg",
-          title: "员工账号",
-          tip: "支持配置员工账号，管理员工在店铺中可查看的内容或执行的操作",
-          url: "",
-        },
+        // {
+        //   id: 6,
+        //   icon: url + "/static/img/settings/checkout-setting.png",
+        //   title: "结账设置",
+        //   tip: "自定义客人结账时的流程",
+        //   url: "/checkoutSetting",
+        // },
+        // {
+        //   id: 7,
+        //   icon: url + "/static/img/settings/paid-bills.png",
+        //   title: "账单",
+        //   tip: "支持查看你的店铺出账，绑定自动续费，核对账单信息",
+        //   url: "",
+        // },
+        // {
+        //   id: 8,
+        //   icon: url + "/static/img/settings/employees.svg",
+        //   title: "员工账号",
+        //   tip: "支持配置员工账号，管理员工在店铺中可查看的内容或执行的操作",
+        //   url: "",
+        // },
         {
           id: 9,
           icon: url + "/static/img/settings/policyClauses.svg",
