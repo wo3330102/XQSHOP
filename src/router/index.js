@@ -336,8 +336,8 @@ router.beforeEach((to, from, next) => {
   if (Object.is(to.name, 'Login')) {
     next();
     return
-  }
-  next();
+  } 
+  next(); 
   // 判断当前是否含有token
   // if (token) {
   //   localStorage.setItem('router-path', to.path)

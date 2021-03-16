@@ -55,7 +55,10 @@
           <div class="box">
             <h3 class="title">
               商品列表
-              <span class="option" v-show="tableData.length<2" @click="shopDialog = true"
+              <span
+                class="option"
+                v-show="tableData.length < 2"
+                @click="shopDialog = true"
                 >添加组合商品</span
               >
             </h3>
@@ -75,15 +78,13 @@
             </div>
           </div>
         </el-col>
-        <el-col :span="8" style="padding-left: 10px; padding-right: 10px;">
+        <el-col :span="8" style="padding-left: 10px; padding-right: 10px">
           <div class="box">
             <p class="infoTip">信息提示</p>
             <p class="infoContent">
               1. 为主商品添加组合商品，最多添加两个，未配置则在模版中不显示。
             </p>
-            <p class="infoContent">
-              2.组合商品的加购次数有0次。
-            </p> 
+            <p class="infoContent">2.组合商品的加购次数有{{detail.cartNum}}次。</p>
           </div>
         </el-col>
       </el-row>
@@ -96,8 +97,8 @@
       :visible.sync="shopDialog"
       :requestUrl="'api/yxComposeProduct/list/product'"
       :requestParams="requestParams"
-      @selectItem="SelectItem" 
-      :disableNum='disableNum'
+      @selectItem="SelectItem"
+      :disableNum="disableNum"
       :needLoad="false"
     ></selectProduct>
   </div>
@@ -105,7 +106,7 @@
 <script>
 import tableTem from "@/components/tableTem";
 import selectProduct from "@/components/selectProduct";
-import { getDetail,saveSecond } from "@/api/yxComposeProduct";
+import { getDetail, saveSecond } from "@/api/yxComposeProduct";
 
 export default {
   components: {
@@ -116,8 +117,8 @@ export default {
     return {
       detail: {},
       requestParams: {
-        filterType:0,
-        productName:'',
+        filterType: 0,
+        productName: "",
       },
       tableHeader: [
         {
@@ -143,45 +144,51 @@ export default {
       ],
       isRefresh: 0,
       shopDialog: false,
-      tableData: [],
+      tableData: [], 
     };
   },
   created() {
     getDetail({ id: this.$route.query.id }).then((res) => {
       this.detail = res.data;
-      this.tableData = res.data.secondProducts;
+      this.tableData = res.data.secondProducts; 
       this.requestParams = {
-        filterType:2,
-        composeId:res.data.composeId,
-        productName:'',
+        filterType: 2,
+        composeId: res.data.composeId,
+        productName: "",
       };
     });
   },
-  computed:{
-    disableNum:function(){ 
-      return 2-this.tableData.length;
-    }
+  computed: {
+    disableNum: function () {
+      return 2 - this.tableData.length;
+    },
   },
-    methods: {
+  methods: {
     SelectItem: function (e) {  
-      this.tableData = this.tableData.concat(e);
+      if(this.tableData.length>0){
+        if(e.indexOf(this.tableData[0])>-1){
+          this.$message.error('已存在该商品') 
+          return false;
+        }
+      } 
+      this.tableData = e.concat(this.tableData); 
     },
-    DelMenu: function (index) {
-      this.tableData.splice(index, 1);
+    DelMenu: function (index) {  
+      this.tableData.splice(index, 1); 
     },
-    Save:function(){
-      let arr= this.tableData.map(item=>{
+    Save: function () {
+      let arr = this.tableData.map((item) => {
         return item.id;
-      })
+      });
       let par = {
-        composeId:Number(this.$route.query.id),
-        secondIds:arr,
-      }
-      saveSecond(par).then(res=>{
-        this.$message.success('添加成功')
-        this.$router.push('/combinationProduct')
-      })
-    }
+        composeId: Number(this.$route.query.id),
+        secondIds: arr,
+      };
+      saveSecond(par).then((res) => {
+        this.$message.success("添加成功");
+        this.$router.push("/combinationProduct");
+      });
+    },
   },
 };
 </script>
@@ -254,8 +261,8 @@ h1 {
   position: relative;
   .ellipsis {
     flex: 1;
-    padding-left: 13px; 
-        display: flex;
+    padding-left: 13px;
+    display: flex;
     align-items: center;
   }
   .options {
@@ -283,7 +290,7 @@ h1 {
   font-size: 12px;
   color: #606266;
   margin-bottom: 10px;
-  &:last-child{
+  &:last-child {
     margin: 0;
   }
 }

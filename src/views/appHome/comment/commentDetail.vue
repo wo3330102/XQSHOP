@@ -98,6 +98,7 @@
         <div class="search-box">
           <el-input
             v-model="searchVal"
+            maxlength="512"
             placeholder="搜索评论内容"
             @change="Search"
           >
@@ -230,6 +231,7 @@
           <el-input
             type="textarea"
             v-model="form.comment"
+            maxlength="512"
             placeholder="请输入姓名"
           ></el-input>
         </el-form-item> 
@@ -334,6 +336,7 @@
             >
               <el-input
                 v-model="item.comment"
+                maxlength="512"
                 placeholder="请输入评论内容"
               ></el-input>
             </el-form-item>
@@ -357,7 +360,7 @@
                   v-for="i in skuList"
                   :key="i.id"
                   :label="i.sku"
-                  :value="i.sku"
+                  :value="i.id"
                 ></el-option>
               </el-select>
             </el-form-item>
@@ -739,6 +742,7 @@ export default {
           } else {
             this.showUpload = false;
           }
+          console.log()
           break;
         case "delete":
           let delpar = {
@@ -855,6 +859,8 @@ export default {
             i.pics = arr.toString();
             delete i.fileList;
           });
+          console.log(par);
+          // return false
           addComment(par).then((res) => {
             this.showAdd = false;
             this.$message.success("新增成功");  

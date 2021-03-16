@@ -256,6 +256,7 @@
                 <el-input
                   v-model="detail.buttonName"
                   placeholder="请输入按钮文案"
+                  maxlength="20"
                 ></el-input>
               </div>
               <div

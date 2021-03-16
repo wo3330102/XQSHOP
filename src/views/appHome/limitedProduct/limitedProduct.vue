@@ -207,6 +207,8 @@
           <div class="seach-box-item">
             <el-select
               v-model="productListParams.tagId"
+              clearable
+              @clear="productListParams.tagId = ''"
               placeholder="请选择分类"
               style="width: 164px"
             >
