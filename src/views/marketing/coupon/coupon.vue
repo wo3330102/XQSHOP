@@ -3,7 +3,9 @@
     <h1 class="title">
       <span>优惠券列表</span>
       <span style="font-size: 0">
-        <el-button type="primary" @click="ToAddShop">添加优惠券</el-button>
+        <el-button type="primary" v-show="active !== 2" @click="ToAdd">{{
+          active == 0 ? "添加优惠券" : "添加优惠券事件"
+        }}</el-button>
       </span>
     </h1>
     <div class="content">
@@ -18,22 +20,22 @@
           >
             {{ item.label }}
           </div>
-        </div> 
+        </div>
       </div>
       <div class="conditions" v-show="active == 0 || active == 2">
         <el-input
           v-show="active == 0 || active == 2"
           v-model="searchVal"
-          size="small" 
+          size="small"
           suffix-icon="el-icon-search"
           placeholder="请输入优惠券名称或券号"
           @change="Search(1)"
         ></el-input>
         <el-input
-          style="margin-left:15px"
+          style="margin-left: 15px"
           v-show="active == 2"
           v-model="searchVal2"
-          size="small" 
+          size="small"
           suffix-icon="el-icon-search"
           placeholder="请输入优惠券名称或券号"
           @change="Search(2)"
@@ -73,10 +75,18 @@
                   v-model="scope.row.status"
                   :active-value="1"
                   :inactive-value="0"
+                  @change="ChangeStatus(scope.row)"
                 ></el-switch>
               </template>
               <template v-else-if="item.prop == 'option'">
-                <el-dropdown type="primary" @command="(e)=>{Options(e,scope.row)}">
+                <el-dropdown
+                  type="primary"
+                  @command="
+                    (e) => {
+                      Options(e, scope.row);
+                    }
+                  "
+                >
                   <el-button size="small">
                     操作<i class="el-icon-arrow-down el-icon--right"></i>
                   </el-button>
@@ -92,7 +102,7 @@
               </template>
             </template>
           </el-table-column>
-        </template> 
+        </template>
         <template v-else-if="active === 1">
           <el-table-column
             v-for="item in tableHeader"
@@ -114,12 +124,19 @@
                 }}
               </template>
               <template v-else-if="item.prop == 'option'">
-                <el-dropdown type="primary" @command="(e)=>{Options(e,scope.row)}">
+                <el-dropdown
+                  type="primary"
+                  @command="
+                    (e) => {
+                      Options(e, scope.row);
+                    }
+                  "
+                >
                   <el-button size="small">
                     操作<i class="el-icon-arrow-down el-icon--right"></i>
                   </el-button>
                   <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item command="edit">编辑</el-dropdown-item> 
+                    <el-dropdown-item command="edit">编辑</el-dropdown-item>
                     <el-dropdown-item command="del">删除</el-dropdown-item>
                   </el-dropdown-menu>
                 </el-dropdown>
@@ -129,7 +146,7 @@
               </template>
             </template>
           </el-table-column>
-        </template> 
+        </template>
         <template v-else>
           <el-table-column
             v-for="item in tableHeader"
@@ -142,7 +159,13 @@
           >
             <template slot-scope="scope">
               <template v-if="item.prop == 'status'">
-                {{scope.row.status == 0?'未使用':scope.row.status == 1?'已使用':'已过期'}}
+                {{
+                  scope.row.status == 0
+                    ? "未使用"
+                    : scope.row.status == 1
+                    ? "已使用"
+                    : "已过期"
+                }}
               </template>
               <template v-else>
                 {{ scope.row[item.prop] }}
@@ -156,7 +179,7 @@
 </template>
 <script>
 import tableTem from "@/components/tableTem";
-import { getCates } from "@/api/yxStoreCategory";
+import { delCoupon, delCouponEvent, changeStatus } from "@/api/coupon";
 export default {
   components: {
     tableTem,
@@ -188,7 +211,7 @@ export default {
       ],
       active: 0,
       searchVal: "",
-      searchVal2:'',
+      searchVal2: "",
       tableHeader: [
         {
           prop: "activityName",
@@ -245,40 +268,41 @@ export default {
       ],
     };
   },
-  created() {
-    // 获取分类信息
-    let par = {
-      size: 99,
-      page: 0,
-    };
-    getCates(par).then((res) => {
-      this.categoryList = res.content;
-    });
-  },
   methods: {
     // 表格数据
     TableResult: function (e) {},
     // 针对某个优惠券的操作
-    Options: function (type,e) {
+    Options: function (type, e) {
       console.log(type);
       switch (type) {
         case "edit":
-          if(this.active == 0){
+          let couponDetail = JSON.stringify(e);
+          if (this.active == 0) {
             // 编辑优惠券
-            let couponDetail = JSON.stringify(e);
-            localStorage.setItem('couponDetail',couponDetail)
-            this.$router.push('/editCoupon')
+            localStorage.setItem("couponDetail", couponDetail);
+            this.$router.push("/editCoupon");
           } else {
             // 编辑优惠券事件
-            this.$router.push('/editCouponEvent',e.id)
+            localStorage.setItem("couponEventDetail", couponDetail);
+            this.$router.push("/editCouponEvent", e.id);
           }
-          console.log('编辑')
           break;
         case "copy":
-          console.log('复制')
+          console.log("复制");
           break;
         case "del":
-          console.log('删除')
+          if (this.active == 0) {
+            delCoupon([e.id]).then((res) => {
+              this.$message.success("删除成功");
+              this.isRefresh += 1;
+            });
+          } else {
+            delCouponEvent([e.id]).then((res) => {
+              this.$message.success("删除成功");
+              this.isRefresh += 1;
+            });
+          }
+
           break;
       }
     },
@@ -286,14 +310,14 @@ export default {
     ChangeActive: function (index) {
       this.active = index;
       let par = {
-        page:0,
-        size:30,
-      } 
-      this.searchVal = '';
-      this.searchVal2 = '';
+        page: 0,
+        size: 30,
+      };
+      this.searchVal = "";
+      this.searchVal2 = "";
       switch (index) {
-        case 0: 
-          par.queryName = '';
+        case 0:
+          par.queryName = "";
           this.tableHeader = [
             {
               prop: "activityName",
@@ -347,9 +371,9 @@ export default {
               width: "120",
               align: "center",
             },
-          ]; 
+          ];
           break;
-        case 1: 
+        case 1:
           this.tableHeader = [
             {
               prop: "eventName",
@@ -398,25 +422,25 @@ export default {
             },
           ];
           break;
-        case 2: 
-          par.couponNo = '';
-          par.couponTitle = '';
+        case 2:
+          par.couponNo = "";
+          par.couponTitle = "";
           this.tableHeader = [
             {
               prop: "couponNo",
-              label: "优惠券号码", 
+              label: "优惠券号码",
               align: "center",
             },
             {
               prop: "activityName",
-              label: "活动名称", 
+              label: "活动名称",
               align: "center",
             },
             {
               prop: "nickName",
-              label: "拥有者", 
+              label: "拥有者",
               align: "center",
-            }, 
+            },
             {
               prop: "createTime",
               label: "获得时间",
@@ -426,36 +450,36 @@ export default {
               prop: "useTime",
               label: "使用时间",
               align: "center",
-            }, 
+            },
             {
               prop: "status",
               label: "状态",
               align: "center",
               width: "80",
-            }, 
+            },
           ];
           break;
       }
-      this.requestParams = {...par}
+      this.requestParams = { ...par };
     },
     // 搜索
     Search: function (e) {
-      if(e == 1){ 
-        let par = {  
-          page:0,
-          size:30,
-          queryName:this.searchVal
+      if (e == 1) {
+        let par = {
+          page: 0,
+          size: 30,
+          queryName: this.searchVal,
         };
-        this.requestParams = {...par};
+        this.requestParams = { ...par };
       } else {
-        let par = {  
-          page:0,
-          size:30,
-          couponNo:this.searchVal,
-          couponTitle:this.searchVal2
+        let par = {
+          page: 0,
+          size: 30,
+          couponNo: this.searchVal,
+          couponTitle: this.searchVal2,
         };
-        this.requestParams = {...par};
-      } 
+        this.requestParams = { ...par };
+      }
     },
     // 批量操作
     // BatchOption: function (e, selectItem) {
@@ -497,12 +521,32 @@ export default {
     //     });
     //   }
     // },
-    // ToAddShop: function () {
-    //   this.$router.push("/commodity/edit");
-    // },
-    // toDetail: function (e) {
-    //   this.$router.push({ path: "/commodity/edit", query: { id: e.id } });
-    // },
+    ToAdd: function () {
+      if (this.active == 0) {
+        if (localStorage.getItem("couponDetail")) {
+          localStorage.removeItem("couponDetail");
+        }
+        this.$router.push("/editCoupon");
+      } else {
+        if (localStorage.getItem("couponEventDetail")) {
+          localStorage.removeItem("couponEventDetail");
+        }
+        this.$router.push("/editCouponEvent");
+      }
+    },
+    ChangeStatus: function (e) {
+      let par = {
+        id: e.id,
+        status: e.status,
+      };
+      changeStatus(par)
+        .then((res) => {
+          this.$message.success("修改成功");
+        })
+        .catch((res) => {
+          this.isRefresh += 1;
+        });
+    },
     Preview: function (params) {
       let url =
         "https://" +
@@ -525,7 +569,7 @@ export default {
   justify-items: center;
   justify-content: space-between;
   flex: 1;
-} 
+}
 .content {
   overflow: hidden;
   border-radius: 4px;
@@ -559,7 +603,7 @@ export default {
     padding: 9px 12px;
     display: flex;
     justify-content: space-between;
-    border-bottom: 1px solid #f1f1f6; 
+    border-bottom: 1px solid #f1f1f6;
   }
 }
 .download-tpl-link-new {

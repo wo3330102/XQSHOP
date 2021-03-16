@@ -274,7 +274,7 @@
         :model="addForm"
         label-width="50px"
         label-position="left"
-        style="max-height: 540px; overflow: auto"
+        style="max-height: 540px; overflow: auto;"
         ref="addForm"
         :hide-required-asterisk="true"
       >
@@ -1035,25 +1035,7 @@ h1 {
 .flex {
   display: flex;
   align-items: center;
-}
-.el-form {
-  /*滚动条样式*/
-  &::-webkit-scrollbar {
-    /*滚动条整体样式*/
-    width: 6px;
-    margin-right: 2px;
-  }
-  &::-webkit-scrollbar-thumb {
-    /*滚动条里面小方块*/
-    border-radius: 5px;
-    background: #d5d5e6;
-  }
-  &::-webkit-scrollbar-track {
-    /*滚动条里面轨道*/
-    border-radius: 6px;
-    background: #f5f5f9;
-  }
-}
+} 
 .avatar-uploader {
   width: 80px;
   height: 80px;

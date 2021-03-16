@@ -118,7 +118,7 @@
         <el-form-item label="条件类型">
           <el-radio-group v-model="detail.conditionType">
             <el-radio :label="0">全部</el-radio>
-            <el-radio :label="1">首次下单</el-radio>
+            <el-radio :label="1">商品分类</el-radio>
             <el-radio :label="2">品牌</el-radio>
           </el-radio-group>
         </el-form-item>
@@ -201,7 +201,38 @@
                         ></el-input>
                       </div>
                     </el-radio>
-                    <el-radio :label="2">送礼物</el-radio>
+                    <el-radio :label="2" style="display: inline-block">
+                      <span style="line-height: 28px">送礼物</span>
+                      <div v-if="detail.couponType == 2">
+                        <div style="margin-left: 30px; margin-top: 5px">
+                          <span style="margin-right: 10px">礼品件数</span>
+                          <el-input
+                            size="mini"
+                            v-model.number="detail.giftNum"
+                            placeholder="请输入礼物件数"
+                          ></el-input>
+                        </div>
+                        <div
+                          style="
+                            margin-left: 30px;
+                            margin-top: 5px;
+                            display: flex;
+                            align-items: center;
+                          "
+                        >
+                          <div style="margin-right: 10px">
+                            <p
+                              class="textBtn"
+                              @click.stop="showSelectProduct = true"
+                            >
+                              选择商品
+                            </p>
+                            <span>(单规格)</span>
+                          </div>
+                          <p>{{ product.storeName }}</p>
+                        </div>
+                      </div>
+                    </el-radio>
                     <el-radio :label="3">包邮</el-radio>
                   </el-radio-group>
                 </el-form-item>
@@ -232,25 +263,54 @@
     </div>
     <div class="pageSaveBtn">
       <el-button @click="$NavgitorTo('/share')">取消</el-button>
-      <el-button type="primary" @click="Save" v-loading="disabled" :disabled="disabled">保存</el-button>
+      <el-button
+        type="primary"
+        @click="Save"
+        v-loading="disabled"
+        :disabled="disabled"
+        >保存</el-button
+      >
     </div>
+    <select-product
+      :visible.sync="showSelectProduct"
+      :requestParams="requestParams"
+      :productId="detail.giftIds"
+      @Result="Result"
+    > </select-product>
   </div>
 </template> 
 <script>
 import { getLevels, addCoupon, editCoupon } from "@/api/coupon";
+import selectProduct from "../components/selectProductInCoupon";
 export default {
+  components:{selectProduct},
   data() {
     return {
       detail: {
-        type: 0,
-        firstOrderType: 0,
+        activityName: "",
         conditionType: 0,
-        status: 1,
+        couponDiscount: 0,
+        couponEndTime: "",
+        couponNo: "",
+        couponStartTime: "",
+        couponType: 0,
+        description: "",
+        firstOrderType: 0,
+        giftIds: "",
+        giftNum:'',
+        isCoverBargain: 0,
+        isCoverDiscount: 0,
         isShow: 1,
+        memberGroupIds: "",
+        productIds: "",
         ruleVo: {
+          maxValue: 0,
+          minValue: 0,
           ruleType: 1,
         },
-        couponType: 0,
+        status: 1,
+        title: "",
+        type: 0,
       },
       rules: {
         title: [
@@ -281,7 +341,7 @@ export default {
             trigger: ["change", "blur"],
           },
         ],
-        couponNo:[
+        couponNo: [
           {
             required: true,
             message: "请输入优惠券号码",
@@ -289,6 +349,7 @@ export default {
           },
         ],
       },
+      showSelectProduct: false,
       groupIdList: [], // 会员分组
       ruleForm: {}, // 优惠券规则左边数据
       timeOptions: {
@@ -296,7 +357,8 @@ export default {
           return time.getTime() < new Date().getTime() - 8.64e7;
         },
       },
-      disabled:false,
+      product:{},
+      disabled: false, 
     };
   },
   created() {
@@ -316,9 +378,12 @@ export default {
     });
   },
   methods: {
+    Result:function(e){
+      this.product = e;
+    },
     Save: function () {
-      this.disabled = true
-      this.$refs.form.validate((e) => { 
+      this.disabled = true;
+      this.$refs.form.validate((e) => {
         if (e) {
           // 判断优惠券规则 0-无需条件 1-金额限制 2-数量限制
           if (this.detail.ruleVo.ruleType == 1) {
@@ -344,35 +409,69 @@ export default {
             this.detail.ruleVo.maxValue = "";
           }
           // 判断优惠类型:0-满减 1-折扣 2-赠品 3-包邮
-          if (this.detail.couponType == 0) {
-            this.detail.couponDiscount = "";
-          } else if (this.detail.couponType == 1) {
-            this.detail.couponPrice = "";
-          } else {
-            this.detail.couponDiscount = "";
-            this.detail.couponPrice = "";
+          switch (this.detail.couponType) {
+            case 0:
+              if (this.detail.couponPrice) {
+                this.detail.couponDiscount = "";
+              } else {
+                this.$message.warning("请填写优惠券金额");
+                this.disabled = false;
+                return false;
+              }
+              break;
+            case 1:
+              if (this.detail.couponDiscount) {
+                this.detail.couponPrice = "";
+              } else {
+                this.$message.warning("请填写优惠券折扣");
+                this.disabled = false;
+                return false;
+              }
+              break;
+            case 2:
+              if (!this.product.hasOwnProperty('id')) {
+                this.$message.warning("选择赠送的商品");
+                this.disabled = false;
+                return false;
+              } else if(!this.detail.giftNum){
+                this.$message.warning("选择赠送的商品数量,最少为1");
+                this.disabled = false;
+                return false;
+              } else {
+                this.detail.giftIds = this.product.id
+              }
+              break;
+            default:
+              this.detail.couponDiscount = "";
+              this.detail.couponPrice = "";
+              break;
           }
+          this.detail.couponType == 2?'':this.detail.giftNum = '';
           if (this.detail.id) {
             // 修改
-            editCoupon(this.detail).then((res) => {
-              this.$message.success("修改成功");
-              this.disabled = false;
-              this.$router.push("/coupon");
-            }).catch(()=>{
-               this.disabled = false;
-            });
+            editCoupon(this.detail)
+              .then((res) => {
+                this.$message.success("修改成功");
+                this.disabled = false;
+                this.$router.push("/coupon");
+              })
+              .catch(() => {
+                this.disabled = false;
+              });
           } else {
             // 新增
-            addCoupon(this.detail).then((res) => {
-              this.$message.success("新增成功");
-              this.disabled = false;
-              this.$router.push("/coupon");
-            }).catch(()=>{
-               this.disabled = false;
-            });
+            addCoupon(this.detail)
+              .then((res) => {
+                this.$message.success("新增成功");
+                this.disabled = false;
+                this.$router.push("/coupon");
+              })
+              .catch(() => {
+                this.disabled = false;
+              });
           }
         } else {
-          this.$message.error('请完善表单数据');
+          this.$message.error("请完善表单数据");
           this.disabled = false;
         }
       });

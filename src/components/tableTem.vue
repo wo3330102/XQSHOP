@@ -24,8 +24,7 @@
       <el-table
         ref="multipleTable"
         :data="data"
-        tooltip-effect="dark"
-        style="width: 100%"
+        tooltip-effect="dark" 
         empty-text="暂无数据"
         v-loading="loading"
         :default-sort="defaultSort"
@@ -34,6 +33,7 @@
         @row-click="rowClick"
         :row-style="rowIsClick ? { cursor: 'pointer' } : { cursor: 'initial' }" 
         :row-key="'id'"
+        max-height="600"
       >
         <!-- 是否需要选框 -->
         <el-table-column
@@ -347,8 +347,8 @@ export default {
 .show {
   width: 100% !important;
 }
-.table {
-  position: relative;
+.table { 
+  position: relative; 
   .checkOption {
     overflow: hidden;
     width: 82px;
@@ -388,6 +388,9 @@ export default {
       color: #c0c4cc;
     }
   }
+} 
+/deep/.el-table--scrollable-x .el-table__body-wrapper{
+  overflow-x: hidden;
 }
 .sign-span-item {
   font-size: 12px;

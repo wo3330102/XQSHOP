@@ -140,7 +140,7 @@
         <div class="router-view">
           <transition name="fade" mode="out-in">
             <router-view
-              style="padding-bottom: 50px"
+              style="padding-bottom: 10px"
               v-if="isRouterAlive"
             ></router-view>
           </transition>
