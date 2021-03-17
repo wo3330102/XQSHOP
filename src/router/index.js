@@ -126,7 +126,15 @@ const routes = [{
       path: '/editCouponEvent',
       name: 'EditCouponEvent',
       component: () => import( /* webpackChunkName: "about" */ '../views/marketing/coupon/editCouponEvent.vue'),
-    }, ]
+    },{
+      path: '/seckill',
+      name: 'Seckill',
+      component: () => import( /* webpackChunkName: "about" */ '../views/marketing/seckill/seckill.vue'),
+    }, {
+      path: '/editSeckill',
+      name: 'EditSeckill',
+      component: () => import( /* webpackChunkName: "about" */ '../views/marketing/seckill/editSeckill.vue'),
+    },   ]
   }, {
     path: 'appHome',
     name: '应用管理',
@@ -295,6 +303,14 @@ const routes = [{
       path: '/paymentType',
       name: 'PaymentType',
       component: () => import( /* webpackChunkName: "about" */ '../views/setting/paymentType/paymentType.vue'),
+    }, {
+      path: '/pay',
+      name: 'Pay',
+      component: () => import( /* webpackChunkName: "about" */ '../views/setting/paymentType/pay.vue'),
+    }, {
+      path: '/editCOD',
+      name: 'EditCOD',
+      component: () => import( /* webpackChunkName: "about" */ '../views/setting/paymentType/editCOD.vue'),
     }, {
       path: '/checkoutSetting',
       name: 'CheckoutSetting',

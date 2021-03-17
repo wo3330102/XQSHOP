@@ -20,112 +20,215 @@
     <div>
       <el-row>
         <el-col :span="16">
-          <el-form
-            class="form"
-            ref="payOption"
-            :model="payOption"
-            label-width="120px"
-            style="padding-top: 40px"
-          >
-            <el-form-item
-              label="paypal clientId"
-              prop="clientId"
-              :rules="[
-                {
-                  required: true,
-                  message: '请输入paypal clientId',
-                  trigger: 'blur',
-                },
-              ]"
+          <!-- paypal支付设置 -->
+          <div class="box" v-if="false">
+            <h3>paypal支付设置</h3>
+            <el-form
+              class="form"
+              ref="payOption"
+              :model="payOption"
+              label-width="120px"
+              style="padding-top: 40px"
             >
-              <el-input v-model="payOption.clientId" style="width: 370px" />
-            </el-form-item>
-            <el-form-item
-              label="paypal secret"
-              prop="secret"
-              :rules="[
-                {
-                  required: true,
-                  message: '请输入paypal secret',
-                  trigger: 'blur',
-                },
-              ]"
-            >
-              <el-input v-model="payOption.secret" style="width: 370px" />
-            </el-form-item>
-            <el-form-item
-              label="返回页面路径"
-              prop="domain"
-              :rules="[
-                {
-                  required: true,
-                  message: '请输入返回页面路径',
-                  trigger: 'blur',
-                },
-              ]"
-            >
-              <el-input v-model="payOption.domain" style="width: 370px" />
-            </el-form-item>
-            <el-form-item
-              label="支付结果路径"
-              prop="successUrl"
-              :rules="[
-                {
-                  required: true,
-                  message: '请输入支付结果路径',
-                  trigger: 'blur',
-                },
-              ]"
-            >
-              <el-input v-model="payOption.successUrl" style="width: 370px" />
-            </el-form-item>
-            <el-form-item
-              label="货币类型"
-              prop="currencyCode"
-              :rules="[
-                { required: true, message: '请选择货币类型', trigger: 'change' },
-              ]"
-            >
-              <el-select
-                v-model="payOption.currencyCode"
-                placeholder="请选择货币类型"
+              <el-form-item
+                label="paypal clientId"
+                prop="clientId"
+                :rules="[
+                  {
+                    required: true,
+                    message: '请输入paypal clientId',
+                    trigger: 'blur',
+                  },
+                ]"
               >
-                <el-option :label="currency.n" value="currency.n"></el-option>
-                <el-option label="CNY" value="CNY"></el-option>
-              </el-select>
-            </el-form-item>
-            <el-form-item
-              label="沙盒模式"
-              prop="sandBox"
-              :rules="[
-                {
-                  required: true,
-                  message: '请选择是否开启沙盒模式',
-                  trigger: 'change',
-                },
-              ]"
+                <el-input v-model="payOption.clientId" style="width: 370px" />
+              </el-form-item>
+              <el-form-item
+                label="paypal secret"
+                prop="secret"
+                :rules="[
+                  {
+                    required: true,
+                    message: '请输入paypal secret',
+                    trigger: 'blur',
+                  },
+                ]"
+              >
+                <el-input v-model="payOption.secret" style="width: 370px" />
+              </el-form-item>
+              <el-form-item
+                label="返回页面路径"
+                prop="domain"
+                :rules="[
+                  {
+                    required: true,
+                    message: '请输入返回页面路径',
+                    trigger: 'blur',
+                  },
+                ]"
+              >
+                <el-input v-model="payOption.domain" style="width: 370px" />
+              </el-form-item>
+              <el-form-item
+                label="支付结果路径"
+                prop="successUrl"
+                :rules="[
+                  {
+                    required: true,
+                    message: '请输入支付结果路径',
+                    trigger: 'blur',
+                  },
+                ]"
+              >
+                <el-input v-model="payOption.successUrl" style="width: 370px" />
+              </el-form-item>
+              <el-form-item
+                label="货币类型"
+                prop="currencyCode"
+                :rules="[
+                  {
+                    required: true,
+                    message: '请选择货币类型',
+                    trigger: 'change',
+                  },
+                ]"
+              >
+                <el-select
+                  v-model="payOption.currencyCode"
+                  placeholder="请选择货币类型"
+                >
+                  <el-option :label="currency.n" value="currency.n"></el-option>
+                  <el-option label="CNY" value="CNY"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item
+                label="沙盒模式"
+                prop="sandBox"
+                :rules="[
+                  {
+                    required: true,
+                    message: '请选择是否开启沙盒模式',
+                    trigger: 'change',
+                  },
+                ]"
+              >
+                <el-select
+                  v-model="payOption.sandBox"
+                  placeholder="是否开启沙盒模式"
+                >
+                  <el-option label="否" :value="0"></el-option>
+                  <el-option label="是" :value="1"></el-option>
+                </el-select>
+                <!-- <el-switch v-model="payOption.sandBox"></el-switch> -->
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="submitForm('payOption')"
+                  >保存</el-button
+                >
+                <el-button @click="$NavgitorTo('/setting')">取消</el-button>
+              </el-form-item>
+            </el-form>
+          </div>
+          <!-- payssion支付设置 -->
+          <div class="box">
+            <h3>payssion支付设置</h3>
+            <el-form
+              class="form"
+              ref="payssion"
+              :model="payssionOption"
+              label-width="120px"
+              style="padding-top: 40px"
+              v-loading="payssionOptionLoading"
             >
-              <el-select
-                v-model="payOption.sandBox"
-                placeholder="是否开启沙盒模式"
+              <el-form-item
+                label="name"
+                prop="name"
+                :rules="[
+                  {
+                    required: true,
+                    message: '请输入name',
+                    trigger: 'blur',
+                  },
+                ]"
               >
-                <el-option label="否" :value="0"></el-option>
-                <el-option label="是" :value="1"></el-option>
-              </el-select>
-              <!-- <el-switch v-model="payOption.sandBox"></el-switch> -->
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="submitForm('payOption')"
-                >保存</el-button
+                <el-input v-model="payssionOption.name" style="width: 370px" />
+              </el-form-item>
+              <el-form-item
+                label="apiKey"
+                prop="apiKey"
+                :rules="[
+                  {
+                    required: true,
+                    message: '请输入apiKey',
+                    trigger: 'blur',
+                  },
+                ]"
               >
-              <el-button
-                @click="$NavgitorTo('/setting')"
-                >取消</el-button
+                <el-input
+                  v-model="payssionOption.apiKey"
+                  style="width: 370px"
+                />
+              </el-form-item>
+              <el-form-item
+                label="secretKey"
+                prop="secretKey"
+                :rules="[
+                  {
+                    required: true,
+                    message: '请输入secretKey',
+                    trigger: 'blur',
+                  },
+                ]"
               >
-            </el-form-item>
-          </el-form>
+                <el-input
+                  v-model="payssionOption.secretKey"
+                  style="width: 370px"
+                />
+              </el-form-item>
+              <el-form-item
+                label="返回页面路径"
+                prop="urlReturn"
+                :rules="[
+                  {
+                    required: true,
+                    message: '请输入返回页面路径',
+                    trigger: 'blur',
+                  },
+                ]"
+              >
+                <el-input
+                  v-model="payssionOption.urlReturn"
+                  style="width: 370px"
+                />
+              </el-form-item>
+              <el-form-item
+                label="支付结果路径"
+                prop="urlNotify"
+                :rules="[
+                  {
+                    required: true,
+                    message: '请输入支付结果路径',
+                    trigger: 'blur',
+                  },
+                ]"
+              >
+                <el-input
+                  v-model="payssionOption.urlNotify"
+                  style="width: 370px"
+                />
+              </el-form-item>
+              <el-form-item>
+                <el-button @click="changePayssionStatus()">{{
+                  payssionOption.status == 0 ? "开启" : "关闭"
+                }}</el-button>
+                <el-button type="primary" @click="submitForm('payssion')"
+                  >保存</el-button
+                >
+              </el-form-item>
+            </el-form>
+          </div>
           <!-- 活动名称 -->
-          <div class="box" v-if="''">
+          <div class="box" v-if="false">
             <h3 class="title">
               <img
                 style="vertical-align: middle"
@@ -157,11 +260,7 @@
                 <el-button type="primary">绑定</el-button>
               </div>
               <div v-else class="payPalFormBox">
-                <el-form
-                  :model="payPalForm"
-                  :hide-required-asterisk="true"
-                  @validate="ValidatePayPalForm"
-                >
+                <el-form :model="payPalForm" :hide-required-asterisk="true">
                   <el-form-item
                     label="Merchant ID"
                     style="width: 270px"
@@ -243,7 +342,7 @@
             </div>
           </div>
           <!-- 信用卡收款 -->
-          <div class="box" v-if="''">
+          <div class="box" v-if="false">
             <h3 class="title">
               <span style="flex: 1">
                 信用卡收款
@@ -273,7 +372,7 @@
             </div>
           </div>
           <!-- 货到付款 -->
-          <div class="box" v-if="''">
+          <div class="box">
             <h3 class="title">
               <span style="flex: 1">
                 货到付款
@@ -289,12 +388,37 @@
             <div>
               <div class="credit-done">
                 <p>
-                  开启Cash on Delivery模式，该模式可以与PayPal和信用卡共存。
+                  <el-form
+                    :model="CODDetail"
+                    class="form"
+                    ref="CODFrom"
+                    label-width="120px"
+                  >
+                    <el-form-item
+                      label="前台显示名称"
+                      prop="name"
+                      :rules="[
+                        {
+                          required: true,
+                          message: '请输入前台展示名称',
+                          trigger: 'blur',
+                        },
+                      ]"
+                    >
+                      <el-input
+                        style="width: 370px"
+                        v-model="CODDetail.name"
+                        placeholder="请输入前台展示名称"
+                      ></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                      <el-button @click="EditCOD">{{
+                        CODDetail.status == 0 ? "开启" : "关闭"
+                      }}</el-button>
+                    </el-form-item>
+                  </el-form>
                 </p>
               </div>
-              <p style="text-align: right">
-                <el-button type="primary">开启</el-button>
-              </p>
             </div>
           </div>
         </el-col>
@@ -314,7 +438,7 @@
   </div>
 </template> 
 <script>
-import { GetPayDetail, EditPay } from "@/api/pay";
+import { getPayssion, editPayssion, getCOD, editCOD } from "@/api/pay";
 export default {
   data() {
     return {
@@ -326,37 +450,92 @@ export default {
         secret: "",
       },
       payOption: {},
+      payssionOptionLoading: true,
+      payssionOption: {
+        apiKey: "",
+        name: "",
+        id: 0,
+        secretKey: "",
+        status: 1,
+        urlNotify: "",
+        urlReturn: "",
+      },
+      CODDetail: {},
     };
   },
   created() {
-    let storeId = localStorage.getItem("storeId");
-    GetPayDetail(storeId)
-      .then((res) => {
-        this.payOption = res;
-        this.payLoading = false;
-        this.$refs["payOption"].clearValidate();
-      })
-      .catch((res) => {
-        console.log(res);
-        this.payOption = {};
-        this.payLoading = false;
-        this.$refs["payOption"].clearValidate();
-      });
+    this.Init();
   },
   methods: {
-    ValidatePayPalForm: function (bool, obj) {
-      console.log(bool);
+    Init: function () {
+      let storeId = localStorage.getItem("storeId");
+      // 获取payssion详情
+      getPayssion({ storeId }).then((res) => {
+        if (res) {
+          console.log(res);
+          this.payssionOptionLoading = false;
+          this.payssionOption = { ...res.data };
+        }
+      });
+      // 获取COD
+      getCOD().then((res) => {
+        if (res) {
+          this.CODDetail = res.data;
+        }
+      });
     },
+    // 修改payssion是否启用
+    changePayssionStatus: function () {
+      let par = {
+        ...this.payssionOption,
+        status: this.payssionOption.status == 0 ? 1 : 0,
+      };
+      editPayssion(this.payssionOption).then((res) => {
+        this.$message.success("修改成功");
+        this.payssionOption.status = this.payssionOption.status == 0 ? 1 : 0;
+      });
+    },
+    // 修改COD是否启用
+    EditCOD: function () {
+      console.log(this.CODDetail)
+      if (this.CODDetail.status) {
+        comment(this.CODDetail);
+      } else {
+        this.$refs["CODFrom"].validate((valid) => {
+          if (valid) {
+            comment(this.CODDetail);
+          }
+        });
+      }
+      var that = this;
+      function comment(detail){ 
+        let par = {
+          ...detail,
+          status: detail.status == 0 ? 1 : 0,
+        };
+        editCOD(par).then((res) => {
+          that.$message.success("修改成功");
+          that.CODDetail.status = that.CODDetail.status == 0 ? 1 : 0;
+        });
+      }
+    },
+    // 保存
     submitForm: function (formName) {
       let that = this;
       let storeId = localStorage.getItem("storeId");
       this.$refs[formName].validate((valid) => {
-        if (valid) { 
-          this.payOption.storeId = storeId;
-          EditPay(this.payOption).then((res) => { 
-            this.$message.success('编辑成功') 
-            that.showPay = false;
-          });
+        if (valid) {
+          if (formName == "payssion") {
+            editPayssion(this.payssionOption).then((res) => {
+              this.$message.success("编辑成功");
+            });
+          } else {
+            this.payOption.storeId = storeId;
+            EditPay(this.payOption).then((res) => {
+              this.$message.success("编辑成功");
+              that.showPay = false;
+            });
+          }
         } else {
           return false;
         }
@@ -381,17 +560,6 @@ h1 {
   .el-col {
     padding: 0 10px;
   }
-}
-.form {
-  margin-bottom: 20px;
-  padding: 12px;
-  padding-bottom: 20px;
-  box-sizing: border-box;
-  background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px 0 rgba(35, 35, 112, 0.2),
-    0 0 0 1px rgba(67, 67, 145, 0.05);
-  overflow: hidden;
 }
 .box {
   margin-bottom: 20px;

@@ -1,251 +1,532 @@
 <template>
   <div class="container">
     <h1 class="title">
-      <span>秒杀</span> 
+      <span>秒杀</span>
+      <span style="font-size: 0">
+        <el-button type="primary" @click="showSelectProduct = true">添加秒杀</el-button>
+      </span>
     </h1>
     <div class="content">
       <div class="tab">
-        <div
-          v-for="(item,index) in nav"
-          :key="item.id"
-          :class="acitve == index?'active':''"
-          @click="ChangeActive(index)"
-        >{{item.label}}</div>
-      </div>
-      <div class="conditions" v-if="false">
-        <!-- 分类 -->
-        <el-select
-          v-model="requestParams.isSubscribe"
-          clearable
-          placeholder="订阅状态"
-          @change="ChangeSelect"
-          style="margin-right: 10px;width:140px"
-        >
-          <el-option
-            v-for="item in subscribeTypeList"
+        <div>
+          <div
+            v-for="(item, index) in nav"
             :key="item.id"
-            :label="item.label"
-            :value="item.id"
-          ></el-option>
-        </el-select>
-        <!-- 时间选择 -->
-        <el-date-picker
-          v-model="date"
-          type="daterange"
-          range-separator="至"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          @change="ChangeSelect"
-          format="yyyy/MM/dd"
-          value-format="yyyy-MM-dd"
-          style="width:230px;margin-right: 10px;"
-          :picker-options="endOptions"
-        ></el-date-picker>
-        <!-- 标签 -->
-        <!-- <el-select
-          v-model="countryType"
-          clearable
-          placeholder="国家/地区"
-          @change="ChangeSelect"
-          style="margin-right: 10px;width:164px"
-        >
-          <el-option
-            v-for="item in countryTypeList"
-            :key="item.id"
-            :label="item.label"
-            :value="item.id"
-          ></el-option>
-        </el-select> -->
-        <div class="search-box">
-          <el-input v-model="searchVal" placeholder="请输入姓名、邮箱、手机">
-            <el-button slot="append" @click="Search">搜索</el-button>
-          </el-input>
-        </div>
-        <div style="line-height:36px; align-self: center; margin-left: 20px;">
-          <el-dropdown style="cursor:pointer" trigger="click">
-            <span class="el-dropdown-link">
-              更多筛选
-              <i class="el-icon-arrow-down el-icon--right"></i>
-            </span>
-            <el-dropdown-menu slot="dropdown">
-              <div class="filter-box">
-                <h4>筛选条件</h4>
-                <div class="item">
-                  <div class="inp-number">
-                    <span class="inp-number-prepend">最小金额</span>
-                    <el-input v-model="minMoney" placeholder></el-input>
-                  </div>
-                  <span style="margin: 0px 10px;">-</span>
-                  <div class="inp-number">
-                    <span class="inp-number-prepend">最大金额</span>
-                    <el-input v-model="maxMoney" placeholder></el-input>
-                  </div>
-                </div>
-                <div class="item">
-                  <div class="inp-number">
-                    <span class="inp-number-prepend">最小订单</span>
-                    <el-input v-model="minOrder" placeholder></el-input>
-                  </div>
-                  <span style="margin: 0px 10px;">-</span>
-                  <div class="inp-number">
-                    <span class="inp-number-prepend">最大订单</span>
-                    <el-input v-model="maxOrder" placeholder></el-input>
-                  </div>
-                </div>
-                <div class="option-btn">
-                  <el-button @click="Screen">筛选</el-button>
-                </div>
-              </div>
-            </el-dropdown-menu>
-          </el-dropdown>
+            class="nav-item"
+            :class="active == index ? 'active' : ''"
+            @click="ChangeActive(index)"
+          >
+            {{ item.label }}
+          </div>
         </div>
       </div>
-      <table-tem 
+      <!-- 筛选条件 -->
+      <!-- <div class="conditions" v-show="active == 0 || active == 2">
+        <el-input
+          v-show="active == 0 || active == 2"
+          v-model="searchVal"
+          size="small"
+          suffix-icon="el-icon-search"
+          placeholder="请输入优惠券名称或券号"
+          @change="Search(1)"
+        ></el-input>
+        <el-input
+          style="margin-left: 15px"
+          v-show="active == 2"
+          v-model="searchVal2"
+          size="small"
+          suffix-icon="el-icon-search"
+          placeholder="请输入优惠券名称或券号"
+          @change="Search(2)"
+        ></el-input>
+      </div> -->
+      <table-tem
         :requestUrl="nav[active].url"
-        :requestParams="requestParams"
-        :optionList="['删除']" 
+        :optionList="['取消秒杀']"
+        :requestParams="tableParams"
         :tableHeader="tableHeader"
         :isRefresh="isRefresh"
+        :isNewApi="true"
+        :rowIsClick="false"
         @rowClick="toDetail"
-        @BatchOption="BatchOption" 
-        ></table-tem>
-    </div> 
+        @resultData="TableResult"
+      >
+        <!-- 外面给判断而不是在循环里面给判断的原因是为了解决el-table-column未重新生成导致页面不刷新的BUG -->
+        <template v-if="active == 0">
+          <el-table-column
+            v-for="item in tableHeader"
+            :key="item.id"
+            :width="item.width ? item.width : ''"
+            :prop="item.prop ? item.prop : ''"
+            :label="item.label ? item.label : ''"
+            :align="item.align ? item.align : ''"
+            :sortable="item.sortable"
+          >
+            <template slot-scope="scope">
+              <template v-if="item.prop == 'perview'">
+                <span class="textBtn" @click.stop="Preview">预览</span>
+              </template>
+              <template v-else-if="item.prop == 'isShow'">
+                {{ scope.row.isShow == 1 ? "显示" : "前端隐藏" }}
+              </template>
+              <template v-else-if="item.prop == 'status'">
+                <el-switch
+                  v-model="scope.row.status"
+                  :active-value="1"
+                  :inactive-value="0"
+                  @change="ChangeStatus(scope.row)"
+                ></el-switch>
+              </template>
+              <template v-else-if="item.prop == 'option'">
+                <el-dropdown
+                  type="primary"
+                  @command="
+                    (e) => {
+                      Options(e, scope.row);
+                    }
+                  "
+                >
+                  <el-button size="small">
+                    操作<i class="el-icon-arrow-down el-icon--right"></i>
+                  </el-button>
+                  <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item command="edit">编辑</el-dropdown-item>
+                    <el-dropdown-item command="copy">复制</el-dropdown-item>
+                    <el-dropdown-item command="del">删除</el-dropdown-item>
+                  </el-dropdown-menu>
+                </el-dropdown>
+              </template>
+              <template v-else>
+                <span>{{ scope.row[item.prop] }}</span>
+              </template>
+            </template>
+          </el-table-column>
+        </template>
+        <template v-else-if="active === 1">
+          <el-table-column
+            v-for="item in tableHeader"
+            :key="item.id"
+            :width="item.width ? item.width : ''"
+            :prop="item.prop ? item.prop : ''"
+            :label="item.label ? item.label : ''"
+            :align="item.align ? item.align : ''"
+            :sortable="item.sortable"
+          >
+            <template slot-scope="scope">
+              <template v-if="item.prop == 'conditionVo.type'">
+                {{
+                  new Object(scope.row.conditionVo).type == 0
+                    ? "支付金额"
+                    : new Object(scope.row.conditionVo).type == 1
+                    ? "下单金额"
+                    : "下单时间"
+                }}
+              </template>
+              <template v-else-if="item.prop == 'option'">
+                <el-dropdown
+                  type="primary"
+                  @command="
+                    (e) => {
+                      Options(e, scope.row);
+                    }
+                  "
+                >
+                  <el-button size="small">
+                    操作<i class="el-icon-arrow-down el-icon--right"></i>
+                  </el-button>
+                  <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item command="edit">编辑</el-dropdown-item>
+                    <el-dropdown-item command="del">删除</el-dropdown-item>
+                  </el-dropdown-menu>
+                </el-dropdown>
+              </template>
+              <template v-else>
+                <span>{{ scope.row[item.prop] }}</span>
+              </template>
+            </template>
+          </el-table-column>
+        </template>
+        <template v-else>
+          <el-table-column
+            v-for="item in tableHeader"
+            :key="item.id"
+            :width="item.width ? item.width : ''"
+            :prop="item.prop ? item.prop : ''"
+            :label="item.label ? item.label : ''"
+            :align="item.align ? item.align : ''"
+            :sortable="item.sortable"
+          >
+            <template slot-scope="scope">
+              <template v-if="item.prop == 'status'">
+                {{
+                  scope.row.status == 0
+                    ? "未使用"
+                    : scope.row.status == 1
+                    ? "已使用"
+                    : "已过期"
+                }}
+              </template>
+              <template v-else>
+                {{ scope.row[item.prop] }}
+              </template>
+            </template>
+          </el-table-column>
+        </template>
+      </table-tem>
+    </div>
+    <select-product
+      :visible.sync="showSelectProduct"
+      :requestParams="productParams" 
+      @Result="ToAdd"
+    >
+    </select-product>
   </div>
 </template>
-<script> 
+<script>
 import tableTem from "@/components/tableTem";
-import {del} from '@/api/yxUser'
+import { delCoupon, delCouponEvent, changeStatus } from "@/api/coupon";
 export default {
-  components: { 
+  components: {
     tableTem,
-  }, 
+  },
   data() {
     return {
-      requestParams:{
+      tableParams: {
         page: 0,
-        size: 30,  
-        beginTime:'',
-        endTime:'',
-        keyword:'',
-        minOrder:'',
-        maxOrder:'',
-        minMoney:'',
-        maxMoney:'',
-        notStoreId:true,
+        size: 30,
       },
-      showExport: false,
+      productParams: {
+        page: 0,
+        size: 30,
+      },
+      isRefresh: 0,
       nav: [
         {
-          id: 1,
+          id: 0,
           label: "商品秒杀",
-          url:'',
+          url: "api/seckill/Seckill",
+        },
+        {
+          id: 1,
+          label: "过期商品秒杀",
+          url: "api/seckill/overdueList",
         },
         {
           id: 2,
-          label: "过期商品秒杀",
-        },
-        {
-          id: 3,
           label: "秒杀历史",
+          url: "api/seckill/historyList",
         },
       ],
-      acitve: 0, 
-      subscribeTypeList: [
-        {
-          id: 1,
-          label: "已订阅",
-        },
-        {
-          id: 0,
-          label: "未订阅",
-        },
-      ],
-      // countryType: "",
-      // countryTypeList: [
-      //   {
-      //     id: 1,
-      //     label: "中国",
-      //   },
-      // ],
-      date: "",
-      searchVal: "",
-      minMoney: "",
-      maxMoney: "",
-      minOrder: "",
-      maxOrder: "",
-      tableData: [],
-      isRefresh:0,
+      active: 0,
       tableHeader: [
         {
-          width: 263,
-          label: "姓名",
-          prop:'nickname',
+          prop: "image",
+          label: "图片",
+          width: "80",
+          align: "center",
         },
         {
-          width: 261,
-          label: "地区",
-          prop:'addres',
+          prop: "info",
+          label: "商品名称/编号/分类",
+          width: "140",
+          align: "center",
+        },
+        // {
+        //   prop: "perview",
+        //   label: "排序",
+        //   width: "70",
+        //   align: "center",
+        // },
+        {
+          prop: "status",
+          label: "状态",
+          width: "60",
+          align: "center",
         },
         {
-          width: 261,
-          label: "已购订单",
-          sortable: true,
-          prop:'payCount',
+          prop: "isShow",
+          label: "价格",
+          width: "120",
+          align: "center",
         },
         {
-          width: 261,
-          label: "总金额",
-          sortable: true,
-          prop:'sumMoney',
+          prop: "isShow",
+          label: "秒杀价格",
+          width: "120",
+          align: "center",
+        },
+        {
+          prop: "num",
+          label: "限购数量",
+          align: "center",
+        },
+        {
+          prop: "startTime",
+          label: "开始时间",
+          align: "center",
+        },
+        {
+          prop: "stopTime",
+          label: "结束时间",
+          align: "center",
+        },
+        {
+          prop: "statusStr",
+          label: "活动状态",
+          width: "80",
+          align: "center",
+        },
+        {
+          prop: "option",
+          label: "操作",
+          width: "120",
+          align: "center",
         },
       ],
-      currentPage: 1, 
-      endOptions:{
-        disabledDate(time) {
-          return time.getTime() > new Date().getTime() ;
-        },
-      },
+      showSelectProduct:false,
     };
-  }, 
+  },
+
   methods: {
-    ChangeActive: function (index) {
-      this.acitve = index;
-    },
-    ChangeSelect: function (newVal) {
-      if(newVal){
-        this.requestParams.beginTime = newVal[0];
-        this.requestParams.endTime = newVal[1];
-      } else {
-        this.requestParams.beginTime = ''
-        this.requestParams.endTime = ''
+    // 表格数据
+    TableResult: function (e) {},
+    // 针对某个优惠券的操作
+    Options: function (type, e) {
+      console.log(type);
+      switch (type) {
+        case "edit":
+          let couponDetail = JSON.stringify(e);
+          if (this.active == 0) {
+            // 编辑优惠券
+            localStorage.setItem("couponDetail", couponDetail);
+            this.$router.push("/editCoupon");
+          } else {
+            // 编辑优惠券事件
+            localStorage.setItem("couponEventDetail", couponDetail);
+            this.$router.push("/editCouponEvent", e.id);
+          }
+          break;
+        case "copy":
+          console.log("复制");
+          break;
+        case "del":
+          if (this.active == 0) {
+            delCoupon([e.id]).then((res) => {
+              this.$message.success("删除成功");
+              this.isRefresh += 1;
+            });
+          } else {
+            delCouponEvent([e.id]).then((res) => {
+              this.$message.success("删除成功");
+              this.isRefresh += 1;
+            });
+          }
+
+          break;
       }
-    }, 
-    toDetail:function(e){ 
-      localStorage.setItem('customerDetail',JSON.stringify(e))
-      this.$router.push('/customerDetail')
+    },
+    // 改变搜索条件
+    ChangeActive: function (index) {
+      this.active = index;
+      let par = {
+        page: 0,
+        size: 30,
+      };
+      switch (index) {
+        case 0:
+          par.queryName = "";
+          this.tableHeader = [
+            {
+              prop: "activityName",
+              label: "优惠券活动",
+              width: "110",
+              align: "center",
+            },
+            {
+              prop: "title",
+              label: "券名（前缀、通用券）",
+              width: "212",
+              align: "center",
+            },
+            {
+              prop: "perview",
+              label: "预览",
+              width: "70",
+              align: "center",
+            },
+            {
+              prop: "useCouponCount",
+              label: "已使用",
+              width: "120",
+              align: "center",
+            },
+            {
+              prop: "couponStartTime",
+              label: "开始时间",
+              align: "center",
+            },
+            {
+              prop: "couponEndTime",
+              label: "结束时间",
+              align: "center",
+            },
+            {
+              prop: "isShow",
+              label: "前台列表是否显示",
+              width: "170",
+              align: "center",
+            },
+            {
+              prop: "status",
+              label: "状态",
+              align: "center",
+              width: "80",
+            },
+            {
+              prop: "option",
+              label: "操作",
+              width: "120",
+              align: "center",
+            },
+          ];
+          break;
+        case 1:
+          this.tableHeader = [
+            {
+              prop: "eventName",
+              label: "事件名称",
+              width: "110",
+              align: "center",
+            },
+            {
+              prop: "memberGroupIds",
+              label: "会员组",
+              width: "120",
+              align: "center",
+            },
+            {
+              prop: "conditionVo.type",
+              label: "限制条件",
+              width: "210",
+              align: "center",
+            },
+            {
+              prop: "couponNum",
+              label: "赠送优惠券",
+              width: "127",
+              align: "center",
+            },
+            {
+              prop: "couponNum",
+              label: "券数",
+              align: "center",
+            },
+            {
+              prop: "eventStartTime",
+              label: "开始时间",
+              align: "center",
+            },
+            {
+              prop: "eventEndTime",
+              label: "结束时间",
+              align: "center",
+            },
+            {
+              prop: "option",
+              label: "操作",
+              width: "120",
+              align: "center",
+            },
+          ];
+          break;
+        case 2:
+          par.couponNo = "";
+          par.couponTitle = "";
+          this.tableHeader = [
+            {
+              prop: "couponNo",
+              label: "优惠券号码",
+              align: "center",
+            },
+            {
+              prop: "activityName",
+              label: "活动名称",
+              align: "center",
+            },
+            {
+              prop: "nickName",
+              label: "拥有者",
+              align: "center",
+            },
+            {
+              prop: "createTime",
+              label: "获得时间",
+              align: "center",
+            },
+            {
+              prop: "useTime",
+              label: "使用时间",
+              align: "center",
+            },
+            {
+              prop: "status",
+              label: "状态",
+              align: "center",
+              width: "80",
+            },
+          ];
+          break;
+      }
+      this.requestParams = { ...par };
     },
     // 批量操作
-    BatchOption:function(e,selectItem){
+    BatchOption: function (e, selectItem) {
+      console.log(e);
       let that = this;
-      let par = [];
-      selectItem.map(i=>{
-        par.push(i.uid);
-      })
-      this.$DelTip(function(){
-        del(par).then(()=>{
-          that.isRefresh += 1;
-          that.$message.success('删除成功')
+      // 取消秒杀
+      // 0为下架  1为上架
+      let arr = [];
+      selectItem.map((i) => {
+        arr.push(i.id);
+      });
+      onsaleAll(par).then(() => {
+        that.$message.success("操作成功");
+        that.isRefresh += 1;
+      });
+    },
+    ToAdd: function () {
+      if (this.active == 0) {
+        if (localStorage.getItem("couponDetail")) {
+          localStorage.removeItem("couponDetail");
+        }
+        this.$router.push("/editCoupon");
+      } else {
+        if (localStorage.getItem("couponEventDetail")) {
+          localStorage.removeItem("couponEventDetail");
+        }
+        this.$router.push("/editCouponEvent");
+      }
+    },
+    ChangeStatus: function (e) {
+      let par = {
+        id: e.id,
+        status: e.status,
+      };
+      changeStatus(par)
+        .then((res) => {
+          this.$message.success("修改成功");
         })
-      })
+        .catch((res) => {
+          this.isRefresh += 1;
+        });
     },
-    Screen:function(){ 
-      this.requestParams.minOrder = this.minOrder
-      this.requestParams.maxOrder = this.maxOrder
-      this.requestParams.minMoney = this.minMoney
-      this.requestParams.maxMoney = this.maxMoney
-    },
-    Search:function(){
-      this.requestParams.keyword = this.searchVal
+    Preview: function (params) {
+      let url =
+        "https://" +
+        localStorage.getItem("storeUrl") +
+        "/product-details.html?id=" +
+        params.params.id;
+      window.open(url, "_blank");
     },
   },
 };
@@ -261,15 +542,6 @@ export default {
   justify-items: center;
   justify-content: space-between;
   flex: 1;
-  /deep/.el-button,
-  .el-button--medium {
-    padding: 10px 20px;
-    font-size: 14px;
-    border-radius: 4px;
-  }
-  /deep/.el-button + .el-button {
-    margin-left: 20px !important;
-  }
 }
 .content {
   overflow: hidden;
@@ -279,19 +551,22 @@ export default {
   background-color: #fff;
   .tab {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: 0 10px;
+    height: 45px;
     border-bottom: 1px solid #dcdfe6;
     .active {
-      border-bottom: 4px solid #f49342;
+      border-bottom: 4px solid #f49342 !important;
       color: #1a1d2c;
     }
-    & > div {
+    .nav-item {
       display: inline-block;
       padding: 0 10px;
-      height: 36px;
+      height: 41px;
       background: #fcfdff;
       font-size: 14px;
-      line-height: 36px;
+      line-height: 41px;
       border-bottom: 4px solid #fcfdff;
       color: #5e7185;
       cursor: pointer;
@@ -300,107 +575,26 @@ export default {
   .conditions {
     padding: 9px 12px;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     border-bottom: 1px solid #f1f1f6;
-    flex-wrap: wrap; 
-    .search-box {
-      display: flex;
-      flex: 1;
-    }
-    /deep/.el-input-group__append {
-      background: #fff;
-      color: #000000;
-    }
-    /deep/ .el-button {
-      height: 36px;
-      padding: 0 15px;
-    }
-  }
-  .pagination {
-    padding: 14px 0;
-    text-align: center;
   }
 }
-.filter-box {
-  padding: 10px 20px;
-  .item {
-    margin-top: 20px;
-    .inp-number {
-      display: inline-table;
-      font-size: 13px;
-      line-height: normal;
-      width: 200px;
-      border-collapse: separate;
-      border-spacing: 0;
-      border-top-left-radius: 4px;
-      border-bottom-left-radius: 4px;
-      border-right: none;
-      .inp-number-prepend,
-      .inp-number-append {
-        border-top-left-radius: 4px;
-        border-bottom-left-radius: 4px;
-        border-right: none;
-        border: 1px solid #dcdfe6;
-        padding: 0 15px;
-        color: #1a1d2c;
-        display: table-cell;
-        -webkit-box-sizing: border-box;
-        box-sizing: border-box;
-        width: 1px;
-        white-space: nowrap;
-        background: #fff;
-      }
-      /deep/ .el-input > input,
-      .el-input__inner > input {
-        border-top-left-radius: 0 !important;
-        border-bottom-left-radius: 0 !important;
-        border-left: 0;
-      }
-    }
-    & > span {
-      margin: 0px 10px;
-    }
-  }
-  .option-btn {
-    margin: 30px 0 10px;
-    text-align: center;
-  }
+.download-tpl-link-new {
+  color: #242b4a;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+  float: right;
 }
-.table {
-  position: relative;
-  .checkOption {
-    overflow: hidden;
-    width: 82px;
-    height: 36px;
-    line-height: 36px;
-    background: #fff;
-    padding: 0 12px;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-    z-index: 1;
-    position: absolute;
-    left: 0;
-    top: 8px;
-    .checkContent {
-      width: 100%;
-      height: 100%;
-      padding: 0 10px;
-      box-sizing: border-box;
-      border-radius: 4px;
-      border: 1px solid #dcdfe6;
-      color: #273a8a;
-      i {
-        float: right;
-        line-height: 36px;
-        margin-right: 4px;
-        cursor: pointer;
-        color: #c0c4cc;
-      }
-    }
-  }
-}  
-/deep/ .el-table--enable-row-transition .el-table__body td{
-  height: 70px;
+.textBtn {
+  // padding: 10px 0;
+  color: #273a8a;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: 400;
+  // margin-left: 10px;
+  // text-decoration: underline;
 }
 </style>
 

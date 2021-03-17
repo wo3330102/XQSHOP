@@ -167,11 +167,7 @@
                 <el-button type="primary">选择</el-button>
               </p>
             </div>
-          </div>
-
-
-
-
+          </div> 
           <!-- paypal支付设置 -->
           <div class="box">
             <h3 class="title">
@@ -234,7 +230,7 @@
   </div>
 </template> 
 <script>
-import { GetPayPalDetail, EditPay } from "@/api/pay";
+// import { GetPayPalDetail, EditPay } from "@/api/pay";
 export default {
   data() {
     return {
@@ -250,18 +246,18 @@ export default {
   },
   created() {
     let storeId = localStorage.getItem("storeId");
-    GetPayPalDetail(storeId)
-      .then((res) => {
-        this.payOption = res;
-        this.payLoading = false;
-        this.$refs["payOption"].clearValidate();
-      })
-      .catch((res) => {
-        console.log(res);
-        this.payOption = {};
-        this.payLoading = false;
-        this.$refs["payOption"].clearValidate();
-      });
+    // GetPayPalDetail(storeId)
+    //   .then((res) => {
+    //     this.payOption = res;
+    //     this.payLoading = false;
+    //     this.$refs["payOption"].clearValidate();
+    //   })
+    //   .catch((res) => {
+    //     console.log(res);
+    //     this.payOption = {};
+    //     this.payLoading = false;
+    //     this.$refs["payOption"].clearValidate();
+    //   });
   },
   methods: {
     ValidatePayPalForm: function (bool, obj) {

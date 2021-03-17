@@ -6,6 +6,9 @@ import store from './store'
 import enums from './utils/enums'
 import 'element-ui/lib/theme-chalk/index.css';
 import './element-variables.scss'; 
+import VueClipboard from 'vue-clipboard2'
+ 
+Vue.use(VueClipboard)
 Vue.prototype.$ELEMENT = {
   size: 'medium'
 };  

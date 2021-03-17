@@ -463,7 +463,7 @@ let planNameList = [];
 export default {
   data() {
     var checkmaxUnit = (rule, value, callback) => {
-      if (value && value < this.form.minUnit) {
+      if (value && Number(value) < Number(this.form.minUnit)) {
         callback(
           new Error(
             "不得小于" + (this.logisticsPlanType == 1 ? "金额" : "重量")
