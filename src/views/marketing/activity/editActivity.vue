@@ -75,7 +75,7 @@
                 @change="DiscountPrice"
                 v-if="detail.discountType === 0"
                 size="medium" 
-                @blur="detail.discountMoney = $IsNaN(detail.discountMoney)"
+                @blur="detail.discountMoney = $toDecimal2(detail.discountMoney)"
                 :maxlength="discountTypeValueOfInfomation[0].maxlength"
                 :placeholder="discountTypeValueOfInfomation[0].placeholder"
                 style="flex: 1"
@@ -179,7 +179,7 @@
                 ></el-option>
               </el-select>
               <div v-if="detail.effectCondition == 1" style="flex: 1">
-                <el-input v-model="detail.effectMoney" @blur="detail.effectMoney = $IsNaN(detail.effectMoney)" maxlength="8" placeholder>
+                <el-input v-model="detail.effectMoney" @blur="detail.effectMoney = $toDecimal2(detail.effectMoney)" maxlength="8" placeholder>
                   <span
                     slot="prefix"
                     style="line-height: 36px; margin-left: 3px"
@@ -342,11 +342,11 @@
                 <dd>使用次数</dd>
               </dl>
               <dl>
-                <dt>{{currency.s}}{{$IsNaN(detail.discountTotal) || '0.00' }}</dt>
+                <dt>{{currency.s}}{{$toDecimal2(detail.discountTotal) || '0.00' }}</dt>
                 <dd>优惠金额</dd>
               </dl>
               <dl>
-                <dt>{{currency.s}}{{$IsNaN(detail.saleTotal) ||'0.00' }}</dt>
+                <dt>{{currency.s}}{{$toDecimal2(detail.saleTotal) ||'0.00' }}</dt>
                 <dd>销售总额</dd>
               </dl>
             </div>
@@ -666,8 +666,8 @@ export default {
         this.isAutoApplyOffers = true;
       }
       console.log(detail)
-      detail.discountMoney = this.$IsNaN(detail.discountMoney)
-      detail.effectMoney = this.$IsNaN(detail.effectMoney)
+      detail.discountMoney = this.$toDecimal2(detail.discountMoney)
+      detail.effectMoney = this.$toDecimal2(detail.effectMoney)
       this.detail = detail;
       this.disabled = true;
     }

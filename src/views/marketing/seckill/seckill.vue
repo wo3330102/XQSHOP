@@ -184,10 +184,12 @@
 </template>
 <script>
 import tableTem from "@/components/tableTem";
+import selectProduct from "../components/selectProductInCoupon";
 import { delCoupon, delCouponEvent, changeStatus } from "@/api/coupon";
 export default {
   components: {
     tableTem,
+    selectProduct
   },
   data() {
     return {
@@ -494,18 +496,9 @@ export default {
         that.isRefresh += 1;
       });
     },
-    ToAdd: function () {
-      if (this.active == 0) {
-        if (localStorage.getItem("couponDetail")) {
-          localStorage.removeItem("couponDetail");
-        }
-        this.$router.push("/editCoupon");
-      } else {
-        if (localStorage.getItem("couponEventDetail")) {
-          localStorage.removeItem("couponEventDetail");
-        }
-        this.$router.push("/editCouponEvent");
-      }
+    ToAdd: function (e) { 
+      localStorage.setItem('seckillProduct',JSON.stringify(e));  
+      this.$router.push("/editSeckill"); 
     },
     ChangeStatus: function (e) {
       let par = {

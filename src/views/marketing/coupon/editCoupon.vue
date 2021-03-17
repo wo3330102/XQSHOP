@@ -123,7 +123,7 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="优惠券规则">
-          <div class="box">
+          <div class="box" style="width:800px">
             <el-row>
               <el-col :span="12">
                 <el-form-item>
@@ -516,6 +516,14 @@ h1 {
 }
 .small {
   width: 110px !important;
+}
+/deep/.el-form-item{
+  display: flex;
+  align-items: center;
+  /deep/.el-form-item__content{
+    flex: 1;
+    margin-left: 0 !important;
+  }
 }
 /deep/.el-form-item__label {
   color: #000000;

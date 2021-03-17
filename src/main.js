@@ -20,24 +20,30 @@ Vue.use(infiniteScroll);
 Vue.prototype.$enums=enums
 // 强制保留两位小数
 Vue.prototype.$toDecimal2 = function (x) {
-  var f = parseFloat(x);
-  if (isNaN(f) || f<0) {
-    return false;
+  if(e){
+    if (isNaN(e) || e<0) {
+      return e = '0.00';
+    } else {
+      var f = parseFloat(e);
+      if (isNaN(f)) {
+        return false;
+      }
+      var f = Math.round(e * 100) / 100;
+      var s = f.toString();
+      var rs = s.indexOf(".");
+      if (rs < 0) {
+        rs = s.length;
+        s += ".";
+      }
+      while (s.length <= rs + 2) {
+        s += "0";
+      }
+      return s; 
+    }
   }
-  var f = Math.round(x * 100) / 100;
-  var s = f.toString();
-  var rs = s.indexOf(".");
-  if (rs < 0) {
-    rs = s.length;
-    s += ".";
-  }
-  while (s.length <= rs + 2) {
-    s += "0";
-  }
-  return s;
 };
 // 判断是否为数字类型
-Vue.prototype.$IsNaN = function (e) { 
+Vue.prototype.$toDecimal2 = function (e) { 
   if(e){
     if (isNaN(e) || e<0) {
       return e = '0.00';

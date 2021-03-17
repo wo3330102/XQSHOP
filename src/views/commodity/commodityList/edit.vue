@@ -46,7 +46,7 @@
               maxlength="8"
               size="medium"
               placeholder="请输入商品现价"
-              @blur="attr.price = $IsNaN(attr.price)"
+              @blur="attr.price = $toDecimal2(attr.price)"
             >
               <span slot="append">{{ currency.n }}</span>
             </el-input>
@@ -129,7 +129,7 @@
               maxlength="8"
               size="medium"
               placeholder="请输入商品原价"
-              @blur="attr.ot_price = $IsNaN(attr.ot_price)"
+              @blur="attr.ot_price = $toDecimal2(attr.ot_price)"
             >
               <span slot="append">{{ currency.n }}</span>
             </el-input>
@@ -140,7 +140,7 @@
               class="box-item-entry"
               v-model="attr.weight"
               maxlength="8"
-              @blur="attr.weight = $IsNaN(attr.weight)"
+              @blur="attr.weight = $toDecimal2(attr.weight)"
               size="medium"
               placeholder="请输入商品重量"
             >
@@ -668,13 +668,13 @@ export default {
           that.attr = res.productInfo.attr;
           res.productInfo.attr.price == 0
             ? (that.attr.price = "")
-            : (that.attr.price = this.$IsNaN(res.productInfo.attr.price));
+            : (that.attr.price = this.$toDecimal2(res.productInfo.attr.price));
           res.productInfo.attr.weight == 0
             ? (that.attr.weight = "")
-            : (that.attr.weight = this.$IsNaN(res.productInfo.attr.weight));
+            : (that.attr.weight = this.$toDecimal2(res.productInfo.attr.weight));
           res.productInfo.attr.ot_price == 0
             ? (that.attr.ot_price = "")
-            : (that.attr.ot_price = this.$IsNaN(res.productInfo.attr.ot_price));
+            : (that.attr.ot_price = this.$toDecimal2(res.productInfo.attr.ot_price));
           res.productInfo.attr.stock === 0 ? (that.attr.stock = "") : "";
           that.detail.cate_id = Number(that.detail.cate_id);
           // 判断是否上架
@@ -898,7 +898,7 @@ export default {
       if (key == "skuCode") {  
         return false;
       } else if (key !== "stock") {  
-        data[key] = data[key] ? this.$IsNaN(data[key].toString()) : "0.00";
+        data[key] = data[key] ? this.$toDecimal2(data[key].toString()) : "0.00";
       } else { 
         isNaN(Number(data[key]))?data[key] = 0:''; 
       }
@@ -968,7 +968,7 @@ export default {
               item[e] =
                 e == "stock" || e == "skuCode"
                   ? that.batchValue
-                  : that.$IsNaN(that.batchValue);
+                  : that.$toDecimal2(that.batchValue);
             }
           });
         });

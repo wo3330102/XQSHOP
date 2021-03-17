@@ -234,14 +234,13 @@ export default {
         } else if(that.requestUrl == 'api/productLimit/limitedProductList'){
           that.data = res.data.content.map(item=>{
             item.isEdit = false;
-            item.editPrice = this.$IsNaN(item.preferentialPrice);
+            item.editPrice = this.$toDecimal2(item.preferentialPrice);
             item.editNum = item.number;
             return item;
           }); 
           that.total = res.data.totalElements; 
         } else if(this.isNewApi){ 
-          that.data = res.data.content
-          
+          that.data = res.data.content 
           that.total = res.data.totalElements; 
         } else {
           that.data = res.content;

@@ -168,7 +168,7 @@
                   style="width: 210px"
                   :maxlength="8"
                   :disabled="disabled" 
-                  @blur="detail.terms1 == 1?item.consumption = $IsNaN(item.consumption):''"
+                  @blur="detail.terms1 == 1?item.consumption = $toDecimal2(item.consumption):''"
                 >
                   <template
                     slot="prefix"
@@ -185,7 +185,7 @@
                   style="width: 210px"
                   :maxLength="detail.terms2 === 0 ? 8 : 2"
                   :disabled="disabled"
-                  @blur="detail.terms2 === 0 ? item.reduction = $IsNaN(item.reduction):''"
+                  @blur="detail.terms2 === 0 ? item.reduction = $toDecimal2(item.reduction):''"
                 >
                   <template
                     slot="prefix"
@@ -388,7 +388,7 @@
                 {{
                   detail.terms1 === 0
                     ? item.consumption + "件"
-                    : currency.s + $IsNaN(item.consumption)
+                    : currency.s + $toDecimal2(item.consumption)
                 }}，
                 {{ appliedObjectList[detail.applyObject].label }}
                 减免
@@ -409,12 +409,12 @@
               </dl>
               <dl>
                 <dt>
-                  {{currency.s+ (detail.discountTotal ? $IsNaN(detail.discountTotal) : "0.00") }}
+                  {{currency.s+ (detail.discountTotal ? $toDecimal2(detail.discountTotal) : "0.00") }}
                 </dt>
                 <dd>优惠金额</dd>
               </dl>
               <dl>
-                <dt>{{currency.s+ (detail.saleTotal ? $IsNaN(detail.saleTotal) : "0.00" )}}</dt>
+                <dt>{{currency.s+ (detail.saleTotal ? $toDecimal2(detail.saleTotal) : "0.00" )}}</dt>
                 <dd>销售总额</dd>
               </dl>
             </div>
@@ -432,7 +432,7 @@
                   {{
                     detail.terms1 === 0
                       ? item.consumption + "件"
-                      : currency.s + $IsNaN(item.consumption)
+                      : currency.s + $toDecimal2(item.consumption)
                   }}，
                   {{ appliedObjectList[detail.applyObject].label }}
                   减免
@@ -450,14 +450,14 @@
                 <span class="title">优惠金额：</span>
                 <span class="text"
                   >{{
-                    currency.s + (detail.discountTotal ? $IsNaN(detail.discountTotal) : "0.00")
+                    currency.s + (detail.discountTotal ? $toDecimal2(detail.discountTotal) : "0.00")
                   }}</span
                 >
               </p>
               <p>
                 <span class="title">销售金额：</span>
                 <span class="text"
-                  >{{currency.s+ (detail.saleTotal ? $IsNaN(detail.saleTotal) : "0.00") }}</span
+                  >{{currency.s+ (detail.saleTotal ? $toDecimal2(detail.saleTotal) : "0.00") }}</span
                 >
               </p>
             </div>
@@ -807,10 +807,10 @@ export default {
         if (i.reduceDiscount) {
           par.reduction = i.reduceDiscount;
         } else {
-          par.reduction = this.$IsNaN(i.reduceMoney);
+          par.reduction = this.$toDecimal2(i.reduceMoney);
         }
         if (i.specMoney) {
-          par.consumption = this.$IsNaN(i.specMoney);
+          par.consumption = this.$toDecimal2(i.specMoney);
         } else {
           par.consumption = i.specNums;
         }

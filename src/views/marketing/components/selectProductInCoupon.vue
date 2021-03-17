@@ -39,7 +39,7 @@
                 <!-- <span>{{itme.skuCode || ''}}</span> -->
                 <!-- <span>{{itme.cateId || ''}}</span> -->
               </div>
-              <h3>{{ currency.s + $IsNaN(item.price) }}</h3>
+              <h3>{{ currency.s + $toDecimal2(item.price) }}</h3>
               <span :class="item.status == 1 ? '' : 'off'">{{
                 item.status == 1 ? "在线" : "下架"
               }}</span>
