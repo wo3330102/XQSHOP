@@ -86,7 +86,7 @@
               {{
                 currency.s +
                 " " +
-                (scope.row.price ? $IsNaN(scope.row.price) : "0.00")
+                (scope.row.price ? $toDecimal2(scope.row.price) : "0.00")
               }}
             </template>
             <!-- 优惠价格 -->
@@ -97,17 +97,17 @@
                 placeholder="输入优惠价格"
                 @blur="
                   scope.row.editPrice == ''
-                    ? (scope.row.editPrice = $IsNaN(
+                    ? (scope.row.editPrice = $toDecimal2(
                         scope.row.preferentialPrice
                       ))
-                    : (scope.row.editPrice = $IsNaN(scope.row.editPrice))
+                    : (scope.row.editPrice = $toDecimal2(scope.row.editPrice))
                 "
               ></el-input>
               <span v-else>{{
                 currency.s +
                 " " +
                 (scope.row.preferentialPrice
-                  ? $IsNaN(scope.row.preferentialPrice)
+                  ? $toDecimal2(scope.row.preferentialPrice)
                   : "0.00")
               }}</span>
             </template>
@@ -169,7 +169,7 @@
         <el-form-item label="优惠价格">
           <el-input
             v-model="form.price"
-            @change="form.price = $IsNaN(form.price)"
+            @change="form.price = $toDecimal2(form.price)"
             placeholder="请输入优惠价格"
           ></el-input>
         </el-form-item>
@@ -207,6 +207,8 @@
           <div class="seach-box-item">
             <el-select
               v-model="productListParams.tagId"
+              clearable
+              @clear="productListParams.tagId = ''"
               placeholder="请选择分类"
               style="width: 164px"
             >
@@ -273,7 +275,7 @@
                   "
                 >
                   {{ v.sku }}
-                  <span class="price">{{ currency.s + $IsNaN(v.price) }}</span>
+                  <span class="price">{{ currency.s + $toDecimal2(v.price) }}</span>
                 </el-checkbox>
               </p>
             </el-collapse-item>

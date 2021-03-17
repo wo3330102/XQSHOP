@@ -77,17 +77,17 @@
                   </td>
                   <td class="spec">1</td>
                   <td class="price">
-                    {{currency.s}}{{ $IsNaN(item.cartInfoMap.truePrice) }} *
+                    {{currency.s}}{{ $toDecimal2(item.cartInfoMap.truePrice) }} *
                     {{ item.cartInfoMap.cartNum }}
                   </td>
                   <td class="totalPrice">
                     {{
-                      currency.s+$IsNaN(
+                      currency.s+$toDecimal2(
                         item.cartInfoMap.truePrice * item.cartInfoMap.cartNum
                       )
                     }}
                   </td>
-                  <td class="discount">{{currency.s}}{{detail.discount?$IsNaN(detail.discount):'0.00'}}</td>
+                  <td class="discount">{{currency.s}}{{detail.discount?$toDecimal2(detail.discount):'0.00'}}</td>
                 </tr>
               </tbody>
             </table>
@@ -99,28 +99,28 @@
               <div class="left">小计</div>
               <div class="right">
                 <span>{{ detail.totalNum }}项</span>
-                <span class="num">{{currency.s}} {{ $IsNaN(detail.totalPrice) }}</span>
+                <span class="num">{{currency.s}} {{ $toDecimal2(detail.totalPrice) }}</span>
               </div>
             </div>
             <div class="item">
               <div class="left">折扣</div>
               <div class="right">
                 <span>折扣金额</span>
-                <span class="num">{{currency.s}} {{ detail.discount?$IsNaN(detail.discount):'0.00' }}</span>
+                <span class="num">{{currency.s}} {{ detail.discount?$toDecimal2(detail.discount):'0.00' }}</span>
               </div>
             </div>
             <div class="item">
               <div class="left">运费</div>
               <div class="right">
                 <span>Standard Shipping</span>
-                <span class="num">{{currency.s}} {{ (detail.payPostage?$IsNaN(detail.payPostage):'0.00') }}</span>
+                <span class="num">{{currency.s}} {{ (detail.payPostage?$toDecimal2(detail.payPostage):'0.00') }}</span>
               </div>
             </div>
             <div class="item">
               <div class="left">运费险</div>
               <div class="right">
                 <span></span>
-                <span class="num">{{currency.s}} {{ (detail.freightPrice?$IsNaN(detail.freightPrice):'0.00') }}</span>
+                <span class="num">{{currency.s}} {{ (detail.freightPrice?$toDecimal2(detail.freightPrice):'0.00') }}</span>
               </div> 
             </div>
             <div class="item">

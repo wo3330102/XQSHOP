@@ -77,13 +77,13 @@ export default {
         //   tip: "支持配置员工账号，管理员工在店铺中可查看的内容或执行的操作",
         //   url: "",
         // },
-        {
-          id: 9,
-          icon: url + "/static/img/settings/policyClauses.svg",
-          title: "政策条款",
-          tip: "设置店铺的常见政策条款",
-          url: "/policyClauses",
-        },
+        // {
+        //   id: 9,
+        //   icon: url + "/static/img/settings/policyClauses.svg",
+        //   title: "政策条款",
+        //   tip: "设置店铺的常见政策条款",
+        //   url: "/policyClauses",
+        // },
       ],
     };
   },

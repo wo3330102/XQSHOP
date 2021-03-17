@@ -63,8 +63,8 @@
               <el-menu-item index="/activity">优惠活动</el-menu-item>
               <el-menu-item index="/discount">梯度优惠</el-menu-item>
               <el-menu-item index="/share">激励分享</el-menu-item>
-              <!-- <el-menu-item index="/coupon">优惠券</el-menu-item>
-              <el-menu-item index="/seckill">秒杀产品</el-menu-item> -->
+              <el-menu-item index="/coupon">优惠券</el-menu-item>
+              <!-- <el-menu-item index="/seckill">秒杀产品</el-menu-item> -->
             </el-menu-item-group>
           </el-submenu>
           <el-menu-item index="/appHome">
@@ -140,7 +140,7 @@
         <div class="router-view">
           <transition name="fade" mode="out-in">
             <router-view
-              style="padding-bottom: 50px"
+              style="padding-bottom: 10px"
               v-if="isRouterAlive"
             ></router-view>
           </transition>
@@ -155,8 +155,7 @@ import { getShop, getShopId } from "@/api/yxSystemStore";
 let loadin;
 export default {
   name: "home",
-  data() {
-    
+  data() { 
     return {
       userName: "admin",
       transitionName: "fade",
@@ -186,7 +185,7 @@ export default {
       lock: true,
       text: "Loading",
       spinner: "el-icon-loading",
-      background: "rgba(0, 0, 0, 0.7)",
+      background: "rgba(255, 255, 255, 0.7)",
     });
   },
   created() {

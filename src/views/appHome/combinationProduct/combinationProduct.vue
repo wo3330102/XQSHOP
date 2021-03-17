@@ -76,7 +76,7 @@
                     <span>{{ scope.row.composeCount }}/2</span>
                   </template>
                   <template v-else-if="item.prop == 'option'">
-                    <span class="textBtn" @click.stop="Perview(scope.row.composeId)">预览</span>
+                    <span class="textBtn" @click.stop="Perview(scope.row.productId)">预览</span>
                     <span class="textBtn">编辑</span>
                   </template>
                   <span v-else>{{ scope.row[item.prop] }}</span>
@@ -106,6 +106,7 @@
       @selectItem="SelectItem"
       :requestUrl="'api/yxComposeProduct/list/product'"
       :requestParams="getProductListParams"
+      :disableNum="disableNum"
       :needLoad="false"
     ></selectProduct>
   </div>
@@ -157,7 +158,13 @@ export default {
       shopDialog: false,
       addData: [],
       addType:1,  // 1为添加主商品，2为批量添加子商品；
+      disableNum:9999999,
     };
+  },
+  watch:{
+    addType:function(val){
+      val == 1?this.disableNum = 0 : this.disableNum = 2
+    }
   },
   methods: {
     Perview:function(id){

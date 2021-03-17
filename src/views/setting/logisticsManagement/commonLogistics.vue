@@ -177,10 +177,10 @@
                     <p>
                       <template v-if="plan.type == 1">
                         下单金额：{{ currency.s
-                        }}{{ plan.minUnit ? $IsNaN(plan.minUnit) : "0.00" }}
+                        }}{{ plan.minUnit ? $toDecimal2(plan.minUnit) : "0.00" }}
                         {{
                           plan.maxUnit
-                            ? "- " + currency.s + $IsNaN(plan.maxUnit)
+                            ? "- " + currency.s + $toDecimal2(plan.maxUnit)
                             : "and up"
                         }}
                       </template>
@@ -196,7 +196,7 @@
                     {{
                       plan.price == 0
                         ? "免运费"
-                        : currency.s + $IsNaN(plan.price)
+                        : currency.s + $toDecimal2(plan.price)
                     }}
                   </td>
                 </tr>

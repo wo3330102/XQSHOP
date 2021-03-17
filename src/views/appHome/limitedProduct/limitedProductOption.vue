@@ -29,7 +29,7 @@
                   >（开启后会在商品图上显示优惠提示）</span
                 >
               </span>
-              <span class="option">效果预览</span>
+              <span class="option" @click="preview = true">效果预览</span>
             </h3>
             <el-radio-group v-model="detail.rates">
               <el-radio :label="0">开启</el-radio>
@@ -52,6 +52,14 @@
         <el-button type="primary" @click="Save">保存</el-button>
       </div>
     </div>
+    <el-dialog title="效果预览" :visible.sync="preview">
+      <div style="text-align: center; width: 100%; max-height: 620px;"> 
+        <el-image style="width: 300px;" src="https://alligatoreel-fa.xshoppy.shop/static/img/applications/limit-quantity-discount/limit-quantity-yes.png" ></el-image>
+        <p class="discount_tips-text">
+            限量优惠开启效果展示
+        </p>
+      </div> 
+    </el-dialog>
   </div>
 </template> 
 <script>
@@ -64,6 +72,8 @@ export default {
         type: true,
         id: "",
       },
+      preview:false,
+        
     };
   }, 
   created() {
@@ -138,6 +148,13 @@ h1 {
     }
   }
 }  
+.discount_tips-text{
+  width: 100%;
+    text-align: center;
+    font-size: 14px;
+    color: #3d5265;
+    margin-bottom: 20px;
+}
 .infoContent {
   line-height: 18px;
   font-size: 12px;

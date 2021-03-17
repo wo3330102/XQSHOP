@@ -40,7 +40,7 @@
             init();
           }
         "
-        @clear="requestParams.cateId = 0"
+        @clear="requestParams.cateId = ''"
       >
         <el-option
           v-for="item in shopCategoryList"
@@ -64,6 +64,7 @@
       :data="table"
       style="width: 100%"
       empty-text
+      ref="multipleTable"
       v-el-table-infinite-scroll="load"
       @selection-change="SelectItem"
     >
@@ -148,8 +149,8 @@ export default {
   },
   watch: {
     requestParams: {
-      handler: function (val) {
-        console.log(val); 
+      handler: function (val) { 
+        this.selectItem = [];
         this.init();
       },
       deep: true, 
@@ -157,18 +158,20 @@ export default {
     },
     visible: function (val) {
       this.shopDialog = val;
+      if(!val){
+        this.$refs.multipleTable.clearSelection(); 
+      }
     },
     disableNum: function (val) {
       this.disableNumber = val;
     },
-    selectItem: function (val) {
-      console.log(this.disableNumber);
+    selectItem: function (val) { 
       if (val.length >= this.disableNumber) {
         this.disable = false;
       } else {
         this.disable = true;
       }
-    },
+    }, 
   },
   created() {
     getCates(this.requestParams).then((res) => {
@@ -181,8 +184,7 @@ export default {
       this.$emit("update:visible", false);
     },
     init: function () {
-      let that = this; 
-      console.log(that.requestParams)
+      let that = this;  
       request({
         url:
           that.requestUrl + "?" + qs.stringify(that.requestParams, { indices: false }),
@@ -204,15 +206,16 @@ export default {
     },
     Search: function () {
       this.table = []; 
-      this.requestParams.productName = this.shopContent; 
+      this.requestParams.productName = this.shopContent;
     },
     SelectItem: function (e) {
       this.selectItem = e;
+      this.$store.commit('changeSelectItem',e)
     },
     CheckSelectItem: function () { 
-      if(this.selectItem.length>1){
+      if(this.selectItem.length>0){
         this.$emit("update:visible", false);
-        this.$emit("selectItem", this.selectItem);  
+        this.$emit("selectItem", [...this.selectItem]); 
       } else {
         this.$message.warning('请选择数据')
       } 
@@ -241,4 +244,4 @@ export default {
     },
   },
 };
-</script> 
+</script>

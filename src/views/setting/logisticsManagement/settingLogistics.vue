@@ -113,11 +113,11 @@
                       <td>{{ item.name }}</td>
                       <td>
                         {{ currency.s
-                        }}{{ item.minUnit ? $IsNaN(item.minUnit) : "0.00" }}
+                        }}{{ item.minUnit ? $toDecimal2(item.minUnit) : "0.00" }}
                         {{
                           Number(item.maxUnit) == 0 || !item.maxUnit
                             ? "and up"
-                            : "- "+ currency.s + $IsNaN(item.maxUnit)
+                            : "- "+ currency.s + $toDecimal2(item.maxUnit)
                         }}
                       </td>
                       <td>
@@ -167,11 +167,11 @@
                     >
                       <td>{{ item.name }}</td>
                       <td>
-                        {{ item.minUnit ? $IsNaN(item.minUnit)+'kg' : "0.00 kg" }}
+                        {{ item.minUnit ? $toDecimal2(item.minUnit)+'kg' : "0.00 kg" }}
                         {{
                           Number(item.maxUnit) == 0 || !item.maxUnit
                             ? "and up"
-                            : "- " + $IsNaN(item.maxUnit) + 'kg'
+                            : "- " + $toDecimal2(item.maxUnit) + 'kg'
                         }}
                       </td>
                       <td>
@@ -395,7 +395,7 @@
                   style="flex: 1"
                   placeholder="0.00"
                   v-model="form.minUnit"
-                  @blur="form.minUnit = $IsNaN(form.minUnit)"
+                  @blur="form.minUnit = $toDecimal2(form.minUnit)"
                 >
                   <template slot="prepend"
                     >最低{{
@@ -413,7 +413,7 @@
                   style="flex: 1"
                   placeholder="不限制"
                   v-model="form.maxUnit"
-                  @blur="form.maxUnit = $IsNaN(form.maxUnit)"
+                  @blur="form.maxUnit = $toDecimal2(form.maxUnit)"
                 >
                   <template slot="prepend"
                     >最高{{
@@ -441,7 +441,7 @@
               v-model="form.price"
               placeholder="请输入物流费用"
               maxlength="100"
-              @blur="form.price = $IsNaN(form.price)"
+              @blur="form.price = $toDecimal2(form.price)"
             >
               <template slot="prefix">{{ currency.s }}</template>
             </el-input>
@@ -463,7 +463,7 @@ let planNameList = [];
 export default {
   data() {
     var checkmaxUnit = (rule, value, callback) => {
-      if (value && value < this.form.minUnit) {
+      if (value && Number(value) < Number(this.form.minUnit)) {
         callback(
           new Error(
             "不得小于" + (this.logisticsPlanType == 1 ? "金额" : "重量")

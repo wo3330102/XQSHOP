@@ -17,7 +17,7 @@ export default new Vuex.Store({
     type:0,
     moduleId:0,
     url:'',
-    reflash:false, 
+    reflash:false,  
   },
   mutations: {
     setModuleId:function(state, data){
@@ -34,7 +34,7 @@ export default new Vuex.Store({
     },
     isRefresh:function(state,val){
       state.reflash = val;
-    }, 
+    },  
   },
   actions: {
     getTemplateQuery ({ commit, state }) {

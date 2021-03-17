@@ -6,6 +6,9 @@ import store from './store'
 import enums from './utils/enums'
 import 'element-ui/lib/theme-chalk/index.css';
 import './element-variables.scss'; 
+import VueClipboard from 'vue-clipboard2'
+ 
+Vue.use(VueClipboard)
 Vue.prototype.$ELEMENT = {
   size: 'medium'
 };  
@@ -16,26 +19,8 @@ import infiniteScroll from "vue-infinite-scroll";
 Vue.use(infiniteScroll);
 Vue.prototype.$enums=enums
 // 强制保留两位小数
-Vue.prototype.$toDecimal2 = function (x) {
-  var f = parseFloat(x);
-  if (isNaN(f) || f<0) {
-    return false;
-  }
-  var f = Math.round(x * 100) / 100;
-  var s = f.toString();
-  var rs = s.indexOf(".");
-  if (rs < 0) {
-    rs = s.length;
-    s += ".";
-  }
-  while (s.length <= rs + 2) {
-    s += "0";
-  }
-  return s;
-};
-// 判断是否为数字类型
-Vue.prototype.$IsNaN = function (e) { 
-  if(e){
+Vue.prototype.$toDecimal2 = function (e) {
+  if(e){ 
     if (isNaN(e) || e<0) {
       return e = '0.00';
     } else {
@@ -55,6 +40,17 @@ Vue.prototype.$IsNaN = function (e) {
       }
       return s; 
     }
+  }
+};
+// 判断是否为数字类型
+Vue.prototype.$IsNaN = function (e,max) { 
+  if(e){
+    const num = Number(e);
+    if (isNaN(num) || (max?num<max:num<1)) {
+      return '';
+    } else {
+      return num;
+    }    
   }
 }
 // 全局跳转

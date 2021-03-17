@@ -44,6 +44,7 @@
                 v-model="detail.discountName"
                 size="medium"
                 placeholder="请输入活动名称"
+                maxlength="50"
               ></el-input>
             </div>
           </div>
@@ -74,7 +75,7 @@
                 @change="DiscountPrice"
                 v-if="detail.discountType === 0"
                 size="medium" 
-                @blur="detail.discountMoney = $IsNaN(detail.discountMoney)"
+                @blur="detail.discountMoney = $toDecimal2(detail.discountMoney)"
                 :maxlength="discountTypeValueOfInfomation[0].maxlength"
                 :placeholder="discountTypeValueOfInfomation[0].placeholder"
                 style="flex: 1"
@@ -178,7 +179,7 @@
                 ></el-option>
               </el-select>
               <div v-if="detail.effectCondition == 1" style="flex: 1">
-                <el-input v-model="detail.effectMoney" @blur="detail.effectMoney = $IsNaN(detail.effectMoney)" maxlength="8" placeholder>
+                <el-input v-model="detail.effectMoney" @blur="detail.effectMoney = $toDecimal2(detail.effectMoney)" maxlength="8" placeholder>
                   <span
                     slot="prefix"
                     style="line-height: 36px; margin-left: 3px"
@@ -264,6 +265,7 @@
                 :disabled="isAutoApplyOffers || id !== ''"
                 v-model="detail.promoCode"
                 size="medium"
+                maxlength="100"
                 placeholder="请输入优惠码，如：XMAS20OFF"
               ></el-input>
             </div>
@@ -340,11 +342,11 @@
                 <dd>使用次数</dd>
               </dl>
               <dl>
-                <dt>{{currency.s}}{{$IsNaN(detail.discountTotal) || '0.00' }}</dt>
+                <dt>{{currency.s}}{{$toDecimal2(detail.discountTotal) || '0.00' }}</dt>
                 <dd>优惠金额</dd>
               </dl>
               <dl>
-                <dt>{{currency.s}}{{$IsNaN(detail.saleTotal) ||'0.00' }}</dt>
+                <dt>{{currency.s}}{{$toDecimal2(detail.saleTotal) ||'0.00' }}</dt>
                 <dd>销售总额</dd>
               </dl>
             </div>
@@ -531,6 +533,7 @@ export default {
       detail: {
         discountType: 0,
         applyObject: 0,
+        discountMoney:'',
         status: 1, // 0关闭 1开启
         discountQuota: 0, // 默认折扣百分比为0
         startTime: new Date().getTime(),
@@ -663,8 +666,8 @@ export default {
         this.isAutoApplyOffers = true;
       }
       console.log(detail)
-      detail.discountMoney = this.$IsNaN(detail.discountMoney)
-      detail.effectMoney = this.$IsNaN(detail.effectMoney)
+      detail.discountMoney = this.$toDecimal2(detail.discountMoney)
+      detail.effectMoney = this.$toDecimal2(detail.effectMoney)
       this.detail = detail;
       this.disabled = true;
     }
@@ -833,20 +836,20 @@ export default {
         this.$message.error("请选择活动开始时间");
         return false;
       }
-      if (this.detail.endTime) {
-        this.detail.endTime = this.detail.endTime + 24 * 60 * 60 * 1000 - 1000;
-      }
-      if (this.detail.discountType === 0) {
+      this.detail.endTime?this.detail.endTime = this.detail.endTime + 24 * 60 * 60 * 1000 - 1000:'';
+      if (this.detail.discountType == 0) { 
         if (this.detail.discountMoney <= 0) {
           this.$message.error("请填写优惠金额，金额必须大于0");
           return false;
         }
-      } else {
+      } else if(this.detail.discountType == 1){
         if (!this.detail.discountQuota) {
           this.$message.error("请输入优惠折扣");
           return false;
         }
       }
+      // console.log(this.detail);
+      // return false;
       if (this.detail.effectCondition == 1) {
         if (this.detail.effectMoney <= 0) {
           this.$message.error("请填写生效条件金额，金额必须大于0");
@@ -864,8 +867,7 @@ export default {
             this.detail.prodIds = JSON.stringify([...this.detail.list]);
             break;
         }
-      } else {
-        
+      } else { 
         this.detail.prodIds = "";
         this.detail.tagIds = "";
         if(this.detail.applyObject == 1 || this.detail.applyObject == 2){
@@ -874,19 +876,22 @@ export default {
         }
       }
       let par = { ...this.detail }; 
-      delete par.list;
-      console.log(this.detail);
+      delete par.list; 
       if (this.id) {
         // 修改
         edit(par).then((res) => {
-          this.$message.success("修改成功");
+          if(res){
+            this.$message.success("修改成功");
           this.$router.push("/activity");
+          }
         });
       } else {
         // 新增
         add(par).then((res) => {
-          this.$message.success("新增成功");
+          if(res){
+            this.$message.success("新增成功");
           this.$router.push("/activity");
+          }
         });
       }
     },

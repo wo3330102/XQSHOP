@@ -57,11 +57,11 @@
           ></el-input>
         </div>
         <p>同步店铺将会覆盖原有的物流设置，重复商品，其余数据均不会替换。</p>
-        <p>
+        <!-- <p>
           <el-checkbox v-model="isCoverProduct"
             >使用同步中的商品替换系统重复的商品。</el-checkbox
           >
-        </p>
+        </p> -->
       </div>
     </default-dialog>
     <default-dialog
