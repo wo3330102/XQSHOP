@@ -41,14 +41,11 @@ const allowRequest = function (reqList, url) {
       break
     }
   }
-}
-
-
-
+} 
 // 创建axios实例
 const service = axios.create({
   // axios中请求配置有baseURL选项，表示请求URL公共部分 'http://192.168.1.204:8008/admin'||
-  baseURL:process.env.VUE_APP_BASE_API, //
+  baseURL: process.env.VUE_APP_BASE_API, //
   // 超时
   timeout: 1000000
 })
@@ -68,7 +65,7 @@ service.interceptors.request.use(config => {
     stopRepeatRequest(reqList, config.url, cancel, '请勿重复请求')
     if (config.data) {
       if (!config.data.notStoreId && !(config.data instanceof Array)) {
-        config.data = { 
+        config.data = {
           ...config.data,
           storeId: storeId,
         }
@@ -104,7 +101,7 @@ service.interceptors.request.use(config => {
   } else {
     return config
   }
-}, error => { 
+}, error => {
   Promise.reject(error)
 })
 
@@ -123,9 +120,9 @@ service.interceptors.response.use(res => {
     // 增加延迟，相同请求不得在短时间内重复发送
     setTimeout(() => {
       allowRequest(reqList, res.config.url)
-    }, 1000) 
+    }, 1000)
     // 未设置状态码则默认成功状态 
-    const code = res.data.status || 200; 
+    const code = res.data.status || 200;
     // 获取错误信息
     const msg = res.data.msg
     if (code == 401) {
@@ -134,11 +131,11 @@ service.interceptors.response.use(res => {
       Message({
         message: msg,
         type: 'error'
-      }) 
+      })
       return false;
-    }  else {
+    } else {
       return res.data
-    } 
+    }
   },
   error => {
     // 增加延迟，相同请求不得在短时间内重复发送

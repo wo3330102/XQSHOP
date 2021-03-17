@@ -17,3 +17,13 @@ export function editSeckill(data){
     data
   })
 } 
+
+// 修改秒杀状态
+
+export function editSeckillStatus(data){
+  return request({
+    url:'api/seckill/status',
+    method:'post',
+    data
+  })
+} 

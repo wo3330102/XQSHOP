@@ -247,9 +247,9 @@ export default {
     },
   },
   destroyed() {
-    // if(localStorage.getItem('seckillProduct')){
-    //   localStorage.removeItem('seckillProduct')
-    // }
+    if(localStorage.getItem('seckillProduct')){
+      localStorage.removeItem('seckillProduct')
+    }
 
     console.log("销毁");
   },

@@ -134,7 +134,11 @@ const routes = [{
       path: '/editSeckill',
       name: 'EditSeckill',
       component: () => import( /* webpackChunkName: "about" */ '../views/marketing/seckill/editSeckill.vue'),
-    },   ]
+    },{
+      path: '/editSeckillRules',
+      name: 'EditSeckillRules',
+      component: () => import( /* webpackChunkName: "about" */ '../views/marketing/seckill/editSeckillRules.vue'),
+    },    ]
   }, {
     path: 'appHome',
     name: '应用管理',

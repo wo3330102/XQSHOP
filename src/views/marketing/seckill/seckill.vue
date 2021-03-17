@@ -3,7 +3,9 @@
     <h1 class="title">
       <span>秒杀</span>
       <span style="font-size: 0">
-        <el-button type="primary" @click="showSelectProduct = true">添加秒杀</el-button>
+        <el-button type="primary" @click="showSelectProduct = true"
+          >添加秒杀</el-button
+        >
       </span>
     </h1>
     <div class="content">
@@ -47,7 +49,6 @@
         :tableHeader="tableHeader"
         :isRefresh="isRefresh"
         :isNewApi="true"
-        :rowIsClick="false"
         @rowClick="toDetail"
         @resultData="TableResult"
       >
@@ -63,19 +64,35 @@
             :sortable="item.sortable"
           >
             <template slot-scope="scope">
-              <template v-if="item.prop == 'perview'">
-                <span class="textBtn" @click.stop="Preview">预览</span>
+              <template v-if="item.prop == 'image'">
+                <el-image :src="scope.row.image" class="small-img"></el-image>
               </template>
-              <template v-else-if="item.prop == 'isShow'">
-                {{ scope.row.isShow == 1 ? "显示" : "前端隐藏" }}
+              <template v-else-if="item.prop == 'info'">
+                <div style="text-align: left">
+                  <p style="overflow: hidden; text-overflow: ellipsis;white-space: nowrap">
+                    {{ scope.row.storeName }}
+                  </p>
+                  <p style="overflow: hidden; text-overflow: ellipsis;white-space: nowrap">
+                    {{ scope.row.skuCode }}
+                  </p>
+                  <p style="overflow: hidden; text-overflow: ellipsis;white-space: nowrap">
+                    {{ scope.row.storeName }}
+                  </p>
+                </div>
               </template>
               <template v-else-if="item.prop == 'status'">
+                <!-- {{scope.row.status == 1?'在线':'下线'}} -->
                 <el-switch
                   v-model="scope.row.status"
                   :active-value="1"
                   :inactive-value="0"
                   @change="ChangeStatus(scope.row)"
                 ></el-switch>
+              </template>
+              <template
+                v-else-if="item.prop == 'outPrice' || item.prop == 'price'"
+              >
+                {{ currency.s + $toDecimal2(scope.row[item.prop]) }}
               </template>
               <template v-else-if="item.prop == 'option'">
                 <el-dropdown
@@ -85,14 +102,13 @@
                       Options(e, scope.row);
                     }
                   "
+                  @click.native.stop=""
                 >
                   <el-button size="small">
                     操作<i class="el-icon-arrow-down el-icon--right"></i>
                   </el-button>
                   <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item command="edit">编辑</el-dropdown-item>
-                    <el-dropdown-item command="copy">复制</el-dropdown-item>
-                    <el-dropdown-item command="del">删除</el-dropdown-item>
+                    <el-dropdown-item command="edit">编辑规则</el-dropdown-item> 
                   </el-dropdown-menu>
                 </el-dropdown>
               </template>
@@ -125,11 +141,11 @@
               <template v-else-if="item.prop == 'option'">
                 <el-dropdown
                   type="primary"
-                  @command="
+                  @command.native="
                     (e) => {
                       Options(e, scope.row);
                     }
-                  "
+                  " 
                 >
                   <el-button size="small">
                     操作<i class="el-icon-arrow-down el-icon--right"></i>
@@ -176,7 +192,7 @@
     </div>
     <select-product
       :visible.sync="showSelectProduct"
-      :requestParams="productParams" 
+      :requestParams="productParams"
       @Result="ToAdd"
     >
     </select-product>
@@ -186,10 +202,11 @@
 import tableTem from "@/components/tableTem";
 import selectProduct from "../components/selectProductInCoupon";
 import { delCoupon, delCouponEvent, changeStatus } from "@/api/coupon";
+import {editSeckillStatus} from '@/api/seckill'
 export default {
   components: {
     tableTem,
-    selectProduct
+    selectProduct,
   },
   data() {
     return {
@@ -224,7 +241,7 @@ export default {
         {
           prop: "image",
           label: "图片",
-          width: "80",
+          width: "110",
           align: "center",
         },
         {
@@ -233,33 +250,34 @@ export default {
           width: "140",
           align: "center",
         },
-        // {
-        //   prop: "perview",
-        //   label: "排序",
-        //   width: "70",
-        //   align: "center",
-        // },
         {
-          prop: "status",
-          label: "状态",
+          prop: "sort",
+          label: "排序",
           width: "60",
           align: "center",
         },
         {
-          prop: "isShow",
-          label: "价格",
-          width: "120",
+          prop: "status",
+          label: "状态",
+          width: "70",
           align: "center",
         },
         {
-          prop: "isShow",
+          prop: "outPrice",
+          label: "价格",
+          width: "100",
+          align: "center",
+        },
+        {
+          prop: "price",
           label: "秒杀价格",
-          width: "120",
+          width: "100",
           align: "center",
         },
         {
           prop: "num",
           label: "限购数量",
+          width: "80",
           align: "center",
         },
         {
@@ -281,11 +299,11 @@ export default {
         {
           prop: "option",
           label: "操作",
-          width: "120",
+          width: "100",
           align: "center",
         },
       ],
-      showSelectProduct:false,
+      showSelectProduct: false,
     };
   },
 
@@ -297,18 +315,14 @@ export default {
       console.log(type);
       switch (type) {
         case "edit":
-          let couponDetail = JSON.stringify(e);
+          let seckillProduct = JSON.stringify(e);
           if (this.active == 0) {
             // 编辑优惠券
-            localStorage.setItem("couponDetail", couponDetail);
-            this.$router.push("/editCoupon");
-          } else {
-            // 编辑优惠券事件
-            localStorage.setItem("couponEventDetail", couponDetail);
-            this.$router.push("/editCouponEvent", e.id);
-          }
+            localStorage.setItem("seckillProduct", seckillProduct);
+            this.$router.push("/editSeckillRules");
+          } 
           break;
-        case "copy":
+        case "status":
           console.log("复制");
           break;
         case "del":
@@ -322,8 +336,7 @@ export default {
               this.$message.success("删除成功");
               this.isRefresh += 1;
             });
-          }
-
+          } 
           break;
       }
     },
@@ -339,55 +352,67 @@ export default {
           par.queryName = "";
           this.tableHeader = [
             {
-              prop: "activityName",
-              label: "优惠券活动",
+              prop: "image",
+              label: "图片",
               width: "110",
               align: "center",
             },
             {
-              prop: "title",
-              label: "券名（前缀、通用券）",
-              width: "212",
+              prop: "info",
+              label: "商品名称/编号/分类",
+              width: "140",
               align: "center",
             },
             {
-              prop: "perview",
-              label: "预览",
-              width: "70",
-              align: "center",
-            },
-            {
-              prop: "useCouponCount",
-              label: "已使用",
-              width: "120",
-              align: "center",
-            },
-            {
-              prop: "couponStartTime",
-              label: "开始时间",
-              align: "center",
-            },
-            {
-              prop: "couponEndTime",
-              label: "结束时间",
-              align: "center",
-            },
-            {
-              prop: "isShow",
-              label: "前台列表是否显示",
-              width: "170",
+              prop: "sort",
+              label: "排序",
+              width: "60",
               align: "center",
             },
             {
               prop: "status",
               label: "状态",
+              width: "70",
               align: "center",
+            },
+            {
+              prop: "outPrice",
+              label: "价格",
+              width: "100",
+              align: "center",
+            },
+            {
+              prop: "price",
+              label: "秒杀价格",
+              width: "100",
+              align: "center",
+            },
+            {
+              prop: "num",
+              label: "限购数量",
               width: "80",
+              align: "center",
+            },
+            {
+              prop: "startTime",
+              label: "开始时间",
+              align: "center",
+            },
+            {
+              prop: "stopTime",
+              label: "结束时间",
+              align: "center",
+            },
+            {
+              prop: "statusStr",
+              label: "活动状态",
+              width: "80",
+              align: "center",
             },
             {
               prop: "option",
               label: "操作",
-              width: "120",
+              width: "100",
               align: "center",
             },
           ];
@@ -496,30 +521,26 @@ export default {
         that.isRefresh += 1;
       });
     },
-    ToAdd: function (e) { 
-      localStorage.setItem('seckillProduct',JSON.stringify(e));  
-      this.$router.push("/editSeckill"); 
+    ToAdd: function (e) {
+      localStorage.setItem("seckillProduct", JSON.stringify(e));
+      this.$router.push("/editSeckill");
     },
     ChangeStatus: function (e) {
       let par = {
-        id: e.id,
+        seckillId: e.id,
         status: e.status,
       };
-      changeStatus(par)
+      editSeckillStatus(par)
         .then((res) => {
           this.$message.success("修改成功");
+          this.isRefresh += 1;
         })
         .catch((res) => {
           this.isRefresh += 1;
         });
     },
-    Preview: function (params) {
-      let url =
-        "https://" +
-        localStorage.getItem("storeUrl") +
-        "/product-details.html?id=" +
-        params.params.id;
-      window.open(url, "_blank");
+    toDetail:function(e){
+      console.log(e);
     },
   },
 };
@@ -571,6 +592,10 @@ export default {
     justify-content: space-between;
     border-bottom: 1px solid #f1f1f6;
   }
+}
+.small-img {
+  width: 80px;
+  height: 80px;
 }
 .download-tpl-link-new {
   color: #242b4a;

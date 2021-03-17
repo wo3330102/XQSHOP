@@ -19,8 +19,8 @@ import infiniteScroll from "vue-infinite-scroll";
 Vue.use(infiniteScroll);
 Vue.prototype.$enums=enums
 // 强制保留两位小数
-Vue.prototype.$toDecimal2 = function (x) {
-  if(e){
+Vue.prototype.$toDecimal2 = function (e) {
+  if(e){ 
     if (isNaN(e) || e<0) {
       return e = '0.00';
     } else {
@@ -43,27 +43,14 @@ Vue.prototype.$toDecimal2 = function (x) {
   }
 };
 // 判断是否为数字类型
-Vue.prototype.$toDecimal2 = function (e) { 
+Vue.prototype.$IsNaN = function (e,max) { 
   if(e){
-    if (isNaN(e) || e<0) {
-      return e = '0.00';
+    const num = Number(e);
+    if (isNaN(num) || (max?num<max:num<1)) {
+      return '';
     } else {
-      var f = parseFloat(e);
-      if (isNaN(f)) {
-        return false;
-      }
-      var f = Math.round(e * 100) / 100;
-      var s = f.toString();
-      var rs = s.indexOf(".");
-      if (rs < 0) {
-        rs = s.length;
-        s += ".";
-      }
-      while (s.length <= rs + 2) {
-        s += "0";
-      }
-      return s; 
-    }
+      return num;
+    }    
   }
 }
 // 全局跳转
