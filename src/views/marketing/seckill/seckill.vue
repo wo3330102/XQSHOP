@@ -69,13 +69,31 @@
               </template>
               <template v-else-if="item.prop == 'info'">
                 <div style="text-align: left">
-                  <p style="overflow: hidden; text-overflow: ellipsis;white-space: nowrap">
+                  <p
+                    style="
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
+                  >
                     {{ scope.row.storeName }}
                   </p>
-                  <p style="overflow: hidden; text-overflow: ellipsis;white-space: nowrap">
+                  <p
+                    style="
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
+                  >
                     {{ scope.row.skuCode }}
                   </p>
-                  <p style="overflow: hidden; text-overflow: ellipsis;white-space: nowrap">
+                  <p
+                    style="
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
+                  >
                     {{ scope.row.storeName }}
                   </p>
                 </div>
@@ -108,7 +126,7 @@
                     操作<i class="el-icon-arrow-down el-icon--right"></i>
                   </el-button>
                   <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item command="edit">编辑规则</el-dropdown-item> 
+                    <el-dropdown-item command="edit">编辑规则</el-dropdown-item>
                   </el-dropdown-menu>
                 </el-dropdown>
               </template>
@@ -145,7 +163,7 @@
                     (e) => {
                       Options(e, scope.row);
                     }
-                  " 
+                  "
                 >
                   <el-button size="small">
                     操作<i class="el-icon-arrow-down el-icon--right"></i>
@@ -202,7 +220,7 @@
 import tableTem from "@/components/tableTem";
 import selectProduct from "../components/selectProductInCoupon";
 import { delCoupon, delCouponEvent, changeStatus } from "@/api/coupon";
-import {editSeckillStatus} from '@/api/seckill'
+import { editSeckillStatus } from "@/api/seckill";
 export default {
   components: {
     tableTem,
@@ -241,13 +259,12 @@ export default {
         {
           prop: "image",
           label: "图片",
-          width: "110",
+          width: "80",
           align: "center",
         },
         {
           prop: "info",
           label: "商品名称/编号/分类",
-          width: "140",
           align: "center",
         },
         {
@@ -284,16 +301,18 @@ export default {
           prop: "startTime",
           label: "开始时间",
           align: "center",
+          width: "100",
         },
         {
           prop: "stopTime",
           label: "结束时间",
           align: "center",
+          width: "100",
         },
         {
           prop: "statusStr",
           label: "活动状态",
-          width: "80",
+          width: "100",
           align: "center",
         },
         {
@@ -315,12 +334,15 @@ export default {
       console.log(type);
       switch (type) {
         case "edit":
-          let seckillProduct = JSON.stringify(e);
           if (this.active == 0) {
             // 编辑优惠券
-            localStorage.setItem("seckillProduct", seckillProduct);
-            this.$router.push("/editSeckillRules");
-          } 
+            this.$router.push({
+              path: "/editSeckillRules",
+              query: {
+                id: e.id,
+              },
+            });
+          }
           break;
         case "status":
           console.log("复制");
@@ -336,7 +358,7 @@ export default {
               this.$message.success("删除成功");
               this.isRefresh += 1;
             });
-          } 
+          }
           break;
       }
     },
@@ -349,18 +371,16 @@ export default {
       };
       switch (index) {
         case 0:
-          par.queryName = "";
           this.tableHeader = [
             {
               prop: "image",
               label: "图片",
-              width: "110",
+              width: "80",
               align: "center",
             },
             {
               prop: "info",
               label: "商品名称/编号/分类",
-              width: "140",
               align: "center",
             },
             {
@@ -397,16 +417,18 @@ export default {
               prop: "startTime",
               label: "开始时间",
               align: "center",
+              width: "100",
             },
             {
               prop: "stopTime",
               label: "结束时间",
               align: "center",
+              width: "100",
             },
             {
               prop: "statusStr",
               label: "活动状态",
-              width: "80",
+              width: "100",
               align: "center",
             },
             {
@@ -467,8 +489,6 @@ export default {
           ];
           break;
         case 2:
-          par.couponNo = "";
-          par.couponTitle = "";
           this.tableHeader = [
             {
               prop: "couponNo",
@@ -539,7 +559,7 @@ export default {
           this.isRefresh += 1;
         });
     },
-    toDetail:function(e){
+    toDetail: function (e) {
       console.log(e);
     },
   },
@@ -593,10 +613,10 @@ export default {
     border-bottom: 1px solid #f1f1f6;
   }
 }
-.small-img {
-  width: 80px;
-  height: 80px;
-}
+// .small-img {
+//   width: 80px;
+//   height: 80px;
+// }
 .download-tpl-link-new {
   color: #242b4a;
   font-size: 12px;
