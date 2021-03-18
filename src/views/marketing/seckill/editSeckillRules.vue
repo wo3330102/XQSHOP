@@ -13,7 +13,7 @@
       <i class="el-icon-arrow-left"></i>
       <span>秒杀</span>
     </router-link>
-    <h1>{{ detail.id ? "编辑" : "新增" }}秒杀</h1>
+    <h1>编辑秒杀规则</h1>
     <div class="box">
       <el-form
         :model="detail"
@@ -33,7 +33,7 @@
             </div>
           </div>
         </el-form-item>
-        <!-- <el-form-item label="所属会员组">
+        <el-form-item label="所属会员组">
           <el-select
             style="width: 100%"
             v-model="detail.memberGroupIds"
@@ -48,79 +48,26 @@
               :key="item.id"
             ></el-option>
           </el-select>
-        </el-form-item> -->
-        <el-form-item label="开始时间" prop="beginTime">
-          <el-date-picker
-            style="width: 100%"
-            size="medium"
-            v-model="detail.beginTime"
-            type="datetime"
-            placeholder="请选择活动开始时间"
-            format="yyyy-MM-dd HH:mm:ss"
-            value-format="yyyy-MM-dd HH:mm:ss"
-            :picker-options="timeOptions"
-          ></el-date-picker>
         </el-form-item>
-        <el-form-item label="结束时间" prop="endTime">
-          <el-date-picker
-            style="width: 100%"
-            size="medium"
-            v-model="detail.endTime"
-            type="datetime"
-            placeholder="不填则永久有效"
-            format="yyyy-MM-dd HH:mm:ss"
-            value-format="yyyy-MM-dd HH:mm:ss"
-            :default-time="'23:59:59'"
-            :picker-options="timeOptions"
-          ></el-date-picker>
-        </el-form-item>
-        <el-form-item label="参与商品数量" prop="toStock">
+        <el-form-item label="购买件数">
           <el-input
             v-model="detail.toStock"
-            placeholder="请输入参与商品数量"
+            placeholder="请输入购买件数"
             @blur="detail.toStock = $IsNaN(detail.toStock)"
           ></el-input>
         </el-form-item>
-        <el-form-item label="每人限购次数" prop="num">
+        <el-form-item label="秒杀预付款">
           <el-input
             v-model="detail.num"
-            placeholder="请输入每人限购次数"
+            placeholder="请输入秒杀预付款"
             @blur="detail.num = $IsNaN(detail.num)"
           ></el-input>
         </el-form-item>
-        <el-form-item label="秒杀类型">
-          <div style="display: flex; justify-content: space-between">
-            <el-select v-model="detail.priceType">
-              <el-option label="秒杀价格" :value="0"></el-option>
-              <el-option label="秒杀折扣" :value="1"></el-option>
-            </el-select>
-            <el-form-item prop="price">
-              <el-input
-                v-model="detail.price"
-                maxlength="10"
-                style="width: 720px; float: right"
-                placeholder="请输入秒杀价格或折扣"
-                @blur="
-                  detail.priceType === 0
-                    ? (detail.price = $toDecimal2(detail.price))
-                    : (detail.price = $IsNaN(detail.price))
-                "
-              ></el-input>
-            </el-form-item>
-          </div>
-        </el-form-item>
-        <el-form-item label="秒杀库存" prop="stock">
+        <el-form-item label="分享次数">
           <el-input
             v-model="detail.stock"
-            placeholder="请输入秒杀库存"
+            placeholder="该用户需要分享多少次该秒杀商品才能满足享受该商品的秒杀资格"
             @blur="detail.stock = $IsNaN(detail.stock)"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="秒杀排序">
-          <el-input
-            v-model="detail.couponNum"
-            @blur="detail.num = $IsNaN(detail.num)"
-            placeholder="请输入秒杀排序"
           ></el-input>
         </el-form-item>
       </el-form>
@@ -138,120 +85,56 @@
   </div>
 </template> 
 <script>
-import { addSeckill, editSeckill } from "@/api/seckill";
+import { getLevels } from "@/api/coupon";
+import { getSeckillRules, editSeckill } from "@/api/seckill";
 export default {
   data() {
     return {
       detail: {
         beginTime: "",
         endTime: "",
-        num: '',
+        num: "",
         price: "",
         priceType: 0,
         productId: 0,
         sort: "",
         stock: "",
-        toStock: "", 
+        toStock: "",
       },
-      rules: {
-        beginTime: [
-          {
-            required: true,
-            message: "请选择开始时间",
-            trigger: ["change", "blur"],
-          },
-        ],
-        endTime: [
-          {
-            required: true,
-            message: "请选择结束时间",
-            trigger: ["change", "blur"],
-          },
-        ],
-        num: [
-          {
-            required: true,
-            message: "请输入限购数量",
-            trigger: ["change", "blur"],
-          },
-        ],
-        price: [
-          {
-            required: true,
-            message: "请输入秒杀价格或折扣",
-            trigger: ["change", "blur"],
-          },
-        ],
-        stock: [
-          {
-            required: true,
-            message: "请输入秒杀库存",
-            trigger: ["change", "blur"],
-          },
-        ],
-        toStock: [
-          {
-            required: true,
-            message: "请输入参与商品数量",
-            trigger: ["change", "blur"],
-          },
-        ],
-      },
-      showSelectProduct: false,
-      // groupIdList: [], // 会员分组
-      timeOptions: {
-        disabledDate(time) {
-          return time.getTime() < new Date().getTime() - 8.64e7;
-        },
-      },
+      groupIdList: [], // 会员分组
       productDetail: {},
       disabled: false,
     };
   },
   created() {
-    let storeId = localStorage.getItem('storeId')
-    this.detail.storeId = Number(storeId) 
+    let storeId = localStorage.getItem("storeId");
+    this.detail.storeId = Number(storeId);
     if (localStorage.getItem("seckillProduct")) {
       let productDetail = JSON.parse(localStorage.getItem("seckillProduct"));
       this.detail.productId = productDetail.id;
       this.productDetail = productDetail;
     }
-    // // 获取会员组
-    // getLevels().then((res) => {
-    //   this.groupIdList = res.data;
-    // });
+    // 获取会员组
+    getLevels().then((res) => {
+      this.groupIdList = res.data;
+    });
   },
   methods: {
     Save: function () {
       this.disabled = true;
-      this.$refs.form.validate((e) => {
-        if (e) {
-          if (this.detail.id) {
-            editSeckill(this.detail).then((res) => {
-              this.$message.success("修改成功");
-              this.disabled = false;
-              this.$router.push('/seckill')
-            });
-          } else {
-            addSeckill(this.detail).then((res) => {
-              this.$message.success("添加成功");
-              this.disabled = false;
-              this.$router.push('/seckill')
-            });
-          }
-        } else {
-          this.$message.error("请完善表单数据");
+      editSeckillRules(this.detail).then((res) => {
+          this.$message.success("修改成功");
           this.disabled = false;
-        }
-      });
+          this.$router.push("/seckill");
+        }).catch(res=>{
+          this.disabled = false;
+        });
     },
   },
   destroyed() {
-    if(localStorage.getItem('seckillProduct')){
-      localStorage.removeItem('seckillProduct')
+    if (localStorage.getItem("seckillProduct")) {
+      localStorage.removeItem("seckillProduct");
     }
-
-    console.log("销毁");
   },
 };
 </script>

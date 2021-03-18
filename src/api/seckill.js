@@ -18,8 +18,7 @@ export function editSeckill(data){
   })
 } 
 
-// 修改秒杀状态
-
+// 修改秒杀状态 
 export function editSeckillStatus(data){
   return request({
     url:'api/seckill/status',
@@ -27,3 +26,11 @@ export function editSeckillStatus(data){
     data
   })
 } 
+
+// 获取秒杀规则 
+export function getSeckillRules(id){
+  return request({
+    url:'api/seckill/ruleDetail/'+id,
+    method:'get', 
+  })
+}
