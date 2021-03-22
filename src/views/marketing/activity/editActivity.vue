@@ -524,8 +524,7 @@ var chars = [
 import elTableInfiniteScroll from "el-table-infinite-scroll";
 import { add, edit, editStatus, del } from "@/api/yxStorePromotions";
 import { get } from "@/api/yxStoreProduct";
-import { getCates } from "@/api/yxStoreCategory";
-// import {}
+import { getCates } from "@/api/yxStoreCategory"; 
 export default {
   data() {
     return {

@@ -44,16 +44,18 @@
       </div> -->
       <table-tem
         :requestUrl="nav[active].url"
-        :optionList="['取消秒杀']"
+        :optionList="optionList"
         :requestParams="tableParams"
         :tableHeader="tableHeader"
         :isRefresh="isRefresh"
         :isNewApi="true"
+        :selection="isNeedSelection"
         @rowClick="toDetail"
         @resultData="TableResult"
+        @BatchOption="BatchOption"
       >
         <!-- 外面给判断而不是在循环里面给判断的原因是为了解决el-table-column未重新生成导致页面不刷新的BUG -->
-        <template v-if="active == 0">
+        <template v-if="active !== 2">
           <el-table-column
             v-for="item in tableHeader"
             :key="item.id"
@@ -65,7 +67,8 @@
           >
             <template slot-scope="scope">
               <template v-if="item.prop == 'image'">
-                <el-image :src="scope.row.image" class="small-img"></el-image>
+                <!-- <el-image :src="scope.row.image" class="small-img"></el-image> -->
+                <span class="small-img" :style="{'backgroundImage':'url('+scope.row.image+')'}"></span>
               </template>
               <template v-else-if="item.prop == 'info'">
                 <div style="text-align: left">
@@ -136,50 +139,6 @@
             </template>
           </el-table-column>
         </template>
-        <template v-else-if="active === 1">
-          <el-table-column
-            v-for="item in tableHeader"
-            :key="item.id"
-            :width="item.width ? item.width : ''"
-            :prop="item.prop ? item.prop : ''"
-            :label="item.label ? item.label : ''"
-            :align="item.align ? item.align : ''"
-            :sortable="item.sortable"
-          >
-            <template slot-scope="scope">
-              <template v-if="item.prop == 'conditionVo.type'">
-                {{
-                  new Object(scope.row.conditionVo).type == 0
-                    ? "支付金额"
-                    : new Object(scope.row.conditionVo).type == 1
-                    ? "下单金额"
-                    : "下单时间"
-                }}
-              </template>
-              <template v-else-if="item.prop == 'option'">
-                <el-dropdown
-                  type="primary"
-                  @command.native="
-                    (e) => {
-                      Options(e, scope.row);
-                    }
-                  "
-                >
-                  <el-button size="small">
-                    操作<i class="el-icon-arrow-down el-icon--right"></i>
-                  </el-button>
-                  <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item command="edit">编辑</el-dropdown-item>
-                    <el-dropdown-item command="del">删除</el-dropdown-item>
-                  </el-dropdown-menu>
-                </el-dropdown>
-              </template>
-              <template v-else>
-                <span>{{ scope.row[item.prop] }}</span>
-              </template>
-            </template>
-          </el-table-column>
-        </template>
         <template v-else>
           <el-table-column
             v-for="item in tableHeader"
@@ -191,7 +150,42 @@
             :sortable="item.sortable"
           >
             <template slot-scope="scope">
-              <template v-if="item.prop == 'status'">
+              <template v-if="item.prop == 'image'">
+                <!-- <el-image :src="scope.row.image" class="small-img"></el-image> -->
+                <span class="small-img" :style="{'backgroundImage':'url('+scope.row.image+')'}"></span>
+              </template>
+              <template v-else-if="item.prop == 'info'">
+                <div style="text-align: left">
+                  <p
+                    style="
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
+                  >
+                    {{ scope.row.storeName }}
+                  </p>
+                  <p
+                    style="
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
+                  >
+                    {{ scope.row.skuCode }}
+                  </p>
+                  <p
+                    style="
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
+                  >
+                    {{ scope.row.storeName }}
+                  </p>
+                </div>
+              </template>
+              <template v-else-if="item.prop == 'status'">
                 {{
                   scope.row.status == 0
                     ? "未使用"
@@ -218,9 +212,8 @@
 </template>
 <script>
 import tableTem from "@/components/tableTem";
-import selectProduct from "../components/selectProductInCoupon";
-import { delCoupon, delCouponEvent, changeStatus } from "@/api/coupon";
-import { editSeckillStatus } from "@/api/seckill";
+import selectProduct from "../components/selectProductInCoupon"; 
+import { editSeckillStatus,delSeckill } from "@/api/seckill";
 export default {
   components: {
     tableTem,
@@ -323,9 +316,10 @@ export default {
         },
       ],
       showSelectProduct: false,
+      isNeedSelection:true,
+      optionList:['取消秒杀']
     };
   },
-
   methods: {
     // 表格数据
     TableResult: function (e) {},
@@ -334,15 +328,14 @@ export default {
       console.log(type);
       switch (type) {
         case "edit":
-          if (this.active == 0) {
-            // 编辑优惠券
-            this.$router.push({
-              path: "/editSeckillRules",
-              query: {
-                id: e.id,
-              },
-            });
-          }
+          localStorage.setItem("seckillProduct", JSON.stringify(e));
+          // 编辑优惠券
+          this.$router.push({
+            path: "/editSeckillRules",
+            query: {
+              id: e.id,
+            },
+          });
           break;
         case "status":
           console.log("复制");
@@ -369,162 +362,121 @@ export default {
         page: 0,
         size: 30,
       };
-      switch (index) {
-        case 0:
-          this.tableHeader = [
-            {
-              prop: "image",
-              label: "图片",
-              width: "80",
-              align: "center",
-            },
-            {
-              prop: "info",
-              label: "商品名称/编号/分类",
-              align: "center",
-            },
-            {
-              prop: "sort",
-              label: "排序",
-              width: "60",
-              align: "center",
-            },
-            {
-              prop: "status",
-              label: "状态",
-              width: "70",
-              align: "center",
-            },
-            {
-              prop: "outPrice",
-              label: "价格",
-              width: "100",
-              align: "center",
-            },
-            {
-              prop: "price",
-              label: "秒杀价格",
-              width: "100",
-              align: "center",
-            },
-            {
-              prop: "num",
-              label: "限购数量",
-              width: "80",
-              align: "center",
-            },
-            {
-              prop: "startTime",
-              label: "开始时间",
-              align: "center",
-              width: "100",
-            },
-            {
-              prop: "stopTime",
-              label: "结束时间",
-              align: "center",
-              width: "100",
-            },
-            {
-              prop: "statusStr",
-              label: "活动状态",
-              width: "100",
-              align: "center",
-            },
-            {
-              prop: "option",
-              label: "操作",
-              width: "100",
-              align: "center",
-            },
-          ];
-          break;
-        case 1:
-          this.tableHeader = [
-            {
-              prop: "eventName",
-              label: "事件名称",
-              width: "110",
-              align: "center",
-            },
-            {
-              prop: "memberGroupIds",
-              label: "会员组",
-              width: "120",
-              align: "center",
-            },
-            {
-              prop: "conditionVo.type",
-              label: "限制条件",
-              width: "210",
-              align: "center",
-            },
-            {
-              prop: "couponNum",
-              label: "赠送优惠券",
-              width: "127",
-              align: "center",
-            },
-            {
-              prop: "couponNum",
-              label: "券数",
-              align: "center",
-            },
-            {
-              prop: "eventStartTime",
-              label: "开始时间",
-              align: "center",
-            },
-            {
-              prop: "eventEndTime",
-              label: "结束时间",
-              align: "center",
-            },
-            {
-              prop: "option",
-              label: "操作",
-              width: "120",
-              align: "center",
-            },
-          ];
-          break;
-        case 2:
-          this.tableHeader = [
-            {
-              prop: "couponNo",
-              label: "优惠券号码",
-              align: "center",
-            },
-            {
-              prop: "activityName",
-              label: "活动名称",
-              align: "center",
-            },
-            {
-              prop: "nickName",
-              label: "拥有者",
-              align: "center",
-            },
-            {
-              prop: "createTime",
-              label: "获得时间",
-              align: "center",
-            },
-            {
-              prop: "useTime",
-              label: "使用时间",
-              align: "center",
-            },
-            {
-              prop: "status",
-              label: "状态",
-              align: "center",
-              width: "80",
-            },
-          ];
-          break;
-      }
-      this.requestParams = { ...par };
+      if (this.active == 2) {
+        this.isNeedSelection = false;
+        this.optionList = []
+        this.tableHeader = [
+          {
+            prop: "image",
+            label: "图片",
+            width: "80",
+            align: "center",
+          },
+          {
+            prop: "info",
+            label: "商品名称/编号/分类",
+            width:'224',
+            align: "left",
+          },
+          {
+            prop: "orderId",
+            label: "订单号", 
+            align: "center",
+            width:'180'
+          },
+          {
+            prop: "truePrice",
+            label: "价格", 
+            align: "center",
+          },
+          {
+            prop: "realName",
+            label: "会员", 
+            align: "center",
+          },
+          {
+            prop: "cartNum",
+            label: "购买数量", 
+            align: "center",
+          }, 
+          {
+            prop: "payTime",
+            label: "时间", 
+            align: "center",
+          }, 
+        ]
+      } else {
+        this.isNeedSelection = true; 
+        this.optionList = ['取消秒杀']
+        this.tableHeader = [
+          {
+            prop: "image",
+            label: "图片",
+            width: "80",
+            align: "center",
+          },
+          {
+            prop: "info",
+            label: "商品名称/编号/分类",
+            align: "center",
+          },
+          {
+            prop: "sort",
+            label: "排序",
+            width: "60",
+            align: "center",
+          },
+          {
+            prop: "status",
+            label: "状态",
+            width: "70",
+            align: "center",
+          },
+          {
+            prop: "outPrice",
+            label: "价格",
+            width: "100",
+            align: "center",
+          },
+          {
+            prop: "price",
+            label: "秒杀价格",
+            width: "100",
+            align: "center",
+          },
+          {
+            prop: "num",
+            label: "限购数量",
+            width: "80",
+            align: "center",
+          },
+          {
+            prop: "startTime",
+            label: "开始时间",
+            align: "center",
+            width: "100",
+          },
+          {
+            prop: "stopTime",
+            label: "结束时间",
+            align: "center",
+            width: "100",
+          },
+          {
+            prop: "statusStr",
+            label: "活动状态",
+            width: "100",
+            align: "center",
+          },
+          {
+            prop: "option",
+            label: "操作",
+            width: "100",
+            align: "center",
+          },
+        ];
+      } 
+      this.tableParams = { ...par };
     },
     // 批量操作
     BatchOption: function (e, selectItem) {
@@ -535,9 +487,9 @@ export default {
       let arr = [];
       selectItem.map((i) => {
         arr.push(i.id);
-      });
-      onsaleAll(par).then(() => {
-        that.$message.success("操作成功");
+      }); 
+      delSeckill(arr).then(() => {
+        that.$message.success("删除成功");
         that.isRefresh += 1;
       });
     },

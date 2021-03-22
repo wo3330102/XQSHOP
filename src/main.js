@@ -21,14 +21,15 @@ Vue.prototype.$enums=enums
 // 强制保留两位小数
 Vue.prototype.$toDecimal2 = function (e) {
   if(e){ 
-    if (isNaN(e) || e<0) {
-      return e = '0.00';
+    const num = Number(e);
+    if (isNaN(num) || num<1) {
+      return '0.00';
     } else {
-      var f = parseFloat(e);
+      var f = parseFloat(num);
       if (isNaN(f)) {
         return false;
       }
-      var f = Math.round(e * 100) / 100;
+      var f = Math.round(num * 100) / 100;
       var s = f.toString();
       var rs = s.indexOf(".");
       if (rs < 0) {
@@ -43,10 +44,11 @@ Vue.prototype.$toDecimal2 = function (e) {
   }
 };
 // 判断是否为数字类型
-Vue.prototype.$IsNaN = function (e,max) { 
+Vue.prototype.$IsNaN = function (e,max) {  
   if(e){
     const num = Number(e);
-    if (isNaN(num) || (max?num<max:num<1)) {
+    console.log(num);
+    if (isNaN(num) || (max?num>max:num<1)) {
       return '';
     } else {
       return num;

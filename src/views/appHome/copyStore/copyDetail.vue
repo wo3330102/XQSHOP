@@ -69,7 +69,12 @@
                 </td>
                 <td class="text">
                   <span>{{ item.storeName }}</span>
-                  <p v-if="item.isShow == 0">已下架</p>
+                  <p
+                    v-if="item.isShow == 0"
+                    style="display: block; font-size: 12px; color: #8c8c8c"
+                  >
+                    已下架
+                  </p>
                 </td>
                 <td class="option">
                   <i class="el-icon-delete" @click="Del(item, index)"></i>
@@ -97,7 +102,8 @@
       <select-product
         :visible.sync="showAdd"
         :requestParams="requestParams"
-        :requestUrl="'api/yxStoreProduct'"
+        :isNewApi="true"
+        :requestUrl="'api/productList'"
         @selectItem="AddList"
       ></select-product>
     </div>
@@ -119,8 +125,8 @@
 import { createSecret } from "@/api/copyStore.js";
 import selectProduct from "@/components/selectProduct.vue";
 export default {
-  components:{
-    selectProduct
+  components: {
+    selectProduct,
   },
   data() {
     return {
@@ -138,13 +144,13 @@ export default {
       secret: "",
     };
   },
-  watch:{
-    productType:function(val){
+  watch: {
+    productType: function (val) {
       console.log(val);
-      if(val[0] == 1 || val[0] == 3){
+      if (val[0] == 1 || val[0] == 3) {
         this.productType = [];
       }
-    }
+    },
   },
   methods: {
     AddList: function (e) {
@@ -158,11 +164,11 @@ export default {
       let par = {
         item: [],
       };
-      let obj = {}; 
+      let obj = {};
       if (this.productType[0] == 2) {
-        if(this.list.length == 0){
-          this.$message.warning('请添加指定商品')
-          return false
+        if (this.list.length == 0) {
+          this.$message.warning("请添加指定商品");
+          return false;
         }
         obj = {
           target: "product",
@@ -170,36 +176,36 @@ export default {
             return item.id;
           }),
         };
-        par.item.push({...obj});
+        par.item.push({ ...obj });
       } else if (this.productType[0] == 0) {
         obj.target = "all-product";
         obj.value = [];
-        par.item.push({...obj});
-      }  
+        par.item.push({ ...obj });
+      }
       if (this.productType[1]) {
-        par.item.push({ target: "product_comment",value:[] });
+        par.item.push({ target: "product_comment", value: [] });
       }
       if (this.moduleType.length > 0) {
         console.log(1111);
         this.moduleType.map((item) => {
-          console.log(item)
+          console.log(item);
           switch (item) {
-            case '0':
+            case "0":
               par.item.push({
                 target: "category",
-                value:[],
+                value: [],
               });
               break;
-            case '1':
+            case "1":
               par.item.push({
                 target: "page",
-                value:[],
+                value: [],
               });
               break;
-            case '2':
+            case "2":
               par.item.push({
                 target: "express",
-                value:[],
+                value: [],
               });
               break;
           }
@@ -218,7 +224,7 @@ export default {
         // 复制成功后操作
         this.$message({
           message: "复制成功",
-          type: "success", 
+          type: "success",
         });
         this.$router.push("/copyStore");
       });

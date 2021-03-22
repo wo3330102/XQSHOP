@@ -229,7 +229,7 @@ export default {
         }, 200);
         if(that.requestUrl == 'api/yxComposeProduct'){
           console.log(res);
-          that.data = res.data.composeProducts;
+          that.data = res.data.composeProducts || [];
           that.total = res.data.totalElements; 
         } else if(that.requestUrl == 'api/productLimit/limitedProductList'){
           that.data = res.data.content.map(item=>{
@@ -240,11 +240,11 @@ export default {
           }); 
           that.total = res.data.totalElements; 
         } else if(this.isNewApi){ 
-          that.data = res.data.content 
+          that.data = res.data.content || []; 
           that.total = res.data.totalElements; 
         } else {
-          that.data = res.content;
-          that.total = res.totalElements; 
+          that.data = res.content || [];
+          that.total = res.totalElements || 0; 
         } 
         if (res.hasOwnProperty("cateList")) {
           that.$emit("GetCategory", res.cateList);

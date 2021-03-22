@@ -31,20 +31,45 @@
                 />
               </div>
             </div>
+            <h3 class="otherTitle">分类等级</h3>
+            <div style="display:flex;">
+              <el-select
+                v-model="lv1"
+                placeholder="请选择分类，不选则为创建顶级分类"
+                clearable
+              >
+                <el-option
+                  :label="item.title"
+                  :value="item.id"
+                  v-for="item in lv1List"
+                  :key="item.id"
+                ></el-option>
+              </el-select>
+              <el-select
+                v-model="lv2"
+                placeholder="请选择分类，不选则为创建二级分类"
+                style="margin-left:10px"
+                clearable
+                v-show="lv2List.length>0"
+              >
+                <el-option
+                  :label="item.title"
+                  :value="item.id"
+                  v-for="item in lv2List"
+                  :key="item.id"
+                ></el-option>
+              </el-select>
+            </div>
             <h3 class="otherTitle">分类描述</h3>
             <div>
-              <wangeditor ref="editor" v-model="form.desc"></wangeditor>
+              <wangeditor ref="editor" v-model="form.content"></wangeditor>
             </div>
-            <!-- <h3 class="otherTitle">上级分类</h3>
-            <div> 
-              <treeselect v-model="form.pid" :options="categotyList" style="width: 370px;" placeholder="选择上级分类" /> 
-            </div>  -->
           </div>
           <div class="box image">
             <h3 class="title">分类图片</h3>
             <div class="content">
               <el-upload
-                :action="url+'/api/upload'"
+                :action="url + '/api/upload'"
                 :headers="{
                   Authorization: token,
                 }"
@@ -64,6 +89,7 @@
               </el-dialog>
             </div>
           </div>
+          <!-- 暂时不用 -->
           <div class="box category-type" v-if="''">
             <h3 class="title">分类类型</h3>
             <el-radio v-model="categoryType" :label="1">手动分类</el-radio>
@@ -132,7 +158,7 @@
                       type="number"
                       v-if="formItem.shopAttributeValue == 3"
                     >
-                      <el-button slot="append">{{currency.n}}</el-button>
+                      <el-button slot="append">{{ currency.n }}</el-button>
                     </el-input>
                     <el-input
                       v-model.number="formItem.value"
@@ -140,7 +166,7 @@
                       type="number"
                       v-if="formItem.shopAttributeValue == 4"
                     >
-                      <el-button slot="append">{{currency.n}}</el-button>
+                      <el-button slot="append">{{ currency.n }}</el-button>
                     </el-input>
                     <el-input
                       v-model.number="formItem.value"
@@ -184,6 +210,7 @@
               <el-button @click="addFormData">添加条件</el-button>
             </div>
           </div>
+          <!-- 暂时不用 -->
           <div class="box concat-product" v-if="''">
             <h3 class="title">
               关联商品
@@ -293,13 +320,13 @@
     </el-dialog>
   </div>
 </template> 
-<script> 
-import wangeditor from '@/components/wangeditor'
-import { edit, getCates } from "@/api/yxStoreCategory";
-import '@riophae/vue-treeselect/dist/vue-treeselect.css'
+<script>
+import wangeditor from "@/components/wangeditor";
+import {add, edit, getNewCategoryList,getNewCategoryListByPid,getParentCategory } from "@/api/yxStoreCategory";
+import "@riophae/vue-treeselect/dist/vue-treeselect.css";
 export default {
-  components: { 
-    wangeditor
+  components: {
+    wangeditor,
   },
   data() {
     var validatePass = (rule, value, callback, options) => {
@@ -367,15 +394,20 @@ export default {
       callback();
     };
     return {
-      url:localStorage.getItem('uploadUrl'),
+      url: localStorage.getItem("uploadUrl"),
       token: "",
-      form: {}, // 富文本内容 
+      form: {}, // 详情
       categotyList: [], // 分类列表
       upLoadHeaders: {}, // 上传头部字段
       dialogVisible: false, // 上传图片是否显示
       imageUrl: [], // 图片路径
       showUpload: false, // 是否显示上传按钮
       limit: 1, // 最大上传数
+      lv1:'',
+      lv1List:[],
+      lv2:'',
+      lv2List:[],
+      // 以下属性暂时无用（功能未开发）
       categoryType: 2, // 分类类型（手动/自动）
       categoryCondition: 1, // 满足条件（所有/任一）
       formData: {
@@ -510,14 +542,51 @@ export default {
     };
   },
   created() {
-    let form = JSON.parse(localStorage.getItem('categoryDetail'))
-    let that = this; 
-    this.token = localStorage.getItem("token"); 
-    if(form.pic){
-      this.imageUrl = [{url:form.pic}]; 
-      this.showUpload = true;
-    } 
-    this.form = form;
+    let form = JSON.parse(localStorage.getItem("categoryDetail"));
+    if (form) {
+      if (form.pic) {
+        this.imageUrl = [{ url: form.pic }];
+        this.showUpload = true;
+      }
+      this.form = form;
+      console.log(form);
+      if(form.level == 2){
+        this.lv1 = form.pid 
+      } else if(form.level == 3){
+        this.lv2 = form.pid
+        console.log(this.lv2); 
+        getParentCategory({id:form.pid}).then(res=>{
+          console.log(res);
+          this.lv1 = res.data.pid;
+        })
+      } 
+    }
+    this.token = localStorage.getItem("token");
+    // 获取一级分类
+    let par = {
+      page:0,
+      size:999,
+      pid:0,
+    }
+    getNewCategoryList(par).then(res=>{
+      this.lv1List = res.data.yxStoreTagList
+    })
+  },
+  watch:{
+    lv1:function(val){
+      if(val){
+        let par = { 
+          pid:val,
+        }
+        getNewCategoryListByPid(par).then(res=>{
+          console.log(res);
+          this.lv2List = res.data;
+        })
+      } else {
+        this.lv2List = [];
+        this.lv2 = '';
+      }
+    }
   },
   methods: {
     PictureCardPreview(file) {
@@ -527,11 +596,12 @@ export default {
     ChangeImg(file, fileList) {
       this.showUpload = fileList.length >= this.limit;
     },
-    UploadSuccess: function (res, file) { 
-      this.imageUrl = [{url:res.link}];
+    UploadSuccess: function (res, file) {
+      this.imageUrl = [{ url: res.link }];
     },
     RemoveImg: function (e) {
       this.showUpload = false;
+      this.imageUrl = '';
     },
     validate: function (boolean, object) {
       console.log(boolean);
@@ -539,8 +609,8 @@ export default {
     },
     ChangeShopAttributeValue: function () {
       this.$refs["form"].resetFields();
-    }, 
-    addFormData: function () { 
+    },
+    addFormData: function () {
       this.formData.domains.push({
         value: "",
         shopAttributeValue: 1,
@@ -557,26 +627,37 @@ export default {
     },
     ChangeRelationShopForm: function () {},
     // 新增
-    Save: function () { 
-      let imageUrl = '';
-      let that = this;
-      if(this.imageUrl.length>0){
-        imageUrl = this.imageUrl[0].url
-        console.log(imageUrl)
+    Save: function () {
+      let imageUrl = "";
+      let that = this;  
+      if (this.imageUrl && this.imageUrl.length > 0) {
+        imageUrl = this.imageUrl[0].url; 
       } else {
-        imageUrl = ''
+        this.$message.error('请上传分类图片')
+        return false; 
       } 
-      console.log('测试')
-      let par = {  
+      let par = {
         ...this.form,
         pic: imageUrl,
-      }; 
-      edit(par).then((res) => { 
-        this.$message.success('修改成功');
-        setTimeout(function(){
-          that.$router.push('/commodityType')
-        },200)
+        pid: this.lv2 || this.lv1 || ''
+        
+      };
+      if(this.form.id){
+        edit(par).then((res) => {
+        this.$message.success("修改成功");
+        setTimeout(function () {
+          that.$router.push("/commodityType");
+        }, 200);
       });
+      } else {
+        add(par).then((res) => {
+        this.$message.success("修改成功");
+        setTimeout(function () {
+          that.$router.push("/commodityType");
+        }, 200);
+      });
+      }
+      
     },
   },
 };
@@ -602,7 +683,7 @@ h1 {
   background-color: #fff;
   border-radius: 4px;
   box-shadow: 0 1px 3px 0 rgba(35, 35, 112, 0.2),
-    0 0 0 1px rgba(67, 67, 145, 0.05); 
+    0 0 0 1px rgba(67, 67, 145, 0.05);
   & > .title {
     color: #1a1d2c;
     font-size: 14px;
@@ -667,7 +748,7 @@ h1 {
   padding: 0 -10px;
   /deep/.el-input--suffix {
     width: 55px !important;
-  } 
+  }
 }
 /deep/.el-input-group__append {
   background: #fff;
