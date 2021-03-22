@@ -27,6 +27,15 @@ export function editSeckillStatus(data){
   })
 } 
 
+// 删除秒杀 
+export function delSeckill(data){
+  return request({
+    url:'api/seckill',
+    method:'delete',
+    data
+  })
+} 
+
 // 获取秒杀规则 
 export function getSeckillRules(id){
   return request({
@@ -34,3 +43,22 @@ export function getSeckillRules(id){
     method:'get', 
   })
 }
+
+// 新增秒杀规则
+export function addSeckillRules(data){
+  return request({
+    url:'api/seckillRule/add',
+    method:'post',
+    data
+  })
+}
+
+// 修改秒杀规则
+export function editSeckillRules(data){
+  return request({
+    url:'api/seckillRule/update',
+    method:'post',
+    data
+  })
+}
+

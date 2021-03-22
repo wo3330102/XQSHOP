@@ -37,7 +37,6 @@
         @change="
           () => {
             table = [];
-            init();
           }
         "
         @clear="requestParams.cateId = ''"
@@ -67,6 +66,8 @@
       ref="multipleTable"
       v-el-table-infinite-scroll="load"
       @selection-change="SelectItem"
+      :infinite-scroll-delay="200"
+      :infinite-scroll-distance="100"
     >
       <el-table-column
         type="selection"
@@ -133,6 +134,11 @@ export default {
       type: Boolean,
       default: true,
     },
+    // 是否是新类型API
+    isNewApi: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -149,82 +155,92 @@ export default {
   },
   watch: {
     requestParams: {
-      handler: function (val) { 
+      handler: function (val) {
         this.selectItem = [];
         this.init();
       },
-      deep: true, 
-      immediate:true,
+      deep: true,
+      immediate: true,
     },
     visible: function (val) {
       this.shopDialog = val;
-      if(!val){
-        this.$refs.multipleTable.clearSelection(); 
+      if (!val) {
+        this.$refs.multipleTable.clearSelection();
       }
     },
+
     disableNum: function (val) {
       this.disableNumber = val;
     },
-    selectItem: function (val) { 
+    selectItem: function (val) {
       if (val.length >= this.disableNumber) {
         this.disable = false;
       } else {
         this.disable = true;
       }
-    }, 
+    },
   },
   created() {
     getCates(this.requestParams).then((res) => {
-      this.shopCategoryList = res.content; 
+      this.shopCategoryList = res.content;
     });
-    this.init();
   },
   methods: {
     handleClose() {
       this.$emit("update:visible", false);
     },
-    init: function () {
-      let that = this;  
+    init: function (concat) {
+      let that = this;
+      console.log(that.requestUrl);
       request({
         url:
-          that.requestUrl + "?" + qs.stringify(that.requestParams, { indices: false }),
+          that.requestUrl +
+          "?" +
+          qs.stringify(that.requestParams, { indices: false }),
         method: "get",
       }).then((res) => {
-        if ((that.requestUrl = "api/yxComposeProduct/list/product")) {
-          if(res.data){
-            this.table = res.data;
-            this.tableTotal = res.data.length;
+        if (concat) {
+          if (this.isNewApi) {
+            this.table = this.table.concat(res.data.content);
           } else {
-            this.table = [];
-            this.tableTotal = 0;
+            if (res.data) {
+              this.table = this.table.concat(res.data);
+            }
           }
         } else {
-          this.table = res.content;
-          this.tableTotal = res.totalElements;
+          if (this.isNewApi) {
+            this.table = res.data.content;
+            this.tableTotal = res.data.totalElements;
+          } else {
+            if (res.data) {
+              this.table = res.data;
+              this.tableTotal = res.data.length;
+            }
+          }
         }
       });
     },
     Search: function () {
-      this.table = []; 
+      this.table = [];
       this.requestParams.productName = this.shopContent;
     },
     SelectItem: function (e) {
       this.selectItem = e;
-      this.$store.commit('changeSelectItem',e)
+      this.$store.commit("changeSelectItem", e);
     },
-    CheckSelectItem: function () { 
-      if(this.selectItem.length>0){
+    CheckSelectItem: function () {
+      if (this.selectItem.length > 0) {
         this.$emit("update:visible", false);
-        this.$emit("selectItem", [...this.selectItem]); 
+        this.$emit("selectItem", [...this.selectItem]);
       } else {
-        this.$message.warning('请选择数据')
-      } 
+        this.$message.warning("请选择数据");
+      }
     },
     // 加载更多
     load: function () {
       if (this.needLoad) {
         this.requestParams.page += 1;
-        this.init();
+        this.init(true);
       }
     },
     // 规定禁用功能

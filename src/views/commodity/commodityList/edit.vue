@@ -54,11 +54,12 @@
           <div class="item-margin" v-if="show">
             <span class="text-span">库存数量</span>
             <el-input
-              v-model.number="attr.stock"
+              v-model="attr.stock"
               type="number"
               size="medium"
               maxlength="8"
               placeholder="请输入商品库存"
+              @blur="attr.stock = $IsNaN(attr.stock)"
             ></el-input>
           </div>
           <div class="item-margin" v-if="show">
@@ -104,7 +105,7 @@
                 >（自动分类不可删除）</span
               >
             </span>
-            <el-select
+            <!-- <el-select
               class="box-item-entry"
               size="medium"
               v-model="tagIds"
@@ -117,7 +118,15 @@
                 :label="item.title"
                 :value="item.id"
               ></el-option>
-            </el-select>
+            </el-select> -->
+            <el-cascader
+              style="width: 100%" 
+              v-model="tagIds" 
+              :props="categoryOption"
+              :show-all-levels="false"
+              clearable
+            >
+            </el-cascader>
           </div>
         </div>
         <div class="product-right">
@@ -498,7 +507,10 @@
 import wangeditor from "@/components/wangeditor";
 import tableTem from "@/components/tableTem";
 import { add, edit, getInfo, isFormatAttr } from "@/api/yxStoreProduct";
-import { getCates } from "@/api/yxStoreCategory";
+import {
+  getNewCategoryList,
+  getNewCategoryListByPid,
+} from "@/api/yxStoreCategory";
 export default {
   components: {
     tableTem,
@@ -506,6 +518,33 @@ export default {
   },
   data() {
     return {
+      categoryOption: {
+        lazy: true,
+        lazyLoad(node, resolve) {
+          const { level } = node; 
+          if (level == 0) {
+            let par = {
+              page:0,
+              size:99,
+              pid:0,
+            }
+            getNewCategoryList(par).then((res) => {
+              if (res.data) { 
+                resolve(res.data.yxStoreTagList);
+              }
+            });
+          } else{
+            getNewCategoryListByPid({ pid: node.data.id }).then((res) => {
+              if (res.data) {   
+                resolve(res.data);
+              } 
+            })
+          } 
+        },
+        value: "id",
+        label: "title",
+        checkStrictly: true,
+      },
       url: localStorage.getItem("uploadUrl"),
       id: "",
       isFirst: true,
@@ -536,7 +575,7 @@ export default {
         },
       ],
       categoryValue: "", // 分类值
-      tagIds: "",
+      tagIds: [],
       categoryList: [], // 分类列表
       classIds: "", // 商品标签
       classList: [], // 商品标签列表
@@ -647,6 +686,9 @@ export default {
     this.token = localStorage.getItem("token");
   },
   methods: {
+    ChangeTag:function(e){
+      console.log(e);
+    },
     // 获取信息
     GetInfo() {
       let that = this;
@@ -659,9 +701,8 @@ export default {
         if (that.id === 0) {
           this.temp_id = "";
         } else {
-          console.log(res.productInfo);
           that.detail = { ...res.productInfo };
-          that.tagIds = res.tagList;
+          that.tagIds = res.tagList; 
           if (res.productInfo.classIds) {
             that.classList = res.productInfo.classIds.split(",");
           }
@@ -671,10 +712,14 @@ export default {
             : (that.attr.price = this.$toDecimal2(res.productInfo.attr.price));
           res.productInfo.attr.weight == 0
             ? (that.attr.weight = "")
-            : (that.attr.weight = this.$toDecimal2(res.productInfo.attr.weight));
+            : (that.attr.weight = this.$toDecimal2(
+                res.productInfo.attr.weight
+              ));
           res.productInfo.attr.ot_price == 0
             ? (that.attr.ot_price = "")
-            : (that.attr.ot_price = this.$toDecimal2(res.productInfo.attr.ot_price));
+            : (that.attr.ot_price = this.$toDecimal2(
+                res.productInfo.attr.ot_price
+              ));
           res.productInfo.attr.stock === 0 ? (that.attr.stock = "") : "";
           that.detail.cate_id = Number(that.detail.cate_id);
           // 判断是否上架
@@ -697,13 +742,13 @@ export default {
           that.fileList = arr;
         }
       });
-      let params = {
-        page: 0,
-        size: 20,
-      };
-      getCates(params).then((res) => {
-        this.categoryList = res.content;
-      });
+      // let params = {
+      //   page: 0,
+      //   size: 20,
+      // };
+      // getCates(params).then((res) => {
+      //   this.categoryList = res.content;
+      // });
     },
     PictureCardPreview(file) {
       this.imageUrl = file.url;
@@ -714,14 +759,11 @@ export default {
       this.showUpload = fileList.length >= this.limit;
     },
     RemoveImg: function (e) {
-      console.log(e);
       this.fileList.map((v, i) => {
         if (v.uid == e.uid) {
-          console.log(i);
           this.fileList.splice(i, 1);
         }
       });
-      console.log(this.fileList);
       this.showUpload = false;
     },
     // 添加规格
@@ -757,7 +799,6 @@ export default {
     // 判断属性名称是否一样
     CheckAttrName: function (index) {
       let val = this.shopAttributeList[index].value;
-      console.log(val);
       for (var i in this.shopAttributeList) {
         if (this.shopAttributeList[i].value == val && index != i) {
           this.$message.warning("重复属性");
@@ -829,26 +870,26 @@ export default {
           let table = [...this.table];
           r.value.map((v, i) => {
             v.index = i;
-            if (v.is_show == 1) { 
-              table.map((item) => { 
+            if (v.is_show == 1) {
+              table.map((item) => {
                 if (v.hasOwnProperty("value2")) {
                   // 判断新表单是否有第三规格
                   if (v.hasOwnProperty("value3")) {
                     // 若原表单不含第三规格，则为新增
-                    if (!item.hasOwnProperty("value3")) { 
+                    if (!item.hasOwnProperty("value3")) {
                       if (item.value1 + item.value2 == v.value1 + v.value2) {
-                        delete item.skuCode;  
+                        delete item.skuCode;
                         v = {
                           ...v,
                           ...item,
                         };
                       }
-                    } else { 
+                    } else {
                       // 若原表单含有第三规格，则为新增某一规格值
                       if (
-                        (item.value1 + item.value2 + item.value3) == 
-                        (v.value1 + v.value2 + v.value3)
-                      ) { 
+                        item.value1 + item.value2 + item.value3 ==
+                        v.value1 + v.value2 + v.value3
+                      ) {
                         delete item.skuCode;
                         v = {
                           ...v,
@@ -856,8 +897,8 @@ export default {
                         };
                       }
                     }
-                  } else if(item.hasOwnProperty('value2')){  
-                    if ((v.value1 + v.value2) === (item.value1 + item.value2)) { 
+                  } else if (item.hasOwnProperty("value2")) {
+                    if (v.value1 + v.value2 === item.value1 + item.value2) {
                       delete item.value3;
                       delete item.skuCode;
                       v = {
@@ -865,18 +906,18 @@ export default {
                         ...item,
                       };
                     }
-                  } else{
-                    if(item.value1 == v.value1){
-                      delete item.skuCode; 
+                  } else {
+                    if (item.value1 == v.value1) {
+                      delete item.skuCode;
                       v = {
                         ...v,
                         ...item,
                       };
                     }
-                  } 
-                } else{
-                  if(item.value1 == v.value1){
-                    delete item.skuCode; 
+                  }
+                } else {
+                  if (item.value1 == v.value1) {
+                    delete item.skuCode;
                     delete item.value2;
                     delete item.value3;
                     v = {
@@ -888,19 +929,20 @@ export default {
               });
               array.push(v);
             }
-          }); 
+          });
           this.table = array;
         }
       });
     },
     // 判断多规格数据是否需要转小数点
-    BlurSet: function (key, data) { 
-      if (key == "skuCode") {  
+    BlurSet: function (key, data) {
+      if (key == "skuCode") {
         return false;
-      } else if (key !== "stock") {  
+      } else if (key !== "stock") {
         data[key] = data[key] ? this.$toDecimal2(data[key].toString()) : "0.00";
-      } else { 
-        isNaN(Number(data[key]))?data[key] = 0:''; 
+      } else {
+        console.log(data[key])
+        data[key] = this.$IsNaN(data[key]) 
       }
     },
     // 选择批量操作数据
@@ -979,14 +1021,14 @@ export default {
     // 选择图片
     SelectPicture: function (index) {
       this.tableIndex = index;
-      if(this.fileList.length>0){
+      if (this.fileList.length > 0) {
         if (this.table[index].pic) {
-        this.showDelImage = true;
-      }
-      this.showDialog = true;
+          this.showDelImage = true;
+        }
+        this.showDialog = true;
       } else {
-        this.$message.warning('请先上传商品图片')
-      } 
+        this.$message.warning("请先上传商品图片");
+      }
     },
     // 提交图片
     SubImage: function () {
@@ -1048,11 +1090,9 @@ export default {
       //   that.$message.error("请选择商品分类");
       //   return false;
       // }
-      // 判断是否有标签
-      console.log(this.classList);
+      // 判断是否有标签 
       if (this.classList) {
-        this.detail.classIds = this.classList.toString();
-        console.log(this.detail.classList);
+        this.detail.classIds = this.classList.toString(); 
       }
       // 判断是否输入商品详情
       if (!this.detail.description) {
@@ -1103,8 +1143,7 @@ export default {
         if (!this.detail.skuCode) {
           that.$message.error("请输入商品Sku");
           return false;
-        } else {
-          console.log(this.detail.skuCode);
+        } else { 
           this.attr.skuCode = this.detail.skuCode;
         }
         // 判断用户是否输入库存，默认为空
@@ -1170,7 +1209,8 @@ export default {
         this.detail.attr = this.attr;
       }
       this.detail.is_show = Number(this.isGrounding);
-
+      console.log(this.tagIds);
+      // return false;
       this.detail.tagIds = this.tagIds.toString();
 
       // 基础参数
@@ -1252,7 +1292,6 @@ export default {
         });
       }
     },
-    Error: function (text) {},
   },
 };
 </script>

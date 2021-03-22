@@ -16,7 +16,7 @@
     <h1>编辑秒杀规则</h1>
     <div class="box">
       <el-form
-        :model="detail"
+        :model="ruleForm"
         label-width="150px"
         label-position="left"
         :rules="rules"
@@ -36,9 +36,9 @@
         <el-form-item label="所属会员组">
           <el-select
             style="width: 100%"
-            v-model="detail.memberGroupIds"
+            v-model="detail.levelId"
             clearable
-            @clear="detail.memberGroupIds = ''"
+            @clear="detail.levelId = ''"
             placeholder="请选择所属会员组"
           >
             <el-option
@@ -49,25 +49,49 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="购买件数">
+        <el-form-item prop="buyNum">
+          <template slot="label">
+            <el-checkbox
+              label="购买件数"
+              v-model="ruleForm.isCheckBuy"
+              :true-label="1"
+              :false-label="0"
+            ></el-checkbox>
+          </template>
           <el-input
-            v-model="detail.toStock"
+            v-model="ruleForm.buyNum"
             placeholder="请输入购买件数"
-            @blur="detail.toStock = $IsNaN(detail.toStock)"
+            @blur="ruleForm.buyNum = $IsNaN(ruleForm.buyNum)"
           ></el-input>
         </el-form-item>
-        <el-form-item label="秒杀预付款">
+        <el-form-item prop="prePrice">
+          <template slot="label">
+            <el-checkbox
+              label="秒杀预付款"
+              v-model="ruleForm.isCheckPre"
+              :true-label="1"
+              :false-label="0"
+            ></el-checkbox>
+          </template>
           <el-input
-            v-model="detail.num"
+            v-model="ruleForm.prePrice"
             placeholder="请输入秒杀预付款"
-            @blur="detail.num = $IsNaN(detail.num)"
+            @blur="ruleForm.prePrice = $toDecimal2(ruleForm.prePrice)"
           ></el-input>
         </el-form-item>
-        <el-form-item label="分享次数">
+        <el-form-item prop="shareNum">
+          <template slot="label">
+            <el-checkbox
+              label="分享次数"
+              v-model="ruleForm.isCheckShare"
+              :true-label="1"
+              :false-label="0"
+            ></el-checkbox>
+          </template>
           <el-input
-            v-model="detail.stock"
+            v-model="ruleForm.shareNum"
             placeholder="该用户需要分享多少次该秒杀商品才能满足享受该商品的秒杀资格"
-            @blur="detail.stock = $IsNaN(detail.stock)"
+            @blur="ruleForm.shareNum = $IsNaN(ruleForm.shareNum)"
           ></el-input>
         </el-form-item>
       </el-form>
@@ -86,20 +110,69 @@
 </template> 
 <script>
 import { getLevels } from "@/api/coupon";
-import { getSeckillRules, editSeckill } from "@/api/seckill";
+import {
+  getSeckillRules,
+  editSeckillRules,
+  addSeckillRules,
+} from "@/api/seckill";
 export default {
   data() {
+    var required = (rule, value, callback) => {
+      console.log(value);
+      switch (rule.fullField) {
+        case "buyNum":
+          console.log(this.ruleForm.isCheckBuy);
+          console.log(Boolean(value));
+          if (this.ruleForm.isCheckBuy == 1 && Boolean(value) == false) {
+            return callback(new Error("请输入购买件数，不能为空且必须大于0"));
+          }
+          break;
+        case "prePrice":
+          if (this.ruleForm.isCheckPre && !value) {
+            return callback(new Error("请输入预付款价格，不能为空且必须大于0"));
+          }
+          break;
+        case "shareNum":
+          if (this.ruleForm.isCheckShare && !value) {
+            return callback(new Error("请输入分享次数，不能为空且必须大于0"));
+          }
+          break;
+      }
+      callback();
+    };
     return {
       detail: {
-        beginTime: "",
-        endTime: "",
-        num: "",
-        price: "",
-        priceType: 0,
-        productId: 0,
-        sort: "",
-        stock: "",
-        toStock: "",
+        levelId: "",
+        seckillId: 0,
+        rule: {},
+      },
+      rules: {
+        buyNum: [
+          {
+            validator: required,
+            target: ["change", "blur"],
+          },
+        ],
+        prePrice: [
+          {
+            validator: required,
+            target: ["change", "blur"],
+          },
+        ],
+        shareNum: [
+          {
+            validator: required,
+            target: ["change", "blur"],
+          },
+        ],
+      },
+      ruleForm: {
+        buyNum: "",
+        isCheckBuy: 0,
+        isCheckPre: 0,
+        isCheckShare: 0,
+        prePrice: "",
+        shareNum: "",
       },
       groupIdList: [], // 会员分组
       productDetail: {},
@@ -109,11 +182,17 @@ export default {
   created() {
     let storeId = localStorage.getItem("storeId");
     this.detail.storeId = Number(storeId);
-    if (localStorage.getItem("seckillProduct")) {
+    // 获取规则详情
+    getSeckillRules(this.$route.query.id).then((res) => {
+      if (res.data) {
+        // 修改
+        this.detail = res.data;
+        this.ruleForm = res.data.rule;
+      }
       let productDetail = JSON.parse(localStorage.getItem("seckillProduct"));
-      this.detail.productId = productDetail.id;
+      this.detail.seckillId = productDetail.id;
       this.productDetail = productDetail;
-    }
+    });
     // 获取会员组
     getLevels().then((res) => {
       this.groupIdList = res.data;
@@ -122,13 +201,35 @@ export default {
   methods: {
     Save: function () {
       this.disabled = true;
-      editSeckillRules(this.detail).then((res) => {
-          this.$message.success("修改成功");
-          this.disabled = false;
-          this.$router.push("/seckill");
-        }).catch(res=>{
-          this.disabled = false;
-        });
+      let par = this.detail;
+      par.rule = { ...this.ruleForm };
+      console.log(par);
+      // return false;
+      if (par.id) {
+        editSeckillRules(par)
+          .then((res) => {
+            if (res) {
+              this.$message.success("修改成功");
+              this.disabled = false;
+              this.$router.push("/seckill");
+            }
+          })
+          .catch((res) => {
+            this.disabled = false;
+          });
+      } else {
+        addSeckillRules(par)
+          .then((res) => {
+            if (res) {
+              this.$message.success("新增成功成功");
+              this.disabled = false;
+              this.$router.push("/seckill");
+            }
+          })
+          .catch((res) => {
+            this.disabled = false;
+          });
+      }
     },
   },
   destroyed() {

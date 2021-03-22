@@ -4,7 +4,7 @@
       <span>商品列表</span>
       <span style="font-size: 0">
         <el-button @click="showImport = true">导入</el-button>
-        <el-button @click="showExport=true">导出</el-button>
+        <el-button @click="showExport = true">导出</el-button>
         <!-- <el-button>Feed导出</el-button> -->
         <el-button type="primary" @click="ToAddShop">添加商品</el-button>
       </span>
@@ -21,20 +21,15 @@
         </div>
       </div>
       <div class="conditions">
-        <!-- 分类 -->
-        <el-select
-          v-model="requestParams.tagId"
+        <!-- 分类 --> 
+        <el-cascader 
+        style="margin-right: 10px; width: 210px"
+          v-model="tagId"
+          :props="categoryOption"
+          :show-all-levels="false"
           clearable
-          placeholder="分类"
-          style="margin-right: 10px; width: 210px"
         >
-          <el-option
-            v-for="item in categoryList"
-            :key="item.id"
-            :label="item.title"
-            :value="item.id"
-          ></el-option>
-        </el-select>
+        </el-cascader>
         <!-- 标签 -->
         <el-select
           v-model="searchType"
@@ -75,11 +70,7 @@
           ></span>
         </template>
         <template slot="option" slot-scope="params">
-          <span
-            @click.stop="Preview(params)"
-            class="textBtn"
-            >预览</span
-          > 
+          <span @click.stop="Preview(params)" class="textBtn">预览</span>
         </template>
       </table-tem>
     </div>
@@ -95,12 +86,7 @@
         >
       </div>
       <div style="margin: 30px 0">
-        <el-upload
-          class="upload-demo"
-          drag
-          :action="upUrl"
-          multiple
-        >
+        <el-upload class="upload-demo" drag :action="upUrl" multiple>
           <i class="el-icon-upload"></i>
           <div
             class="el-upload__text"
@@ -134,11 +120,15 @@
     ></export-function>
   </div>
 </template>
-<script> 
+<script>
 import exportFunction from "@/components/exportFunction";
 import tableTem from "@/components/tableTem";
 import { delMany, onsaleAll } from "@/api/yxStoreProduct";
-import { getCates } from "@/api/yxStoreCategory";
+import {
+  getCates,
+  getNewCategoryList,
+  getNewCategoryListByPid,
+} from "@/api/yxStoreCategory";
 export default {
   components: {
     exportFunction,
@@ -146,12 +136,41 @@ export default {
   },
   data() {
     return {
+      tagId: [],
+      categoryOption: {
+        lazy: true,
+        lazyLoad(node, resolve) {
+          const { level } = node;
+          if (level == 0) {
+            let par = {
+              page: 0,
+              size: 99,
+              pid: 0,
+            };
+            getNewCategoryList(par).then((res) => {
+              if (res.data) {
+                resolve(res.data.yxStoreTagList);
+              }
+            });
+          } else {
+            getNewCategoryListByPid({ pid: node.data.id }).then((res) => {
+              if (res.data) {
+                resolve(res.data);
+              }
+            });
+          }
+        },
+        value: "id",
+        label: "title",
+        checkStrictly: true,
+      },
       requestParams: {
         page: 0,
         size: 30,
         sort: "id,desc",
         isShow: 1,
         isDel: 0,
+        tagId:'',
       },
       isRefresh: 0,
       nav: [
@@ -201,18 +220,19 @@ export default {
       showExport: false,
       showImport: false,
       checkImport: true,
-      upUrl:process.env.VUE_APP_BASE_API+'/api/yxStoreProduct/importProduct/'+localStorage.getItem('storeId')
+      upUrl:
+        process.env.VUE_APP_BASE_API +
+        "/api/yxStoreProduct/importProduct/" +
+        localStorage.getItem("storeId"),
     };
   },
-  created() {
-    // 获取分类信息
-    let par = {
-      size: 99,
-      page: 0,
-    };
-    getCates(par).then((res) => {
-      this.categoryList = res.content;
-    });
+  watch: {
+    tagId: {
+      handler: function (val) { 
+        console.log(val[val.length - 1])
+        this.requestParams.tagId = val[val.length - 1];
+      }, 
+    },
   },
   methods: {
     // 改变搜索条件
@@ -275,13 +295,15 @@ export default {
     toDetail: function (e) {
       this.$router.push({ path: "/commodity/edit", query: { id: e.id } });
     },
-    Preview:function(params){
-      let url = 'https://' + localStorage.getItem('storeUrl') + '/product-details.html?id=' +  params.params.id
-      window.open(url, '_blank') 
+    Preview: function (params) {
+      let url =
+        "https://" +
+        localStorage.getItem("storeUrl") +
+        "/product-details.html?id=" +
+        params.params.id;
+      window.open(url, "_blank");
     },
-    ImportProduct:function(){
-
-    }
+    ImportProduct: function () {},
   },
 };
 </script>

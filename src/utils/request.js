@@ -44,8 +44,8 @@ const allowRequest = function (reqList, url) {
 } 
 // 创建axios实例
 const service = axios.create({
-  // axios中请求配置有baseURL选项，表示请求URL公共部分 'http://192.168.1.204:8008/admin'||
-  baseURL: process.env.VUE_APP_BASE_API, //
+  // axios中请求配置有baseURL选项，表示请求URL公共部分 'http://192.168.1.204:8001/admin'||
+  baseURL: '' ||process.env.VUE_APP_BASE_API, //
   // 超时
   timeout: 1000000
 })
@@ -132,7 +132,7 @@ service.interceptors.response.use(res => {
         message: msg,
         type: 'error'
       })
-      return false;
+      return Promise.reject(msg) 
     } else {
       return res.data
     }

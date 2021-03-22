@@ -108,6 +108,9 @@ export default {
           this.showCopy = false;
           this.showCopyDetail = true;
           this.detail = res.data; 
+        }).catch(res=>{
+          this.showCopy = false;
+          this.showCopyDetail = false;
         });
       } else {
         this.$message.warning("请输入密钥");
@@ -125,7 +128,10 @@ export default {
           this.$message.success("复制成功");
           this.showCopyDetail = false;
         }
-      });
+      }).catch(res=>{
+          this.showCopy = false;
+          this.showCopyDetail = false;
+        });;
     },
   },
 };
