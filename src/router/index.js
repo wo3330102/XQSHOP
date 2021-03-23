@@ -168,10 +168,6 @@ const routes = [{
         name: 'RecommendOption',
         component: () => import( /* webpackChunkName: "about" */ '../views/appHome/recommend/recommendOption.vue'),
       }, {
-        path: '/facebookPixel',
-        name: 'FacebookPixel',
-        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/facebookPixel.vue'),
-      }, {
         path: '/combinationProduct',
         name: 'CombinationProduct',
         component: () => import( /* webpackChunkName: "about" */ '../views/appHome/combinationProduct/combinationProduct.vue'),

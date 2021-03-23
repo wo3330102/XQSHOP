@@ -33,6 +33,15 @@ export function delCoupon(data){
     method:'delete',
     data
   })
+} 
+
+// 复制优惠券
+export function copyCoupon(params){
+  return request({
+    url:'api/coupon/copy',
+    method:'get',
+    params
+  })
 }
 
 // 修改优惠券状态 
@@ -86,3 +95,5 @@ export function delCouponEvent(data){
     data
   })
 }
+
+

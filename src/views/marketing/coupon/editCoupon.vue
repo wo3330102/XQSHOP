@@ -140,6 +140,7 @@
                             class="small"
                             size="mini"
                             placeholder="最低金额"
+                            @blur="ruleForm.minPrice = $toDecimal2(ruleForm.minPrice)"
                           ></el-input>
                           -
                           <el-input
@@ -147,6 +148,7 @@
                             class="small"
                             size="mini"
                             placeholder="最高金额"
+                            @blur="ruleForm.maxPrice = $toDecimal2(ruleForm.maxPrice)"
                           ></el-input>
                         </div>
                       </div>
@@ -160,6 +162,7 @@
                             class="small"
                             size="mini"
                             placeholder="最低件数"
+                            @blur="ruleForm.maxPrice = $toDecimal2(ruleForm.maxPrice)"
                           ></el-input>
                           -
                           <el-input
@@ -167,6 +170,7 @@
                             class="small"
                             size="mini"
                             placeholder="最高件数"
+                            @blur="ruleForm.maxPrice = $toDecimal2(ruleForm.maxPrice)"
                           ></el-input>
                           件
                         </div>
@@ -187,6 +191,7 @@
                           class="small"
                           size="mini"
                           placeholder="最低金额"
+                          @blur="detail.couponPrice = $toDecimal2(detail.couponPrice)"
                         ></el-input>
                       </div>
                     </el-radio>

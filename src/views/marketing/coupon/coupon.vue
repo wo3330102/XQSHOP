@@ -179,7 +179,7 @@
 </template>
 <script>
 import tableTem from "@/components/tableTem";
-import { delCoupon, delCouponEvent, changeStatus } from "@/api/coupon";
+import { delCoupon, delCouponEvent, changeStatus,copyCoupon } from "@/api/coupon";
 export default {
   components: {
     tableTem,
@@ -288,7 +288,10 @@ export default {
           }
           break;
         case "copy":
-          console.log("复制");
+          copyCoupon({id:e.id}).then(res=>{
+            this.$message.success('复制成功')
+            this.isRefresh += 1; 
+          }) 
           break;
         case "del":
           if (this.active == 0) {
