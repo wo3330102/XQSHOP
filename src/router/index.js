@@ -308,10 +308,6 @@ const routes = [{
       name: 'Pay',
       component: () => import( /* webpackChunkName: "about" */ '../views/setting/paymentType/pay.vue'),
     }, {
-      path: '/editCOD',
-      name: 'EditCOD',
-      component: () => import( /* webpackChunkName: "about" */ '../views/setting/paymentType/editCOD.vue'),
-    }, {
       path: '/checkoutSetting',
       name: 'CheckoutSetting',
       component: () => import( /* webpackChunkName: "about" */ '../views/setting/checkoutSetting.vue'),

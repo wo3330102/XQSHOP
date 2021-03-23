@@ -128,6 +128,28 @@
             >
             </el-cascader>
           </div>
+          <div class="item-margin">
+            <span class="text-span">虚拟销量</span>
+            <el-input
+              class="box-item-entry"
+              v-model="detail.ficti"
+              maxlength="8"
+              size="medium" 
+              @blur="detail.ficti = $IsNaN(detail.ficti)"
+            > 
+            </el-input>
+          </div>
+          <div class="item-margin" v-show="!show">
+            <span class="text-span">虚拟收藏量</span>
+            <el-input
+              class="box-item-entry"
+              v-model="detail.virtualCollect"
+              maxlength="8"
+              size="medium" 
+              @blur="detail.virtualCollect = $IsNaN(detail.virtualCollect)"
+            > 
+            </el-input>
+          </div>
         </div>
         <div class="product-right">
           <div class="item-margin" v-if="show">
@@ -162,6 +184,28 @@
                   :value="item.value"
                 ></el-option>
               </el-select> -->
+            </el-input>
+          </div>
+          <div class="item-margin">
+            <span class="text-span">虚拟浏览量</span>
+            <el-input
+              class="box-item-entry"
+              v-model="detail.virtualBrowse"
+              maxlength="8"
+              size="medium" 
+              @blur="detail.virtualBrowse = $IsNaN(detail.virtualBrowse)"
+            > 
+            </el-input>
+          </div>
+          <div class="item-margin" v-if="show">
+            <span class="text-span">虚拟收藏量</span>
+            <el-input
+              class="box-item-entry"
+              v-model="detail.virtualCollect"
+              maxlength="8"
+              size="medium" 
+              @blur="detail.virtualCollect = $IsNaN(detail.virtualCollect)"
+            > 
             </el-input>
           </div>
           <div class="item-margin">
@@ -878,11 +922,12 @@ export default {
                     // 若原表单不含第三规格，则为新增
                     if (!item.hasOwnProperty("value3")) {
                       if (item.value1 + item.value2 == v.value1 + v.value2) {
-                        delete item.skuCode;
+                        delete item.skuCode; 
                         v = {
                           ...v,
                           ...item,
                         };
+                        v.index += 1;
                       }
                     } else {
                       // 若原表单含有第三规格，则为新增某一规格值
@@ -895,6 +940,7 @@ export default {
                           ...v,
                           ...item,
                         };
+                        v.index += 1;
                       }
                     }
                   } else if (item.hasOwnProperty("value2")) {
@@ -905,6 +951,7 @@ export default {
                         ...v,
                         ...item,
                       };
+                      v.index += 1;
                     }
                   } else {
                     if (item.value1 == v.value1) {
@@ -913,6 +960,7 @@ export default {
                         ...v,
                         ...item,
                       };
+                      v.index += 1;
                     }
                   }
                 } else {
@@ -924,6 +972,7 @@ export default {
                       ...v,
                       ...item,
                     };
+                    v.index += 1;
                   }
                 }
               });
