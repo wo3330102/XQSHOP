@@ -1,7 +1,7 @@
 <template>
   <div class="page" > 
     <el-button @click="handClick">测试</el-button>
-    <iframe src="http://192.168.1.125:8014/" width="100%" id='iframe' height="80%"></iframe>
+    <iframe src="https://tap.xqkj.top/" width="100%" id='iframe' height="80%"></iframe>
   </div>
 </template> 
 
@@ -17,7 +17,7 @@ export default {
     handClick:function(){ 
       let dom = document.getElementById('iframe').contentWindow; 
       // dom.test();
-      dom.postMessage('123123123123','http://192.168.1.125:8014/');
+      dom.postMessage('123123123123','https://tap.xqkj.top/');
     }
   },
   mounted(){
