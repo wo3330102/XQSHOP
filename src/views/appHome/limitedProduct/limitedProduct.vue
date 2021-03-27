@@ -312,7 +312,7 @@ export default {
       requestParams: {
         page: 0,
         size: 30,
-        productName: "",
+        storeName: "",
       },
       isRefresh: 0,
       optionList: ["批量修改", "删除"],
@@ -436,13 +436,15 @@ export default {
           delLimited(par).then((res) => {
             this.$message.success("删除成功");
             this.isRefresh += 1;
+            // 重新获取商品列表
+            this.GetOptionalProductList();
           });
           break;
       }
     },
     // 搜索
     Search: function () {
-      this.requestParams.productName = this.searchVal;
+      this.requestParams.storeName = this.searchVal;
     },
     // 单个评论操作
     Option: function (detail, type) {

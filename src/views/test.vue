@@ -1,69 +1,27 @@
 <template>
   <div class="page" > 
-    <div>
-      <div>
-        <el-radio-group v-model="zhicheng">
-        <el-radio :label="String(index)" v-for="(item,index) in zhichengList" :key="item.value">
-          {{zhichengList[zhicheng].label}}
-        </el-radio>
-      </el-radio-group>
-      </div>
-      <div>
-        
-      <el-radio-group v-model="xuewei">
-        <el-radio :label="index" v-for="(item,index) in xueweiList" :key="item.value">
-           {{xueweiList[xuewei].label}}
-        </el-radio>
-      </el-radio-group>
-      </div>
-    </div>
-    你的选择结果是{{zhichengList[zhicheng].value+xueweiList[xuewei].value}}
+    <el-button @click="handClick">测试</el-button>
+    <iframe src="http://192.168.1.125:8014/" width="100%" id='iframe' height="80%"></iframe>
   </div>
 </template> 
 
 <script>
 export default {
   data() {
-    return {
-      zhicheng:0,
-      zhichengList:[{
-        label:'教授',
-        value:10000,
-      },{
-        label:'副教授',
-        value:7000,
-      },{
-        label:'助理教授',
-        value:5000,
-      },{
-        label:'讲师',
-        value:4000,
-      },{
-        label:'未定级',
-        value:4000,
-      }],
-      xuewei:0  ,
-      xueweiList:[{
-        label:'博士',
-        value:5500,
-      },{
-        label:'双硕士',
-        value:4800,
-      },{
-        label:'硕士',
-        value:4300,
-      },{
-        label:'双学士',
-        value:3800,
-      },{
-        label:'学士',
-        value:3500,
-      }]
+    return { 
     };
   },  
   created(){ 
   },
   methods:{ 
+    handClick:function(){ 
+      let dom = document.getElementById('iframe').contentWindow; 
+      // dom.test();
+      dom.postMessage('123123123123','http://192.168.1.125:8014/');
+    }
+  },
+  mounted(){
+    console.log(123);
   }
 };
 </script>

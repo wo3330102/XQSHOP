@@ -203,8 +203,7 @@
       </table-tem>
     </div>
     <select-product
-      :visible.sync="showSelectProduct"
-      :requestParams="productParams"
+      :visible.sync="showSelectProduct" 
       @Result="ToAdd"
     >
     </select-product>
@@ -213,7 +212,7 @@
 <script>
 import tableTem from "@/components/tableTem";
 import selectProduct from "../components/selectProductInCoupon"; 
-import { editSeckillStatus,delSeckill } from "@/api/seckill";
+import { editSeckillStatus,delSeckillSelect } from "@/api/seckill";
 export default {
   components: {
     tableTem,
@@ -224,11 +223,7 @@ export default {
       tableParams: {
         page: 0,
         size: 30,
-      },
-      productParams: {
-        page: 0,
-        size: 30,
-      },
+      }, 
       isRefresh: 0,
       nav: [
         {
@@ -488,7 +483,7 @@ export default {
       selectItem.map((i) => {
         arr.push(i.id);
       }); 
-      delSeckill(arr).then(() => {
+      delSeckillSelect(arr).then(() => {
         that.$message.success("删除成功");
         that.isRefresh += 1;
       });

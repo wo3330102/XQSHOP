@@ -248,7 +248,7 @@
         </el-col>
       </el-row>
       <div class="pageSaveBtn">
-        <el-button @click="$NavgitorTo('/commodityList')">取消</el-button>
+        <el-button @click="$NavgitorTo('/commodityType')">取消</el-button>
         <el-button @click="Save" type="primary">保存</el-button>
       </div>
     </div>

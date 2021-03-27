@@ -52,3 +52,20 @@ export function updateLimited(data){
     data
   })
 } 
+
+// 获取限量优惠配置详情
+export function getOptionSetting(){ 
+  return request({
+    url:'api/productLimit/limitConfigs',
+    method:'get', 
+  })
+} 
+
+// 修改限量优惠配置
+export function changeOptionSetting(data){ 
+  return request({
+    url:'api/productLimit/isRemind',
+    method:'post',
+    data
+  })
+} 

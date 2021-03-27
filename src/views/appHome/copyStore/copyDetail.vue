@@ -135,9 +135,9 @@ export default {
       showAdd: false,
       requestParams: {
         page: 0,
-        size: 30,
+        size: 10,
         storeName: "",
-        tagId: "",
+        cateId: "",
       },
       list: [],
       showSecret: false,
@@ -212,8 +212,7 @@ export default {
         });
       }
       console.log(par);
-      createSecret(par).then((res) => {
-        console.log(res);
+      createSecret(par).then((res) => { 
         this.showSecret = true;
         this.secret = res.data.key;
         // this.$router.push('/copyStore')

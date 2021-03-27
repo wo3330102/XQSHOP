@@ -145,7 +145,7 @@
               @current-change="CurrentChange"
               :current-page.sync="currentPage"
               background
-              :page-size="requestParams.limit"
+              :page-size="requestParams.size"
               layout="total, prev, pager, next"
               :total="total"
             ></el-pagination>
@@ -326,7 +326,7 @@ export default {
       requestParams: {
         beginTime: "",
         endTime: "",
-        limit: 10,
+        size: 10,
         page: 0,
         count: 0,
         click: 0,
@@ -380,21 +380,8 @@ export default {
       getlist(this.requestParams).then((res) => {
         this.data[0] = res.browseNumList
         this.data[1] = res.toCartNumList
-        this.data[2] = res.buyNumList 
-        console.log(this.data)
-        this.total = res.totalElements;
-        // switch (this.active){
-        //   case 0:
-        //     this.total = res.totalElements;
-        //     break;
-        //   case 1:
-        //     this.total = res.totalElements;
-        //     break;
-        //   case 2:
-            
-        //     break;
-        // }
-        // this.total = res.
+        this.data[2] = res.buyNumList  
+        this.total = res.totalElements; 
       });
     },
     // 分页选择
@@ -421,7 +408,7 @@ export default {
         if (arr.length <= res.totalElements) {
           this.table = arr;
         } 
-        // this.tableTotal = res.totalElements; 
+        this.tableTotal = res.totalElements; 
       });
     }, 
     // 搜索

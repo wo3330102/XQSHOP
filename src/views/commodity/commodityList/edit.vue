@@ -120,8 +120,8 @@
               ></el-option>
             </el-select> -->
             <el-cascader
-              style="width: 100%" 
-              v-model="tagIds" 
+              style="width: 100%"
+              v-model="tagIds"
               :props="categoryOption"
               :show-all-levels="false"
               clearable
@@ -134,9 +134,9 @@
               class="box-item-entry"
               v-model="detail.ficti"
               maxlength="8"
-              size="medium" 
+              size="medium"
               @blur="detail.ficti = $IsNaN(detail.ficti)"
-            > 
+            >
             </el-input>
           </div>
           <div class="item-margin" v-show="!show">
@@ -145,9 +145,9 @@
               class="box-item-entry"
               v-model="detail.virtualCollect"
               maxlength="8"
-              size="medium" 
+              size="medium"
               @blur="detail.virtualCollect = $IsNaN(detail.virtualCollect)"
-            > 
+            >
             </el-input>
           </div>
         </div>
@@ -187,28 +187,6 @@
             </el-input>
           </div>
           <div class="item-margin">
-            <span class="text-span">虚拟浏览量</span>
-            <el-input
-              class="box-item-entry"
-              v-model="detail.virtualBrowse"
-              maxlength="8"
-              size="medium" 
-              @blur="detail.virtualBrowse = $IsNaN(detail.virtualBrowse)"
-            > 
-            </el-input>
-          </div>
-          <div class="item-margin" v-if="show">
-            <span class="text-span">虚拟收藏量</span>
-            <el-input
-              class="box-item-entry"
-              v-model="detail.virtualCollect"
-              maxlength="8"
-              size="medium" 
-              @blur="detail.virtualCollect = $IsNaN(detail.virtualCollect)"
-            > 
-            </el-input>
-          </div>
-          <div class="item-margin">
             <span class="text-span">标签</span>
             <el-input
               class="input-new-tag"
@@ -227,6 +205,28 @@
             >
               {{ item }}
             </el-tag>
+          </div>
+          <div class="item-margin">
+            <span class="text-span">虚拟浏览量</span>
+            <el-input
+              class="box-item-entry"
+              v-model="detail.virtualBrowse"
+              maxlength="8"
+              size="medium"
+              @blur="detail.virtualBrowse = $IsNaN(detail.virtualBrowse)"
+            >
+            </el-input>
+          </div>
+          <div class="item-margin" v-if="show">
+            <span class="text-span">虚拟收藏量</span>
+            <el-input
+              class="box-item-entry"
+              v-model="detail.virtualCollect"
+              maxlength="8"
+              size="medium"
+              @blur="detail.virtualCollect = $IsNaN(detail.virtualCollect)"
+            >
+            </el-input>
           </div>
         </div>
       </div>
@@ -565,25 +565,25 @@ export default {
       categoryOption: {
         lazy: true,
         lazyLoad(node, resolve) {
-          const { level } = node; 
+          const { level } = node;
           if (level == 0) {
             let par = {
-              page:0,
-              size:99,
-              pid:0,
-            }
+              page: 0,
+              size: 99,
+              pid: 0,
+            };
             getNewCategoryList(par).then((res) => {
-              if (res.data) { 
+              if (res.data) {
                 resolve(res.data.yxStoreTagList);
               }
             });
-          } else{
+          } else {
             getNewCategoryListByPid({ pid: node.data.id }).then((res) => {
-              if (res.data) {   
+              if (res.data) {
                 resolve(res.data);
-              } 
-            })
-          } 
+              }
+            });
+          }
         },
         value: "id",
         label: "title",
@@ -667,6 +667,10 @@ export default {
       optionIndex: 0, // 批量修改类型
       optionList: [
         {
+          label: "删除",
+          value: 1,
+        },
+        {
           label: "修改价格",
           value: 2,
         },
@@ -689,10 +693,6 @@ export default {
         {
           label: "修改商品SKU",
           value: 7,
-        },
-        {
-          label: "删除",
-          value: 1,
         },
       ],
       requestParams: {},
@@ -730,7 +730,7 @@ export default {
     this.token = localStorage.getItem("token");
   },
   methods: {
-    ChangeTag:function(e){
+    ChangeTag: function (e) {
       console.log(e);
     },
     // 获取信息
@@ -746,7 +746,7 @@ export default {
           this.temp_id = "";
         } else {
           that.detail = { ...res.productInfo };
-          that.tagIds = res.tagList; 
+          that.tagIds = res.tagList;
           if (res.productInfo.classIds) {
             that.classList = res.productInfo.classIds.split(",");
           }
@@ -909,11 +909,11 @@ export default {
               array.push(i);
             }
           });
+          console.log(array);
           this.table = array;
         } else {
           let table = [...this.table];
-          r.value.map((v, i) => {
-            v.index = i;
+          r.value.map((v, i) => { 
             if (v.is_show == 1) {
               table.map((item) => {
                 if (v.hasOwnProperty("value2")) {
@@ -922,12 +922,14 @@ export default {
                     // 若原表单不含第三规格，则为新增
                     if (!item.hasOwnProperty("value3")) {
                       if (item.value1 + item.value2 == v.value1 + v.value2) {
-                        delete item.skuCode; 
+                        delete item.skuCode;
+                        const detail = { ...v.detail };
                         v = {
                           ...v,
                           ...item,
+                          detail,
                         };
-                        v.index += 1;
+                        v.index += r.value.length;
                       }
                     } else {
                       // 若原表单含有第三规格，则为新增某一规格值
@@ -936,31 +938,37 @@ export default {
                         v.value1 + v.value2 + v.value3
                       ) {
                         delete item.skuCode;
+                        const detail = { ...v.detail };
                         v = {
                           ...v,
                           ...item,
+                          detail,
                         };
-                        v.index += 1;
+                        v.index += r.value.length;
                       }
                     }
                   } else if (item.hasOwnProperty("value2")) {
                     if (v.value1 + v.value2 === item.value1 + item.value2) {
                       delete item.value3;
                       delete item.skuCode;
+                      const detail = { ...v.detail };
                       v = {
                         ...v,
                         ...item,
+                        detail,
                       };
-                      v.index += 1;
+                      v.index += r.value.length;
                     }
                   } else {
                     if (item.value1 == v.value1) {
                       delete item.skuCode;
+                      const detail = { ...v.detail };
                       v = {
                         ...v,
                         ...item,
+                        detail,
                       };
-                      v.index += 1;
+                      v.index += r.value.length; 
                     }
                   }
                 } else {
@@ -968,17 +976,22 @@ export default {
                     delete item.skuCode;
                     delete item.value2;
                     delete item.value3;
+                    const detail = { ...v.detail };
                     v = {
                       ...v,
                       ...item,
+                      detail,
                     };
-                    v.index += 1;
+                    v.index += r.value.length;
                   }
                 }
               });
               array.push(v);
             }
           });
+          array.map((item,index)=>{
+            item.index = index;
+          })
           this.table = array;
         }
       });
@@ -990,8 +1003,8 @@ export default {
       } else if (key !== "stock") {
         data[key] = data[key] ? this.$toDecimal2(data[key].toString()) : "0.00";
       } else {
-        console.log(data[key])
-        data[key] = this.$IsNaN(data[key]) 
+        console.log(data[key]);
+        data[key] = this.$IsNaN(data[key]);
       }
     },
     // 选择批量操作数据
@@ -1002,7 +1015,6 @@ export default {
     BatchOperation: function (e) {
       let item = this.selectItem;
       let table = this.table;
-      console.log(e);
       this.optionIndex = e - 1;
       // 1 删除; 2 修改价格; 3 修改原价; 4 修改图片; 5 修改库存; 6 修改重量
       if (e == 1) {
@@ -1134,14 +1146,14 @@ export default {
         that.$message.error("请输入商品名称");
         return false;
       }
-      // // 判断是否选择分类
-      // if (!this.tagIds || this.tagIds.length === 0) {
-      //   that.$message.error("请选择商品分类");
-      //   return false;
-      // }
-      // 判断是否有标签 
+      // 判断是否选择分类
+      if (!this.tagIds || this.tagIds.length === 0) {
+        that.$message.error("请选择商品分类");
+        return false;
+      }
+      // 判断是否有标签
       if (this.classList) {
-        this.detail.classIds = this.classList.toString(); 
+        this.detail.classIds = this.classList.toString();
       }
       // 判断是否输入商品详情
       if (!this.detail.description) {
@@ -1192,7 +1204,7 @@ export default {
         if (!this.detail.skuCode) {
           that.$message.error("请输入商品Sku");
           return false;
-        } else { 
+        } else {
           this.attr.skuCode = this.detail.skuCode;
         }
         // 判断用户是否输入库存，默认为空

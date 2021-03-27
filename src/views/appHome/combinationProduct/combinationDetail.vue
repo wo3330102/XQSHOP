@@ -118,7 +118,7 @@ export default {
       detail: {},
       requestParams: {
         filterType: 0,
-        productName: "",
+        storeName: "",
       },
       tableHeader: [
         {
@@ -154,7 +154,7 @@ export default {
       this.requestParams = {
         filterType: 2,
         composeId: res.data.composeId,
-        productName: "",
+        storeName: "",
       };
     });
   },

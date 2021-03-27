@@ -223,7 +223,7 @@
               v-for="item in skuList"
               :key="item.id"
               :label="item.sku"
-              :value="item.sku"
+              :value="item.unique"
             ></el-option>
           </el-select>
         </el-form-item>
@@ -271,6 +271,8 @@
       :visible.sync="showAdd"
       width="1266px"
       class="addReviewDialog"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
     >
       <el-form
         :model="addForm"
@@ -360,7 +362,7 @@
                   v-for="i in skuList"
                   :key="i.id"
                   :label="i.sku"
-                  :value="i.id"
+                  :value="i.unique"
                 ></el-option>
               </el-select>
             </el-form-item>
@@ -603,7 +605,8 @@ export default {
     this.token = localStorage.getItem("token");
     // 获取SKU
     getSKUListById(this.$route.query.id).then((res) => {
-      this.skuList = res.productValue;
+      console.log(res);
+      this.skuList = res.productValue; 
     });
   },
   methods: {
@@ -717,9 +720,13 @@ export default {
           // 深拷贝，解决点击编辑时表格内当前项评分会立马变成编辑后评分的BUG
           this.form = { ...item }; 
           this.form.productScore =
-            this.form.productScore === 0 ? 1 : this.form.productScore;
-          if (item.pics) { 
-            console.log(item.pics)
+            (this.form.productScore === 0 ? 1 : this.form.productScore); 
+          if(!this.form.unique && this.form.fictitiousSku){
+            this.form.unique = this.form.fictitiousSku
+          }
+          console.log(this.form);
+          console.log(this.form.unique);
+          if (item.pics) {  
             if (item.pics.indexOf(",") > -1) {
               let arr = [];
               item.pics.split(",").map((i) => {
@@ -804,8 +811,10 @@ export default {
       let arr = [];
       this.fileList.map((i) => {
         arr.push(i.url);
-      });
-      console.log(arr);
+      }); 
+      if(!this.form.unique && this.form.fictitiousSku){
+        this.form.unique = null;
+      }
       this.form.pics = arr.toString();
       editComment(this.form).then((res) => {
         this.$message.success("修改成功");
@@ -854,13 +863,12 @@ export default {
                 arr.push(v.url);
               });
             }
+            i.unique = i.fictitiousSku
             i.productId = this.id;
             i.storeId = storeId;
             i.pics = arr.toString();
             delete i.fileList;
-          });
-          console.log(par);
-          // return false
+          });  
           addComment(par).then((res) => {
             this.showAdd = false;
             this.$message.success("新增成功");  

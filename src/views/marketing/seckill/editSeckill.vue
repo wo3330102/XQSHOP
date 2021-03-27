@@ -226,6 +226,14 @@ export default {
       this.disabled = true;
       this.$refs.form.validate((e) => {
         if (e) {
+          // 判断开始时间是否大于结束时间
+            const couponStartTime = new Date(this.detail.beginTime + ' 00:00:00').getTime();
+            const couponEndTime = new Date(this.detail.endTime + ' 00:00:00').getTime();
+            if(couponStartTime>couponEndTime){
+              this.$message.error("开始时间不能大于结束时间")
+              this.disabled = false;
+              return false; 
+            } 
           if (this.detail.id) {
             editSeckill(this.detail).then((res) => {
               this.$message.success("修改成功");

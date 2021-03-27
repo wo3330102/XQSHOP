@@ -51,8 +51,8 @@ Vue.prototype.$IsNaN = function (e,max) {
     if (isNaN(num) || (max?num>max:num<1)) {
       return '';
     } else {
-      return num;
-    }    
+      return parseInt(num);
+    }
   }
 }
 // 全局跳转

@@ -20,7 +20,7 @@
           <!-- 活动名称 -->
           <div class="box">
             <h3 class="title">
-              活动名称
+              店铺信息
               <span style="color: rgb(193, 194, 204); font-weight: normal"
                 >（设置店铺的联系方式，平台和顾客将通过此信息与你联系）</span
               >

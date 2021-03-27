@@ -34,14 +34,15 @@
             placeholder="请输入优惠券名称"
           ></el-input>
         </el-form-item>
-        <el-form-item label="所属会员组">
+        <el-form-item label="所属用户">
           <el-select
             style="width: 100%"
             v-model="detail.memberGroupIds"
             clearable
             @clear="detail.memberGroupIds = ''"
-            placeholder="请选择所属会员组"
+            placeholder="请选择所属用户"
           >
+            <el-option label="游客与会员" :value="0"></el-option>
             <el-option
               :label="item.explain"
               :value="item.id"
@@ -114,13 +115,18 @@
             <el-radio :label="1">首次下单</el-radio>
             <el-radio :label="2">首次支付</el-radio>
           </el-radio-group>
-        </el-form-item>
+        </el-form-item> 
         <el-form-item label="条件类型">
           <el-radio-group v-model="detail.conditionType">
             <el-radio :label="0">全部</el-radio>
             <el-radio :label="1">商品分类</el-radio>
             <el-radio :label="2">品牌</el-radio>
           </el-radio-group>
+        </el-form-item>
+        <el-form-item label="商品分类" v-if="detail.conditionType == 1"> 
+          <el-select v-model="detail.categoryIds" placeholder="请选择分类ID">
+            <el-option :label="item.title" :value="item.id" v-for="item in categoryList" :key="item.id"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="优惠券规则">
           <div class="box" style="width:800px">
@@ -267,7 +273,7 @@
       </el-form>
     </div>
     <div class="pageSaveBtn">
-      <el-button @click="$NavgitorTo('/share')">取消</el-button>
+      <el-button @click="$NavgitorTo('/coupon')">取消</el-button>
       <el-button
         type="primary"
         @click="Save"
@@ -286,6 +292,7 @@
 </template> 
 <script>
 import { getLevels, addCoupon, editCoupon } from "@/api/coupon";
+import { getCates } from "@/api/yxStoreCategory";
 import selectProduct from "../components/selectProductInCoupon";
 export default {
   components:{selectProduct},
@@ -306,7 +313,7 @@ export default {
         isCoverBargain: 0,
         isCoverDiscount: 0,
         isShow: 1,
-        memberGroupIds: "",
+        memberGroupIds: 0,
         productIds: "",
         ruleVo: {
           maxValue: 0,
@@ -364,6 +371,15 @@ export default {
       },
       product:{},
       disabled: false, 
+      categoryList:[],  // 分类列表  
+      requestParams:{
+        page:0,
+        size:7,
+        cateId:'',
+        skuCode:'',
+        specType:0,
+        storeName:'',
+      }
     };
   },
   created() {
@@ -381,15 +397,30 @@ export default {
     getLevels().then((res) => {
       this.groupIdList = res.data;
     });
+    // 获取分类列表
+    getCates().then(res=>{
+      console.log(res);
+      if(res.content&&res.content.length>0){
+        this.categoryList = res.content;
+      }
+    })
   },
   methods: {
     Result:function(e){
       this.product = e;
     },
     Save: function () {
-      this.disabled = true;
+      this.disabled = true; 
       this.$refs.form.validate((e) => {
         if (e) {
+          // 判断开始时间是否大于结束时间
+          const couponStartTime = new Date(this.detail.couponStartTime + ' 00:00:00').getTime();
+          const couponEndTime = new Date(this.detail.couponEndTime + ' 00:00:00').getTime();
+          if(couponStartTime>couponEndTime){
+            this.$message.error("开始时间不能大于结束时间")
+            this.disabled = false;
+            return false; 
+          }  
           // 判断优惠券规则 0-无需条件 1-金额限制 2-数量限制
           if (this.detail.ruleVo.ruleType == 1) {
             if (this.ruleForm.minPrice || this.ruleForm.maxPrice) {
@@ -412,6 +443,14 @@ export default {
           } else {
             this.detail.ruleVo.minValue = "";
             this.detail.ruleVo.maxValue = "";
+          }
+          // 判断优惠券条件类型是否为分类
+          if(this.detail.conditionType === 1){
+            if(!this.detail.categoryIds && this.detail.categoryIds !== 0){
+              this.$message.warning("请选择优惠券适用分类");
+              this.disabled = false;
+              return false;
+            }
           }
           // 判断优惠类型:0-满减 1-折扣 2-赠品 3-包邮
           switch (this.detail.couponType) {
@@ -532,6 +571,9 @@ h1 {
 }
 /deep/.el-form-item__label {
   color: #000000;
+}
+/deep/ .el-input__prefix{
+  left:5px !important;
 }
 .pageSaveBtn {
   border-top: 1px solid #dcdfe6;

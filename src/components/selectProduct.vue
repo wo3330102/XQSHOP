@@ -36,10 +36,14 @@
         clearable
         @change="
           () => {
+            requestParams.page = 0;
             table = [];
           }
         "
-        @clear="requestParams.cateId = ''"
+        @clear="()=>{
+          requestParams.page = 0;
+          requestParams.cateId = ''
+        }"
       >
         <el-option
           v-for="item in shopCategoryList"
@@ -55,7 +59,7 @@
         placeholder="请输入内容"
         @change="Search"
       >
-        <el-button @click.prevent.stop="Search" slot="append">查询</el-button>
+        <el-button @click="Search" slot="append">查询</el-button>
       </el-input>
     </div>
     <el-table
@@ -155,8 +159,7 @@ export default {
   },
   watch: {
     requestParams: {
-      handler: function (val) {
-        this.selectItem = [];
+      handler: function (val, old) { 
         this.init();
       },
       deep: true,
@@ -164,11 +167,12 @@ export default {
     },
     visible: function (val) {
       this.shopDialog = val;
+      this.selectItem = []; 
+      console.log("清空选框");
       if (!val) {
         this.$refs.multipleTable.clearSelection();
       }
     },
-
     disableNum: function (val) {
       this.disableNumber = val;
     },
@@ -189,9 +193,8 @@ export default {
     handleClose() {
       this.$emit("update:visible", false);
     },
-    init: function (concat) {
+    init: function () {
       let that = this;
-      console.log(that.requestUrl);
       request({
         url:
           that.requestUrl +
@@ -199,30 +202,33 @@ export default {
           qs.stringify(that.requestParams, { indices: false }),
         method: "get",
       }).then((res) => {
-        if (concat) {
-          if (this.isNewApi) {
-            this.table = this.table.concat(res.data.content);
-          } else {
-            if (res.data) {
+        if (this.table && this.table.length > 0) {
+          if (res.data) {
+            if (this.isNewApi) {
+              this.table = this.table.concat(res.data.content);
+            } else {
               this.table = this.table.concat(res.data);
             }
           }
         } else {
-          if (this.isNewApi) {
-            this.table = res.data.content;
-            this.tableTotal = res.data.totalElements;
-          } else {
-            if (res.data) {
-              this.table = res.data;
-              this.tableTotal = res.data.length;
+          if (res.data) {
+            if (this.isNewApi) {
+              this.table = res.data.content;
+              this.tableTotal = 0 || res.data.totalElements;
+            } else {
+              if (res.data) {
+                this.table = res.data;
+                this.tableTotal = 0 || res.data.length;
+              }
             }
           }
-        }
+        } 
       });
     },
     Search: function () {
       this.table = [];
-      this.requestParams.productName = this.shopContent;
+      this.requestParams.page = 0;
+      this.requestParams.storeName = this.shopContent;
     },
     SelectItem: function (e) {
       this.selectItem = e;
@@ -240,7 +246,6 @@ export default {
     load: function () {
       if (this.needLoad) {
         this.requestParams.page += 1;
-        this.init(true);
       }
     },
     // 规定禁用功能

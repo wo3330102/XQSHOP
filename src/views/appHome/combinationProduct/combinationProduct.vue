@@ -35,9 +35,7 @@
           >{{ status === 1 ? "关闭" : "开启" }}</el-button
         >
         <el-button @click="$NavgitorTo('/combinationOption')">配置</el-button>
-        <el-button type="primary" @click="ShowAddMain"
-          >添加主商品</el-button
-        >
+        <el-button type="primary" @click="ShowAddMain">添加主商品</el-button>
       </span>
     </h1>
     <div style="min-height: 200px">
@@ -76,7 +74,11 @@
                     <span>{{ scope.row.composeCount }}/2</span>
                   </template>
                   <template v-else-if="item.prop == 'option'">
-                    <span class="textBtn" @click.stop="Perview(scope.row.productId)">预览</span>
+                    <span
+                      class="textBtn"
+                      @click.stop="Perview(scope.row.productId)"
+                      >预览</span
+                    >
                     <span class="textBtn">编辑</span>
                   </template>
                   <span v-else>{{ scope.row[item.prop] }}</span>
@@ -85,7 +87,7 @@
             </table-tem>
           </div>
         </el-col>
-        <el-col :span="8" style="padding-left: 10px; padding-right: 10px;">
+        <el-col :span="8" style="padding-left: 10px; padding-right: 10px">
           <div class="box">
             <p class="infoTip">信息提示</p>
             <p class="infoContent">
@@ -114,23 +116,23 @@
 <script>
 import tableTem from "@/components/tableTem";
 import selectProduct from "@/components/selectProduct";
-import { addMain, changeStatus,del,addSecond } from "@/api/yxComposeProduct";
+import { addMain, changeStatus, del, addSecond } from "@/api/yxComposeProduct";
 var addManyChildrenProduct = [];
-export default { 
+export default {
   components: {
     tableTem,
     selectProduct,
   },
-  data() { 
+  data() {
     return {
       status: 0,
       requestParams: {
         page: 0,
-        size: 30, 
+        size: 30,
       },
-      getProductListParams:{ 
-        filterType:1, 
-        productName:'',
+      getProductListParams: {
+        filterType: 1,
+        storeName: "",
       },
       tableHeader: [
         {
@@ -157,32 +159,38 @@ export default {
       isRefresh: 0,
       shopDialog: false,
       addData: [],
-      addType:1,  // 1为添加主商品，2为批量添加子商品；
-      disableNum:9999999,
+      addType: 1, // 1为添加主商品，2为批量添加子商品；
+      disableNum: 9999999,
     };
   },
-  watch:{
-    addType:function(val){
-      val == 1?this.disableNum = 0 : this.disableNum = 2
-    }
+  watch: {
+    addType: function (val) {
+      val == 1 ? (this.disableNum = 0) : (this.disableNum = 2);
+    },
   },
   methods: {
-    Perview:function(id){
-      if(this.status == 1){ 
-        let url = process.env.NODE_ENV == 'product'? 'https://':'http://'+ localStorage.getItem('storeUrl') + '/product-details.html?id=' + id
-            window.open(url, '_blank') 
+    Perview: function (id) {
+      if (this.status == 1) {
+        let url =
+          process.env.NODE_ENV == "product"
+            ? "https://"
+            : "http://" +
+              localStorage.getItem("storeUrl") +
+              "/product-details.html?id=" +
+              id;
+        window.open(url, "_blank");
       }
     },
     Init: function (e) {
       this.status = e.data.isOpen;
     },
     // 添加主商品
-    ShowAddMain:function(){
-      this.getProductListParams = { 
-        filterType:1, 
-        productName:'',
+    ShowAddMain: function () {
+      this.getProductListParams = {
+        filterType: 1,
+        storeName: "",
       };
-      this.shopDialog = true; 
+      this.shopDialog = true;
       this.addType = 1;
     },
     toDetail: function (e) {
@@ -195,29 +203,27 @@ export default {
       localStorage.setItem("combinationDetail", JSON.stringify(e));
     },
     // 批量操作
-    BatchOption: function (index,item) { 
-      switch (index){
+    BatchOption: function (index, item) {
+      switch (index) {
         case 0:
-          console.log('添加');
-          console.log(item);
-          addManyChildrenProduct = item.map(i=>{
+          addManyChildrenProduct = item.map((i) => {
             return i.composeId;
-          })
+          });
           this.shopDialog = true;
-          this.getProductListParams = { 
-            filterType:0,
-            productName:'', 
-          }
+          this.getProductListParams = {
+            filterType: 0,
+            storeName: "",
+          };
           this.addType = 2;
           break;
         case 1:
-          let arr = item.map(i=>{
-            return i.composeId
+          let arr = item.map((i) => {
+            return i.composeId;
           });
-          del(arr).then(res=>{
-            this.$message.success('删除成功');
+          del(arr).then((res) => {
+            this.$message.success("删除成功");
             this.isRefresh += 1;
-          })
+          });
       }
     },
     SelectItem: function (e) {
@@ -226,7 +232,7 @@ export default {
         return item.id;
       });
       let par = {};
-      if(this.addType == 1){
+      if (this.addType == 1) {
         par = {
           mainIds: arr,
         };
@@ -236,13 +242,13 @@ export default {
         });
       } else {
         par = {
-          ids:addManyChildrenProduct,
-          secondIds:arr,
-        }
-        addSecond(par).then(res=>{
+          ids: addManyChildrenProduct,
+          secondIds: arr,
+        };
+        addSecond(par).then((res) => {
           this.$message.success("添加成功");
           this.isRefresh += 1;
-        }) 
+        });
       }
     },
     // 修改当前组件开关
@@ -339,7 +345,7 @@ h1 {
   font-size: 12px;
   color: #606266;
   margin-bottom: 10px;
-  &:last-child{
+  &:last-child {
     margin: 0;
   }
 }

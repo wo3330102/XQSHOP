@@ -33,14 +33,15 @@
             </div>
           </div>
         </el-form-item>
-        <el-form-item label="所属会员组">
+        <el-form-item label="所属用户">
           <el-select
             style="width: 100%"
             v-model="detail.levelId"
             clearable
             @clear="detail.levelId = ''"
-            placeholder="请选择所属会员组"
+            placeholder="请选择所属用户"
           >
+            <el-option label="游客与会员" :value="0"></el-option>
             <el-option
               :label="item.explain"
               :value="item.id"
@@ -142,7 +143,7 @@ export default {
     };
     return {
       detail: {
-        levelId: "",
+        levelId: 0,
         seckillId: 0,
         rule: {},
       },
@@ -204,32 +205,36 @@ export default {
       let par = this.detail;
       par.rule = { ...this.ruleForm };
       console.log(par);
+      this.$refs.form.validator((e) => {
+        if (e) {
+          if (par.id) {
+            editSeckillRules(par)
+              .then((res) => {
+                if (res) {
+                  this.$message.success("修改成功");
+                  this.disabled = false;
+                  this.$router.push("/seckill");
+                }
+              })
+              .catch((res) => {
+                this.disabled = false;
+              });
+          } else {
+            addSeckillRules(par)
+              .then((res) => {
+                if (res) {
+                  this.$message.success("新增成功成功");
+                  this.disabled = false;
+                  this.$router.push("/seckill");
+                }
+              })
+              .catch((res) => {
+                this.disabled = false;
+              });
+          }
+        }
+      });
       // return false;
-      if (par.id) {
-        editSeckillRules(par)
-          .then((res) => {
-            if (res) {
-              this.$message.success("修改成功");
-              this.disabled = false;
-              this.$router.push("/seckill");
-            }
-          })
-          .catch((res) => {
-            this.disabled = false;
-          });
-      } else {
-        addSeckillRules(par)
-          .then((res) => {
-            if (res) {
-              this.$message.success("新增成功成功");
-              this.disabled = false;
-              this.$router.push("/seckill");
-            }
-          })
-          .catch((res) => {
-            this.disabled = false;
-          });
-      }
     },
   },
   destroyed() {

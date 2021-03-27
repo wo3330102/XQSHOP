@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // 获取会员分组
 export function getLevels(){
   return request({
-    url:'api/coupon/getLevels',
+    url:'api/members/getLevelList',
     method:'get', 
   })
 }

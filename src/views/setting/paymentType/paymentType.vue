@@ -131,7 +131,18 @@
           </div>
           <!-- payssion支付设置 -->
           <div class="box">
-            <h3>payssion支付设置</h3>
+            <h3>
+              <span>payssion支付设置</span>
+              <span
+                class="sail-app-status-tag"
+                :class="
+                  payssionOption.status == 1
+                    ? 'sail-app-status-tag-open'
+                    : 'sail-app-status-tag-close'
+                "
+                >{{ payssionOption.status == 1 ? "已开启" : "未开启" }}</span
+              >
+            </h3>
             <el-form
               class="form"
               ref="payssion"
@@ -216,7 +227,7 @@
                   v-model="payssionOption.urlNotify"
                   style="width: 370px"
                 />
-              </el-form-item>
+              </el-form-item> 
               <el-form-item>
                 <el-button @click="changePayssionStatus()">{{
                   payssionOption.status == 0 ? "开启" : "关闭"
@@ -372,7 +383,7 @@
             </div>
           </div>
           <!-- 货到付款 -->
-          <div class="box">
+          <div class="box"> 
             <h3 class="title">
               <span style="flex: 1">
                 货到付款
@@ -384,6 +395,15 @@
                   >（COD）</span
                 >
               </span>
+              <span
+                class="sail-app-status-tag"
+                :class="
+                  CODDetail.status == 1
+                    ? 'sail-app-status-tag-open'
+                    : 'sail-app-status-tag-close'
+                "
+                >{{ CODDetail.status == 1 ? "已开启" : "未开启" }}</span
+              >
             </h3>
             <div>
               <div class="credit-done">
@@ -411,10 +431,22 @@
                         placeholder="请输入前台展示名称"
                       ></el-input>
                     </el-form-item>
+                    <el-form-item
+                      label="手续费" 
+                    >
+                      <el-input
+                        style="width: 370px"
+                        v-model="CODDetail.fees"
+                        @blur="CODDetail.fees = Number($toDecimal2(CODDetail.fees))"
+                        placeholder="请输入COD手续费"
+                        maxlength="8"
+                      ></el-input>
+                    </el-form-item>
                     <el-form-item>
-                      <el-button @click="EditCOD">{{
+                      <el-button @click="EditCOD('status')">{{
                         CODDetail.status == 0 ? "开启" : "关闭"
                       }}</el-button>
+                      <el-button @click="EditCOD" type="primary">保存</el-button>
                     </el-form-item>
                   </el-form>
                 </p>
@@ -465,7 +497,7 @@ export default {
   },
   created() {
     this.Init();
-  },
+  }, 
   methods: {
     Init: function () {
       let storeId = localStorage.getItem("storeId");
@@ -496,26 +528,31 @@ export default {
       });
     },
     // 修改COD是否启用
-    EditCOD: function () {
-      console.log(this.CODDetail)
-      if (this.CODDetail.status) {
-        comment(this.CODDetail);
-      } else {
-        this.$refs["CODFrom"].validate((valid) => {
+    EditCOD: function (e) { 
+      console.log(e);
+      this.$refs["CODFrom"].validate((valid) => {
           if (valid) {
-            comment(this.CODDetail);
+            let par = {};
+            if(e == 'status'){
+              par = {
+                ...this.CODDetail,
+                status: this.CODDetail.status == 0 ? 1 : 0,
+              };
+            } else {
+              par = {
+                ...this.CODDetail
+              };
+            }
+            comment(par); 
           }
         });
-      }
       var that = this;
-      function comment(detail){ 
-        let par = {
-          ...detail,
-          status: detail.status == 0 ? 1 : 0,
-        };
-        editCOD(par).then((res) => {
+      function comment(detail) { 
+        editCOD(detail).then((res) => {
           that.$message.success("修改成功");
-          that.CODDetail.status = that.CODDetail.status == 0 ? 1 : 0;
+          if(e == 'status'){
+            that.CODDetail.status = that.CODDetail.status == 0 ? 1 : 0;
+          }
         });
       }
     },
@@ -541,7 +578,7 @@ export default {
         }
       });
     },
-  },
+  }, 
   updated() {
     console.log("更新");
   },
@@ -684,5 +721,27 @@ h1 {
   text-align: right;
   font-size: 0;
   margin-bottom: 40px;
+}
+.sail-app-status-tag-open {
+  border: 2px solid #fff;
+  background: #bbe5b3;
+  color: #414f3e;
+}
+.sail-app-status-tag-close {
+  background: #dfe3e8;
+  border: 2px solid #fff;
+  color: #454f5b;
+}
+.sail-app-status-tag {
+  border-radius: 100px;
+  width: 60px;
+  height: 20px;
+  line-height: 20px;
+  display: inline-block;
+  font-size: 13px;
+  text-align: center;
+  position: relative;
+  top: -4px;
+  float: right;
 }
 </style>  

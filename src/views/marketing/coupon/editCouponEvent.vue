@@ -36,14 +36,15 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="所属会员组">
+        <el-form-item label="所属用户">
           <el-select
             style="width: 100%"
             v-model="detail.memberGroupIds"
             clearable
             @clear="detail.memberGroupIds = ''"
-            placeholder="请选择所属会员组"
+            placeholder="请选择所属用户"
           >
+            <el-option label="游客与会员" :value="0"></el-option>
             <el-option
               :label="item.explain"
               :value="item.id"
@@ -76,7 +77,7 @@
             :picker-options="timeOptions"
           ></el-date-picker>
         </el-form-item>
-        <el-form-item label="事件规则">
+        <el-form-item label="事件规则" v-if="detail.eventType != 1 && detail.eventType != 6 && detail.eventType != 8">
           <table class="table" border="0" cellspacing="0" cellpadding="0">
             <tr>
               <td>订单限制门槛</td>
@@ -162,7 +163,7 @@
             </tr>
           </table>
         </el-form-item>
-        <el-form-item label="评论条件" v-show="detail.eventName == 6">
+        <el-form-item label="评论条件" v-show="detail.eventType == 6">
           <el-radio-group v-model="detail.conditionType">
             <el-radio :label="0">全部</el-radio>
             <el-radio :label="1">带图</el-radio>
@@ -219,13 +220,13 @@ export default {
         conditionVo: {
           type: 0,
         },
-        couponId: '',
+        couponId: "",
         couponNum: 1,
         eventEndTime: "",
         eventName: "",
         eventStartTime: "",
-        eventType: '',
-        memberGroupIds: "",
+        eventType: "",
+        memberGroupIds: 0,
       },
       form: {
         type: 0,
@@ -335,78 +336,89 @@ export default {
   methods: {
     Save: function () {
       this.disabled = true;
-      this.$refs.form.validate((e) => {
-        if (e) {
-          // 判断订单限制门槛:0-支付金额 1-下单时间 2-支付时间 
-          switch (this.form.type) {
-            case 0:
-              if (this.form.minPrice || this.form.maxPrice) {
-                this.detail.conditionVo = {
-                  minValue: this.form.minPrice || "",
-                  maxValue: this.form.maxPrice || "",
-                  type: this.form.type,
-                };
-              } else {
-                this.$message.warning("请填写订单支付金额限制条件");
-                this.disabled = false;
-                return false;
-              }
-              break;
-            case 1:
-              if (this.form.orderCreateTimeStart || this.form.orderEndTime) {
-                this.detail.conditionVo = {
-                  minValue: this.form.orderCreateTimeStart || "",
-                  maxValue: this.form.orderEndTime || "",
-                  type: this.form.type,
-                };
-              } else {
-                this.$message.warning("请填写订单下单时间限制条件");
-                this.disabled = false;
-                return false;
-              }
-              break;
-            case 2:
-              if (this.form.payCreatTime || this.form.payEndTime) {
-                this.detail.conditionVo = {
-                  minValue: this.form.payCreatTime || "",
-                  maxValue: this.form.payEndTime || "",
-                  type: this.form.type,
-                };
-              } else {
-                this.$message.warning("请填写订单支付时间限制条件");
-                this.disabled = false;
-                return false;
-              }
-              break;
-          }
-          if (this.detail.id) {
-            // 修改
-            editCouponEvent(this.detail)
-              .then((res) => {
-                this.$message.success("修改成功");
-                this.disabled = false;
-                this.$router.push("/coupon");
-              })
-              .catch(() => {
-                this.disabled = false;
-              });
+      if (this.detail.eventType !== 1) {
+        this.$refs.form.validate((e) => {
+          if (e) {
+            // 判断开始时间是否大于结束时间
+            const couponStartTime = new Date(this.detail.eventStartTime + ' 00:00:00').getTime();
+            const couponEndTime = new Date(this.detail.eventEndTime + ' 00:00:00').getTime();
+            if(couponStartTime>couponEndTime){
+              this.$message.error("开始时间不能大于结束时间")
+              this.disabled = false;
+              return false; 
+            }  
+            // 判断订单限制门槛:0-支付金额 1-下单时间 2-支付时间
+            switch (this.form.type) {
+              case 0:
+                if (this.form.minPrice || this.form.maxPrice) {
+                  this.detail.conditionVo = {
+                    minValue: this.form.minPrice || "",
+                    maxValue: this.form.maxPrice || "",
+                    type: this.form.type,
+                  };
+                } else {
+                  this.$message.warning("请填写订单支付金额限制条件");
+                  this.disabled = false;
+                  return false;
+                }
+                break;
+              case 1:
+                if (this.form.orderCreateTimeStart || this.form.orderEndTime) {
+                  this.detail.conditionVo = {
+                    minValue: this.form.orderCreateTimeStart || "",
+                    maxValue: this.form.orderEndTime || "",
+                    type: this.form.type,
+                  };
+                } else {
+                  this.$message.warning("请填写订单下单时间限制条件");
+                  this.disabled = false;
+                  return false;
+                }
+                break;
+              case 2:
+                if (this.form.payCreatTime || this.form.payEndTime) {
+                  this.detail.conditionVo = {
+                    minValue: this.form.payCreatTime || "",
+                    maxValue: this.form.payEndTime || "",
+                    type: this.form.type,
+                  };
+                } else {
+                  this.$message.warning("请填写订单支付时间限制条件");
+                  this.disabled = false;
+                  return false;
+                }
+                break;
+            }
           } else {
-            // 新增
-            addCouponEvent(this.detail)
-              .then((res) => {
-                this.$message.success("新增成功");
-                this.disabled = false;
-                this.$router.push("/coupon");
-              })
-              .catch(() => {
-                this.disabled = false;
-              });
+            this.$message.error("请完善表单数据");
+            this.disabled = false;
+            return false;
           }
-        } else {
-          this.$message.error("请完善表单数据");
-          this.disabled = false;
-        }
-      });
+        });
+      }  
+      if (this.detail.id) {
+        // 修改
+        editCouponEvent(this.detail)
+          .then((res) => {
+            this.$message.success("修改成功");
+            this.disabled = false;
+            this.$router.push("/coupon");
+          })
+          .catch(() => {
+            this.disabled = false;
+          });
+      } else {
+        // 新增
+        addCouponEvent(this.detail)
+          .then((res) => {
+            this.$message.success("新增成功");
+            this.disabled = false;
+            this.$router.push("/coupon");
+          })
+          .catch(() => {
+            this.disabled = false;
+          });
+      }
     },
   },
 };
@@ -463,6 +475,9 @@ h1 {
 }
 /deep/.el-form-item__label {
   color: #000000;
+}
+/deep/ .el-input__prefix{
+  left:5px !important;
 }
 .pageSaveBtn {
   border-top: 1px solid #dcdfe6;

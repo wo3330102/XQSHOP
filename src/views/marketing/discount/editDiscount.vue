@@ -1184,79 +1184,14 @@ h1 {
       white-space: nowrap;
       width: 1px;
     }
-    /deep/ .el-input__inner {
-      padding-left: 26px;
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-    }
-    /deep/ .el-input__prefix {
-      left: 0;
-    }
   }
   .detail-list {
     margin-bottom: 12px;
     border-bottom: 1px solid #dcdfe6;
-    .item {
-      width: 100%;
-      padding: 12px 0;
-      border-top: 1px solid #dcddeb;
-      display: flex;
-      align-items: center;
-      flex: 1;
-      height: 36px;
-      & > span {
-        margin-right: 8px;
-      }
-      /deep/.el-icon-delete-solid {
-        margin-left: 20px;
-        color: #c1c2cc;
-      }
-      /deep/ .el-input__prefix {
-        line-height: 36px !important;
-      }
-      /deep/ .el-input__suffix {
-        line-height: 36px !important;
-      }
-    }
   }
   .ext-btn-link-tetx {
     height: 85px;
     padding-top: 20px;
-  }
-  .ext-select-container {
-    .ext-select-text {
-      position: absolute;
-      left: 8px;
-      top: 5px;
-      font-size: 12px;
-      font-weight: 400;
-      color: #808598;
-    }
-    /deep/.el-select {
-      margin-bottom: 12px;
-    }
-    /deep/.el-input__prefix {
-      width: 100%;
-      left: 0;
-    }
-    /deep/.el-input__inner {
-      height: 48px;
-      padding-top: 15px;
-      padding-left: 10px;
-    }
-    .sub-title {
-      font-size: 12px;
-      font-weight: 400;
-      color: #c2c3cd;
-      line-height: 20px;
-    }
-    .title {
-      font-size: 12px;
-      font-weight: 400;
-      color: #1a1d2c;
-      line-height: 20px;
-      margin-bottom: 8px;
-    }
   }
 }
 .overview > p,
@@ -1467,15 +1402,80 @@ h1 {
 //   background-repeat: no-repeat;
 //   overflow: hidden;
 // }
-/deep/.el-input-group__prepend {
-  background: #fff;
-}
-/deep/ .el-icon-delete-solid {
+</style>  
+<style lang="scss">
+.el-icon-delete-solid {
   font-size: 18px;
   line-height: 38px;
   cursor: pointer;
 }
-/deep/.el-input-group__append {
-  background: #fff;
+.ext-select-container {
+  .ext-select-text {
+    position: absolute;
+    left: 8px;
+    top: 5px;
+    font-size: 12px;
+    font-weight: 400;
+    color: #808598;
+  }
+  .el-select {
+    margin-bottom: 12px;
+  }
+  .el-input__prefix {
+    width: 100%;
+    left: 0;
+  }
+  .el-input__inner {
+    height: 48px;
+    padding-top: 15px;
+    padding-left: 10px;
+  }
+  .sub-title {
+    font-size: 12px;
+    font-weight: 400;
+    color: #c2c3cd;
+    line-height: 20px;
+  }
+  .title {
+    font-size: 12px;
+    font-weight: 400;
+    color: #1a1d2c;
+    line-height: 20px;
+    margin-bottom: 8px;
+  }
 }
-</style>  
+.detail-list {
+  .item {
+    width: 100%;
+    padding: 12px 0;
+    border-top: 1px solid #dcddeb;
+    display: flex;
+    align-items: center;
+    flex: 1;
+    height: 36px;
+    & > span {
+      margin-right: 8px;
+    }
+    .el-icon-delete-solid {
+      margin-left: 20px;
+      color: #c1c2cc;
+    }
+    .el-input__prefix {
+      line-height: 36px !important;
+    }
+    .el-input__suffix {
+      line-height: 36px !important;
+    }
+  }
+}
+.time-group {
+  .el-input__inner {
+    padding-left: 26px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  .el-input__prefix {
+    left: 0;
+  }
+}
+</style>

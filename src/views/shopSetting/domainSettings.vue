@@ -21,7 +21,7 @@
           <el-table :data="mainDomainForm">
             <el-table-column prop="domain" label="域名">
               <template slot-scope="scope">
-                <a :href="'https://' +scope.row.url">{{ scope.row.url }}</a> 
+                <a :href="'https://' +scope.row.domain">{{ scope.row.domain }}</a> 
                 <span class=""></span>
               </template>
             </el-table-column>

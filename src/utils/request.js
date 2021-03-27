@@ -55,7 +55,7 @@ service.interceptors.request.use(config => {
   config.headers['Authorization'] = getToken() // 让每个请求携带自定义token 请根据实际情况自行修改
   const storeId = localStorage.getItem('storeId')
   if ((config.method === 'post' || config.method === 'put') && config.url.indexOf('api/yxStoreProductReply') < 0 && config.url.indexOf('api/yxStorePromotions/mod') < 0) {
-    // 判断post,put是否需要增加storeId 
+   
     let cancel
     // 设置cancelToken对象
     config.cancelToken = new axios.CancelToken(function (c) {
@@ -63,6 +63,8 @@ service.interceptors.request.use(config => {
     })
     // 阻止重复请求。当上个请求未完成时，相同的请求不会进行
     stopRepeatRequest(reqList, config.url, cancel, '请勿重复请求')
+
+     // 判断post,put是否需要增加storeId 
     if (config.data) {
       if (!config.data.notStoreId && !(config.data instanceof Array)) {
         config.data = {
@@ -70,7 +72,8 @@ service.interceptors.request.use(config => {
           storeId: storeId,
         }
       }
-    }
+      config.data.notStoreId?delete config.data.notStoreId : '';
+    } 
   } else if (config.method === 'get') {
     config.params = {
       storeId: storeId,
@@ -120,7 +123,7 @@ service.interceptors.response.use(res => {
     // 增加延迟，相同请求不得在短时间内重复发送
     setTimeout(() => {
       allowRequest(reqList, res.config.url)
-    }, 1000)
+    }, 400)
     // 未设置状态码则默认成功状态 
     const code = res.data.status || 200;
     // 获取错误信息

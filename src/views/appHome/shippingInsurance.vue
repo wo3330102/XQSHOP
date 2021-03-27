@@ -82,7 +82,7 @@
         <el-button type="primary" @click="Save">保存</el-button>
       </div>
     </div>
-    <el-dialog title="效果预览">
+    <el-dialog title="效果预览" :visible.sync="preview">
       <div style="text-align: center; width: 100%; max-height: 620px;"> 
         <el-image style="width: 300px; margin-bottom: 20px;" src="https://alligatoreel-fa.xshoppy.shop/static/img/applications/insurance/insurance-preview-unchecked.png" ></el-image>
       </div> 
@@ -102,6 +102,7 @@ export default {
         type: true,
         id: "",
       },
+      preview:false
     };
   }, 
   created() {

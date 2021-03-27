@@ -30,15 +30,15 @@
           clearable
         >
         </el-cascader>
-        <!-- 标签 -->
+        <!-- 搜索类型 -->
         <el-select
-          v-model="searchType"
-          clearable
+          v-model="searchType" 
           placeholder="搜索类型"
           style="margin-right: 10px; width: 210px"
           @change="(e) => {}"
         >
           <el-option label="商品名称" value="storeName"></el-option>
+          <el-option label="商品SKU" value="skuCode"></el-option>
         </el-select>
         <div class="search-box">
           <el-input
@@ -46,7 +46,7 @@
             placeholder="请输入商品名称或SKU"
             @change="
               (e) => {
-                requestParams.storeName = e;
+                searchType == 'storeName'?requestParams.storeName = e :requestParams.skuCode = e;
               }
             "
           >
@@ -171,6 +171,8 @@ export default {
         isShow: 1,
         isDel: 0,
         tagId:'',
+        storeName:'',
+        skuCode:'',
       },
       isRefresh: 0,
       nav: [
@@ -186,7 +188,7 @@ export default {
       active: 0,
       categoryList: [],
       date: "",
-      searchType: "",
+      searchType: "storeName",
       searchTypeList: [
         {
           id: 1,

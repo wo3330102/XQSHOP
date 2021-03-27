@@ -36,6 +36,16 @@ export function delSeckill(data){
   })
 } 
 
+// 批量删除
+
+export function delSeckillSelect(data){
+  return request({
+    url:'api/seckill/deleteIds',
+    method:'delete',
+    data
+  })
+}
+
 // 获取秒杀规则 
 export function getSeckillRules(id){
   return request({
