@@ -80,8 +80,8 @@ Vue.prototype.$DelTip = function(cb){
 }
 // 货币符号
 Vue.prototype.currency = {
-  s:'₱',
-  n:'PHP'
+  s:'￥',
+  n:'元'
 } 
 
 new Vue({ 

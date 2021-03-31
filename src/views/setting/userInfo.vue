@@ -99,6 +99,14 @@
                     <img width="100%" :src="imageUrl" alt />
                   </el-dialog>
                 </el-form-item>
+                <el-form-item label="前台货币展示" >
+                  <el-select v-model="formData.countryDataIds" filterable multiple placeholder="请选择前台展示的货币" style="width:100%">
+                    <el-option :label="item.zh" :value="item.id" v-for="item in countryList" :key="item.id">
+                      <span style="float: left">{{ item.zh }}</span>
+                      <span style="float: right; color: #8492a6; font-size: 13px;margin-right:20px">货币符号：{{ item.currencySymbol }}</span>
+                    </el-option>
+                  </el-select>
+                </el-form-item>
               </el-form>
             </div>
           </div>
@@ -121,7 +129,7 @@
   </div>
 </template> 
 <script>
-import { getShopById, edit } from "@/api/yxSystemStore";
+import { getShopById, edit,getContryList } from "@/api/yxSystemStore";
 export default {
   data() {
     var checkEmail = (rule, value, callback) => {
@@ -150,6 +158,7 @@ export default {
       imageUrl: [], // 图片路径
       showUpload: false, // 是否显示上传按钮
       token: localStorage.getItem("token"),
+      countryList:[],
     };
   },
   watch: {
@@ -159,11 +168,20 @@ export default {
   },
   created() {
     let storeId = localStorage.getItem("storeId");
+    getContryList().then(res=>{
+      res.data.map(item=>{
+        item.id = item.id.toString();
+      })
+      this.countryList = res.data
+    })
     getShopById(storeId).then((res) => {
+      res.countryDataIds = res.countryDataIds?res.countryDataIds.split(','):''
       this.formData = res;
       if (this.formData.phone == "") {
         this.formData.phone = null;
       }
+      console.log(res.countryDataIds)
+
       if (this.formData.image) {
         this.imageUrl = [{ url: this.formData.image }];
         this.showUpload = true;
@@ -197,6 +215,7 @@ export default {
       this.$refs.form.validate((valid) => {
         if (valid) {
           // 向后台发送请求
+          console.log(this.formData)
           let imageUrl = "";
           if (this.imageUrl.length > 0) {
             imageUrl = this.imageUrl[0].url;
@@ -205,6 +224,7 @@ export default {
             this.$message.error("请上传门店logo");
             return false;
           }
+          this.formData.countryDataIds = this.formData.countryDataIds.toString();
           this.formData.image = imageUrl;
           edit(this.formData).then((res) => {
             this.$message.success("编辑成功");
@@ -313,6 +333,10 @@ h1 {
 }
 /deep/.el-input-group__append {
   background: #fff;
+} 
+/deep/.el-select__input{
+  margin-left: 0;
+  padding-left: 8px;
 }
 /deep/ .el-upload-list--picture-card .el-upload-list__item{
   width: 200px;

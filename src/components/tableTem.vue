@@ -84,9 +84,16 @@
                 }}</span
               >
               <span v-else-if="item.label.indexOf('金额') > -1">
-                {{
+                <template v-if="requestUrl == 'api/yxStoreOrder'">
+                  {{
+                  scope.row[item.prop] ? scope.row.currencySymbol + scope.row[item.prop] : scope.row.currencySymbol+"0.00"
+                }}
+                </template>
+                <template v-else>
+                  {{
                   scope.row[item.prop] ? currency.s + scope.row[item.prop] : currency.s+"0.00"
                 }}
+                </template>
               </span>
               <span v-else-if="item.prop == 'categoryType'">手动分类</span>
               <span v-else-if="item.prop.indexOf('storeCategory') > -1">

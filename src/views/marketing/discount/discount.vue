@@ -2,10 +2,19 @@
   <div class="container">
     <h1 class="title">
       <span>
-        梯度优惠
-        <i class="el-icon-video-camera-solid" @click="showVideo = true" style="margin-left:7px;cursor:pointer;"></i>
+        梯度优惠 
+        <span
+          class="sail-app-status-tag"
+          :class="
+            status == 1
+              ? 'sail-app-status-tag-open'
+              : 'sail-app-status-tag-close'
+          "
+          >{{ status == 1 ? "已开启" : "未开启" }}</span
+        >
       </span>
       <span style="font-size:0;">
+        <el-button @click="Close">{{status == 1?'关闭梯度优惠':'开启梯度优惠'}}</el-button>
         <el-button @click="ToAddDiscount" style="color: #f2f3fa; background-color: #2d3259; border-color: #2d3259;" >创建优惠</el-button>
       </span>
     </h1>
@@ -49,30 +58,20 @@
             <span v-else>{{ scope.row[item.prop]?scope.row[item.prop]:0 }}</span>
           </template>
         </el-table-column> 
-      </table-tem>
-      <el-dialog :visible.sync="showVideo" width="40%" center>
-        <video-player
-          class="video-player vjs-custom-skin"
-          ref="videoPlayer"
-          :playsinline="true"
-          :options="playerOptions"
-        ></video-player>
-      </el-dialog>
+      </table-tem> 
     </div>
   </div>
 </template>
 <script> 
-import {del} from '@/api/yxStoreGradient'
-import { videoPlayer } from 'vue-video-player'
-import tableTem from '@/components/tableTem'
-import "video.js/dist/video-js.css";
+import {del,changeStatus,getStatus} from '@/api/yxStoreGradient' 
+import tableTem from '@/components/tableTem'  
 export default {
-  components: {
-    videoPlayer,
+  components: { 
     tableTem
   },
   data() {
     return {
+      status:0,
       searchVal: "",
       tableHeader:[{
         prop:'name',
@@ -129,6 +128,13 @@ export default {
       isRefresh:0,
     };
   },
+  created(){
+    let storeId = localStorage.getItem('storeId')
+    getStatus({storeId:Number(storeId)}).then(res=>{
+      console.log(res);
+      this.status = res.data.isOpen
+    })
+  },
   methods: { 
     ToAddDiscount:function(){
       this.$router.push('./editDiscount')
@@ -154,6 +160,16 @@ export default {
         that.isRefresh += 1;
       })
       }) 
+    },
+    Close:function(){
+      let par = {
+        isOpen:this.status == 1?0:1
+      }
+      changeStatus(par).then(res=>{
+        console.log(res)
+        this.$message.success('修改成功')
+        this.status = this.status == 1?0:1
+      })
     }
   },
 };
@@ -226,4 +242,25 @@ export default {
     text-align: center;
   }
 }  
+.sail-app-status-tag-open {
+  border: 2px solid #fff;
+  background: #bbe5b3;
+  color: #414f3e;
+}
+.sail-app-status-tag-close {
+  background: #dfe3e8;
+  border: 2px solid #fff;
+  color: #454f5b;
+}
+.sail-app-status-tag {
+  border-radius: 100px;
+  width: 60px;
+  height: 20px;
+  line-height: 20px;
+  display: inline-block;
+  font-size: 13px;
+  text-align: center;
+  position: relative;
+  top: -4px;
+}
 </style>

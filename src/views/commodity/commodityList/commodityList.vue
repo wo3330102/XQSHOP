@@ -235,6 +235,13 @@ export default {
         this.requestParams.tagId = val[val.length - 1];
       }, 
     },
+    searchType:function(val){
+      if(val == 'storeName'){
+        this.requestParams.storeName = this.searchVal
+      } else {
+        this.requestParams.skuCode = this.searchVal
+      }
+    }
   },
   methods: {
     // 改变搜索条件

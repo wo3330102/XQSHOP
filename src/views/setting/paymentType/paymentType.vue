@@ -437,7 +437,7 @@
                       <el-input
                         style="width: 370px"
                         v-model="CODDetail.fees"
-                        @blur="CODDetail.fees = Number($toDecimal2(CODDetail.fees))"
+                        @blur="CODDetail.fees?CODDetail.fees = Number($toDecimal2(CODDetail.fees)):0"
                         placeholder="请输入COD手续费"
                         maxlength="8"
                       ></el-input>

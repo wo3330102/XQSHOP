@@ -41,11 +41,11 @@ const allowRequest = function (reqList, url) {
       break
     }
   }
-} 
+}
 // 创建axios实例
 const service = axios.create({
   // axios中请求配置有baseURL选项，表示请求URL公共部分 'http://192.168.1.204:8001/admin'||
-  baseURL: 'http://192.168.1.204:8001/admin' ||process.env.VUE_APP_BASE_API, //
+  baseURL: '' || process.env.VUE_APP_BASE_API, //
   // 超时
   timeout: 1000000
 })
@@ -54,8 +54,7 @@ service.interceptors.request.use(config => {
   // 是否需要设置 token 
   config.headers['Authorization'] = getToken() // 让每个请求携带自定义token 请根据实际情况自行修改
   const storeId = localStorage.getItem('storeId')
-  if ((config.method === 'post' || config.method === 'put') && config.url.indexOf('api/yxStoreProductReply') < 0 && config.url.indexOf('api/yxStorePromotions/mod') < 0) {
-   
+  if ((config.method === 'post' || config.method === 'put') && config.url.indexOf('api/yxStoreProductReply') < 0 && config.url.indexOf('api/yxStorePromotions/mod') < 0) { 
     let cancel
     // 设置cancelToken对象
     config.cancelToken = new axios.CancelToken(function (c) {
@@ -64,7 +63,7 @@ service.interceptors.request.use(config => {
     // 阻止重复请求。当上个请求未完成时，相同的请求不会进行
     stopRepeatRequest(reqList, config.url, cancel, '请勿重复请求')
 
-     // 判断post,put是否需要增加storeId 
+    // 判断post,put是否需要增加storeId 
     if (config.data) {
       if (!config.data.notStoreId && !(config.data instanceof Array)) {
         config.data = {
@@ -72,8 +71,8 @@ service.interceptors.request.use(config => {
           storeId: storeId,
         }
       }
-      config.data.notStoreId?delete config.data.notStoreId : '';
-    } 
+      config.data.notStoreId ? delete config.data.notStoreId : '';
+    }
   } else if (config.method === 'get') {
     config.params = {
       storeId: storeId,
@@ -135,7 +134,7 @@ service.interceptors.response.use(res => {
         message: msg,
         type: 'error'
       })
-      return Promise.reject(msg) 
+      return Promise.reject(msg)
     } else {
       return res.data
     }

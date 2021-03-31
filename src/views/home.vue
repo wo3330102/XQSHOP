@@ -50,10 +50,10 @@
             <i class="el-icon-s-custom"></i>
             <span slot="title">顾客</span>
           </el-menu-item>
-          <el-menu-item index="/dataCenter">
+          <!-- <el-menu-item index="/dataCenter">
             <i class="el-icon-s-data"></i>
             <span slot="title">数据中心</span>
-          </el-menu-item>
+          </el-menu-item> -->
           <el-submenu index="4">
             <template slot="title">
               <i class="el-icon-s-marketing"></i>
@@ -63,8 +63,8 @@
               <el-menu-item index="/activity">优惠活动</el-menu-item>
               <el-menu-item index="/discount">梯度优惠</el-menu-item>
               <el-menu-item index="/share">激励分享</el-menu-item>
-              <el-menu-item index="/coupon">优惠券</el-menu-item>
-              <el-menu-item index="/seckill">秒杀产品</el-menu-item>
+              <!-- <el-menu-item index="/coupon">优惠券</el-menu-item>
+              <el-menu-item index="/seckill">秒杀产品</el-menu-item> -->
             </el-menu-item-group>
           </el-submenu>
           <el-menu-item index="/appHome">
