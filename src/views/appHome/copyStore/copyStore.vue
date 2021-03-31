@@ -57,11 +57,11 @@
           ></el-input>
         </div>
         <p>同步店铺将会覆盖原有的物流设置，重复商品，其余数据均不会替换。</p>
-        <p>
+        <!-- <p>
           <el-checkbox v-model="isCoverProduct"
             >使用同步中的商品替换系统重复的商品。</el-checkbox
           >
-        </p>
+        </p> -->
       </div>
     </default-dialog>
     <default-dialog
@@ -108,6 +108,9 @@ export default {
           this.showCopy = false;
           this.showCopyDetail = true;
           this.detail = res.data; 
+        }).catch(res=>{
+          this.showCopy = false;
+          this.showCopyDetail = false;
         });
       } else {
         this.$message.warning("请输入密钥");
@@ -125,7 +128,10 @@ export default {
           this.$message.success("复制成功");
           this.showCopyDetail = false;
         }
-      });
+      }).catch(res=>{
+          this.showCopy = false;
+          this.showCopyDetail = false;
+        });;
     },
   },
 };

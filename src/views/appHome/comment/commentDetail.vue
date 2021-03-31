@@ -98,6 +98,7 @@
         <div class="search-box">
           <el-input
             v-model="searchVal"
+            maxlength="512"
             placeholder="搜索评论内容"
             @change="Search"
           >
@@ -222,7 +223,7 @@
               v-for="item in skuList"
               :key="item.id"
               :label="item.sku"
-              :value="item.sku"
+              :value="item.unique"
             ></el-option>
           </el-select>
         </el-form-item>
@@ -230,6 +231,7 @@
           <el-input
             type="textarea"
             v-model="form.comment"
+            maxlength="512"
             placeholder="请输入姓名"
           ></el-input>
         </el-form-item> 
@@ -269,12 +271,14 @@
       :visible.sync="showAdd"
       width="1266px"
       class="addReviewDialog"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
     >
       <el-form
         :model="addForm"
         label-width="50px"
         label-position="left"
-        style="max-height: 540px; overflow: auto"
+        style="max-height: 540px; overflow: auto;"
         ref="addForm"
         :hide-required-asterisk="true"
       >
@@ -334,6 +338,7 @@
             >
               <el-input
                 v-model="item.comment"
+                maxlength="512"
                 placeholder="请输入评论内容"
               ></el-input>
             </el-form-item>
@@ -357,7 +362,7 @@
                   v-for="i in skuList"
                   :key="i.id"
                   :label="i.sku"
-                  :value="i.sku"
+                  :value="i.unique"
                 ></el-option>
               </el-select>
             </el-form-item>
@@ -600,7 +605,8 @@ export default {
     this.token = localStorage.getItem("token");
     // 获取SKU
     getSKUListById(this.$route.query.id).then((res) => {
-      this.skuList = res.productValue;
+      console.log(res);
+      this.skuList = res.productValue; 
     });
   },
   methods: {
@@ -714,9 +720,13 @@ export default {
           // 深拷贝，解决点击编辑时表格内当前项评分会立马变成编辑后评分的BUG
           this.form = { ...item }; 
           this.form.productScore =
-            this.form.productScore === 0 ? 1 : this.form.productScore;
-          if (item.pics) { 
-            console.log(item.pics)
+            (this.form.productScore === 0 ? 1 : this.form.productScore); 
+          if(!this.form.unique && this.form.fictitiousSku){
+            this.form.unique = this.form.fictitiousSku
+          }
+          console.log(this.form);
+          console.log(this.form.unique);
+          if (item.pics) {  
             if (item.pics.indexOf(",") > -1) {
               let arr = [];
               item.pics.split(",").map((i) => {
@@ -739,6 +749,7 @@ export default {
           } else {
             this.showUpload = false;
           }
+          console.log()
           break;
         case "delete":
           let delpar = {
@@ -800,8 +811,10 @@ export default {
       let arr = [];
       this.fileList.map((i) => {
         arr.push(i.url);
-      });
-      console.log(arr);
+      }); 
+      if(!this.form.unique && this.form.fictitiousSku){
+        this.form.unique = null;
+      }
       this.form.pics = arr.toString();
       editComment(this.form).then((res) => {
         this.$message.success("修改成功");
@@ -850,11 +863,12 @@ export default {
                 arr.push(v.url);
               });
             }
+            i.unique = i.fictitiousSku
             i.productId = this.id;
             i.storeId = storeId;
             i.pics = arr.toString();
             delete i.fileList;
-          });
+          });  
           addComment(par).then((res) => {
             this.showAdd = false;
             this.$message.success("新增成功");  
@@ -1035,25 +1049,7 @@ h1 {
 .flex {
   display: flex;
   align-items: center;
-}
-.el-form {
-  /*滚动条样式*/
-  &::-webkit-scrollbar {
-    /*滚动条整体样式*/
-    width: 6px;
-    margin-right: 2px;
-  }
-  &::-webkit-scrollbar-thumb {
-    /*滚动条里面小方块*/
-    border-radius: 5px;
-    background: #d5d5e6;
-  }
-  &::-webkit-scrollbar-track {
-    /*滚动条里面轨道*/
-    border-radius: 6px;
-    background: #f5f5f9;
-  }
-}
+} 
 .avatar-uploader {
   width: 80px;
   height: 80px;

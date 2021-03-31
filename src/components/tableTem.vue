@@ -24,15 +24,16 @@
       <el-table
         ref="multipleTable"
         :data="data"
-        tooltip-effect="dark"
-        style="width: 100%"
+        tooltip-effect="dark" 
         empty-text="暂无数据"
         v-loading="loading"
         :default-sort="defaultSort"
         @select="SelectionChange"
         @select-all="SelectionChange"
         @row-click="rowClick"
-        :row-style="rowIsClick ? { cursor: 'pointer' } : { cursor: 'initial' }"
+        :row-style="rowIsClick ? { cursor: 'pointer' } : { cursor: 'initial' }" 
+        :row-key="'id'"
+        max-height="600"
       >
         <!-- 是否需要选框 -->
         <el-table-column
@@ -49,7 +50,7 @@
             :prop="item.prop ? item.prop : ''"
             :label="item.label ? item.label : ''"
             :align="item.align ? item.align : ''"
-            :sortable="item.sortable"
+            :sortable="item.sortable" 
           >
             <template slot-scope="scope">
               <template
@@ -83,9 +84,16 @@
                 }}</span
               >
               <span v-else-if="item.label.indexOf('金额') > -1">
-                {{
+                <template v-if="requestUrl == 'api/yxStoreOrder'">
+                  {{
+                  scope.row[item.prop] ? scope.row.currencySymbol + scope.row[item.prop] : scope.row.currencySymbol+"0.00"
+                }}
+                </template>
+                <template v-else>
+                  {{
                   scope.row[item.prop] ? currency.s + scope.row[item.prop] : currency.s+"0.00"
                 }}
+                </template>
               </span>
               <span v-else-if="item.prop == 'categoryType'">手动分类</span>
               <span v-else-if="item.prop.indexOf('storeCategory') > -1">
@@ -159,6 +167,10 @@ export default {
       default: function () {
         return [];
       },
+    },
+    isNewApi:{
+      type:Boolean,
+      default:false,
     }
   },
   data() {
@@ -170,9 +182,10 @@ export default {
       selectItem: [], // 选中的表单数据
       loading: true, // 加载中 
       total: 0, // 总条目数 
+      needRefresh:true,
     };
   },
-  watch: {
+  watch: { 
     requestParams: {
       handler: function (val) { 
         this.params = { ...val };
@@ -180,16 +193,16 @@ export default {
       },
       deep: true,
       immediate: true,
-    },
-    addTableData: function (val) {
-      console.log(this.data)
-      console.log(val);
+    }, 
+    // tableHeader:function(val){
+    //   this.getData();
+    // },
+    addTableData: function (val) { 
       if(this.data){
         this.data.concat(val);
       } else {
         this.data = [...val]; 
-      }
-      
+      } 
     },
     isRefresh: function (val) {
       this.selectItem = [];
@@ -217,25 +230,29 @@ export default {
           that.requestUrl + "?" + qs.stringify(that.params, { indices: false }),
         method: "get",
       }).then((res) => {
+        this.needRefresh = true;
         setTimeout(function () {
           that.loading = false;
         }, 200);
         if(that.requestUrl == 'api/yxComposeProduct'){
           console.log(res);
-          that.data = res.data.composeProducts;
+          that.data = res.data.composeProducts || [];
           that.total = res.data.totalElements; 
         } else if(that.requestUrl == 'api/productLimit/limitedProductList'){
           that.data = res.data.content.map(item=>{
             item.isEdit = false;
-            item.editPrice = this.$IsNaN(item.preferentialPrice);
+            item.editPrice = this.$toDecimal2(item.preferentialPrice);
             item.editNum = item.number;
             return item;
           }); 
           that.total = res.data.totalElements; 
-        } else{
-          that.data = res.content;
-          that.total = res.totalElements; 
-        }    
+        } else if(this.isNewApi){ 
+          that.data = res.data.content || []; 
+          that.total = res.data.totalElements; 
+        } else {
+          that.data = res.content || [];
+          that.total = res.totalElements || 0; 
+        } 
         if (res.hasOwnProperty("cateList")) {
           that.$emit("GetCategory", res.cateList);
         } 
@@ -265,7 +282,9 @@ export default {
     },
     // 单行点击事件
     rowClick: function (row) {
-      this.$emit("rowClick", row);
+      if(this.rowIsClick){
+        this.$emit("rowClick", row);
+      }
     },
     Jump: function (e) {
       console.log(e);
@@ -334,8 +353,8 @@ export default {
 .show {
   width: 100% !important;
 }
-.table {
-  position: relative;
+.table { 
+  position: relative; 
   .checkOption {
     overflow: hidden;
     width: 82px;
@@ -375,6 +394,9 @@ export default {
       color: #c0c4cc;
     }
   }
+} 
+/deep/.el-table--scrollable-x .el-table__body-wrapper{
+  overflow-x: hidden;
 }
 .sign-span-item {
   font-size: 12px;

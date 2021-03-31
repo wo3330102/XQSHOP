@@ -199,7 +199,7 @@ export default {
           this.tagList = res.content[0].facebookPixel.split(',')
         }
         this.detail = res.content[0];
-      } 
+      }
     });
   },
   methods: {

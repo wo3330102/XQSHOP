@@ -18,7 +18,7 @@
           </el-input>
         </div>
       </div>
-      <table-tem
+      <!-- <table-tem
         :show-img="true"
         :optionList="['删除']"
         :requestUrl="'api/yxStoreTag'"
@@ -41,12 +41,43 @@
             >预览</span
           >
         </template>
-      </table-tem>
+      </table-tem> -->
+      <el-tree
+        :props="props"
+        :load="loadNode"
+        :data="data"
+        lazy
+        @check-change="handleCheckChange"
+      >
+        <div class="tree-class" slot-scope="{ node, data }">
+          <span>{{ node.label }}</span>
+          <span>
+            <el-button 
+              size="mini"
+              @click="() => Edit(data)"
+            >
+              修改
+            </el-button>
+            <el-button
+              type="danger"
+              size="mini"
+              @click.prevent.stop="() => Del(node, data)"
+            >
+              删除
+            </el-button>
+          </span>
+        </div>
+      </el-tree>
     </div>
   </div>
 </template>
 <script>
-import { del } from "@/api/yxStoreCategory";
+import {
+  getCategory,
+  del,
+  getNewCategoryList,
+  getNewCategoryListByPid,
+} from "@/api/yxStoreCategory";
 import tableTem from "@/components/tableTem";
 export default {
   components: {
@@ -55,73 +86,71 @@ export default {
   data() {
     return {
       isActive: false,
-      optionList: ["删除"],
       searchVal: "",
-      tableHeader: [
-        {
-          prop: "pic",
-          label: "",
-        },
-        {
-          prop: "title",
-          label: "分类名称",
-          width: 303,
-        },
-        {
-          prop: "categoryType",
-          label: "分类类型",
-          align: "center",
-          width: 240,
-        },
-        {
-          prop: "count",
-          label: "商品数量",
-          sortable: true,
-          width: 120,
-          align: "center",
-        },
-        {
-          prop: "option",
-          label: "操作",
-          width: 303,
-          align: "right",
-        },
-      ],
       requestParams: {
         page: 0,
         size: 30,
-        sort: "sort,desc",
+        pid: 0,
         title: "",
       },
+      props: {
+        label: "title",
+      },
+      data: [],
       isRefresh: 0,
       loading: true,
     };
   },
+  created() {
+    getNewCategoryList(this.requestParams).then((res) => {
+      this.data = res.data.yxStoreTagList;
+    });
+  },
   methods: {
     AddCategory: function () {
-      this.$router.push("/addCategory");
+      if(localStorage.getItem("categoryDetail")){
+        localStorage.removeItem("categoryDetail")
+        this.$router.push("/editCategory");
+      } else {
+        this.$router.push("/editCategory");
+      }
     },
-    RowClick: function (e) {
+    Edit: function (e) {
+      console.log(e);
       this.$router.push("/editCategory");
       localStorage.setItem("categoryDetail", JSON.stringify(e));
+    }, 
+    Del: function (node, e) {
+      let that = this; 
+      del([e.id]).then((res) => {
+        that.$message.success("删除成功");
+        const children = node.parent.childNodes || parent.childNodes;
+        const index = children.findIndex((d) => d.id === node.id);
+        children.splice(index, 1);
+        children.splice(index, 1);
+      });
     },
-    Del: function (e, selectItem) {
-      let that = this;
-      let par = [];
-      for (var i in selectItem) {
-        if (i.count > 0) {
-          this.$message.error("所选分类下含有商品，无法删除");
-          return false;
-        }
-        par.push(selectItem[i].id);
-      }
-      if (par.length > 0) {
-        this.$DelTip(function(){
-          del(par).then((res) => {
-          that.$message.success("删除成功");
-          that.isRefresh += 1;
+    Preview: function (params) {
+      let url =
+        "http://" +
+        localStorage.getItem("storeUrl") +
+        "/product-list.html?sid=" +
+        params.params.id +
+        "&titleName=" +
+        encodeURIComponent(params.params.title);
+      window.open(url, "_blank");
+    },
+    loadNode: function (node, resolve) {
+      console.log(node.parent);
+      if (this.data.length > 0) {
+        let par = {
+          page: 0,
+          size: 99,
+          pid: node.data.id,
+        };
+        getNewCategoryListByPid(par).then((res) => {
+          resolve(res.data);
         });
-        })
       }
     },
     Preview:function(params){
@@ -147,6 +176,20 @@ export default {
     height: 36px;
     padding: 10px 20px;
   }
+}
+/deep/.el-tree-node__content {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  cursor: pointer;
+  border-bottom: 1px solid #eeeeee;
+}
+.tree-class {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 12px;
+  width: 100%;
 }
 .content {
   overflow: hidden;
@@ -187,10 +230,6 @@ export default {
         background: #fff;
         color: #000000;
       }
-    }
-    /deep/ .el-button {
-      height: 36px;
-      padding: 0 15px;
     }
   }
   .pagination {

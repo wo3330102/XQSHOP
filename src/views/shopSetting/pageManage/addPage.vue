@@ -2,7 +2,13 @@
   <div class="container">
     <router-link
       to="/pageManage"
-      style="color: #5e7185;margin-bottom:12px;display:inline-block;height:20px;line-height:20px"
+      style="
+        color: #5e7185;
+        margin-bottom: 12px;
+        display: inline-block;
+        height: 20px;
+        line-height: 20px;
+      "
     >
       <i class="el-icon-arrow-left"></i>
       <span>页面管理</span>
@@ -16,7 +22,7 @@
             <div>
               <div class="el-input el-input--medium el-input--suffix">
                 <input
-                v-model="detail.title"
+                  v-model="detail.title"
                   type="text"
                   autocomplete="off"
                   placeholder="最多255个字符"
@@ -29,109 +35,140 @@
             <div>
               <wangeditor ref="editor" v-model="detail.content"></wangeditor>
             </div>
-          </div> 
+          </div>
         </el-col>
         <el-col :span="8">
           <div class="box">
             <h3 class="infoTip">状态</h3>
             <p class="infoContent">
-                <el-radio :label="1" v-model="detail.status" style="width:100%;margin: 5px 0px">可见</el-radio>
-                <el-radio :label="2" v-model="detail.status" style="width:100%;margin: 5px 0px">隐藏</el-radio>
+              <el-radio
+                :label="1"
+                v-model="detail.status"
+                style="width: 100%; margin: 5px 0px"
+                >可见</el-radio
+              >
+              <el-radio
+                :label="2"
+                v-model="detail.status"
+                style="width: 100%; margin: 5px 0px"
+                >隐藏</el-radio
+              >
             </p>
           </div>
           <div class="box">
             <h3 class="infoTip">页面类型</h3>
             <!-- <p class="infoContent"></p> -->
-            <el-select v-model="detail.type" placeholder="" @change="SelectType" style="width:100%">
+            <el-select
+              v-model="detail.type"
+              placeholder=""
+              @change="SelectType"
+              style="width: 100%"
+            >
               <el-option
                 v-for="item in typeList"
                 :key="item.value"
                 :label="item.label"
-                :value="item.value">
+                :value="item.value"
+              >
               </el-option>
             </el-select>
           </div>
         </el-col>
       </el-row>
-      <div class="pageSaveBtn"> 
-          <el-button @click="$NavgitorTo('/pageManage')">取消</el-button>
+      <div class="pageSaveBtn">
+        <el-button type="danger" style="float: left" @click="delPage" v-if="id"
+          >删除页面</el-button
+        >
+        <el-button @click="$NavgitorTo('/pageManage')">取消</el-button>
         <el-button type="primary" @click="Save">保存</el-button>
       </div>
-    </div> 
+    </div>
   </div>
 </template> 
 <script>
 import wangeditor from "@/components/wangeditor";
-import {add,edit} from '@/api/yxStorePageBoard'
+import { add, edit, del } from "@/api/yxStorePageBoard";
 export default {
   components: {
-    wangeditor, 
+    wangeditor,
   },
-  data() { 
+  data() {
     return {
-      msg: "", // 富文本内容 
-      id:'',
-      detail:{
-        status:1,
-        type:'1', 
+      msg: "", // 富文本内容
+      id: "",
+      detail: {
+        status: 1,
+        type: "1",
       },
-      typeList:[{
-        value:'1',
-        label:'页面',
-      },{
-        value:'2',
-        label:'页面 - 物流查询',
-      },{
-        value:'3',
-        label:'页面 - 联系我们',
-      }]
+      typeList: [
+        {
+          value: "1",
+          label: "页面",
+        },
+        {
+          value: "2",
+          label: "页面 - 物流查询",
+        },
+        {
+          value: "3",
+          label: "页面 - 联系我们",
+        },
+      ],
+    };
+  },
+  created() {
+    if (this.$route.query.hasOwnProperty("id")) {
+      this.subType = "edit";
+      this.id = this.$route.query.id;
+      this.detail = JSON.parse(localStorage.getItem("pageDetail"));
     }
   },
-  created(){
-    if(this.$route.query.hasOwnProperty('id')){
-      this.subType = 'edit';
-      this.id=this.$route.query.id
-      this.detail = JSON.parse(localStorage.getItem('pageDetail'))
-      console.log(this.detail)
-    } 
-  },
   methods: {
-    SelectType:function(e){ 
-      if(e == 2){
-        this.detail.title = 'Track Your Order',
-        this.detail.content = `<div style="width: 100%; margin: 0 auto; text-align: center; max-width: 540px; direction: initial;">
+    SelectType: function (e) {
+      if (e == 2) {
+        (this.detail.title = "Track Your Order"),
+          (this.detail.content = `<div style="width: 100%; margin: 0 auto; text-align: center; max-width: 540px; direction: initial;">
 <div class="TM_input-group">
 <h3><strong>Please enter the tracking number below.</strong></h3>
 <p>The tracking status might take a few days to be updated, please wait patiently.</p>
 </div>
 <div class="TM_input-group">&nbsp;</div>
 <div class="TM_input-group"><input id="YQNum" class="TM_my_search_input_style" style="border-color: #000000; box-sizing: border-box;" autocomplete="off" maxlength="100" name="button_tracking_number" type="text" value="" placeholder="Tracking Number" /> <span class="TM_input-group-btn"> <button id="query" class="TM_my_search_button_style J-QueryLogistics" style="background-color: #000000;" type="button">Track</button> </span></div>
-</div>`
+</div>`);
       } else {
-        this.detail.title = '';
-        this.detail.content = ''; 
+        this.detail.title = "";
+        this.detail.content = "";
       }
     },
-     Save:function(){
-       let that = this;
-       if(this.id){
-         // 修改页面
-         edit(this.detail).then(res=>{ 
-            this.$message.success('修改成功')
-            setTimeout(function(){
-              that.$router.push('/pageManage')
-            },200)
-         })
-       } else {
-         // 新增页面
-         add(this.detail).then(res=>{ 
-           this.$message.success('新增成功')
-            setTimeout(function(){
-              that.$router.push('/pageManage')
-            },200)
-         })
-       }
-     }
+    delPage: function () {
+      let that = this;
+      del([this.id]).then((res) => {
+        this.$message.success("删除成功");
+        setTimeout(function () {
+          that.$router.push("/pageManage");
+        }, 200);
+      });
+    },
+    Save: function () {
+      let that = this;
+      if (this.id) {
+        // 修改页面
+        edit(this.detail).then((res) => {
+          this.$message.success("修改成功");
+          setTimeout(function () {
+            that.$router.push("/pageManage");
+          }, 200);
+        });
+      } else {
+        // 新增页面
+        add(this.detail).then((res) => {
+          this.$message.success("新增成功");
+          setTimeout(function () {
+            that.$router.push("/pageManage");
+          }, 200);
+        });
+      }
+    },
   },
 };
 </script>
@@ -195,6 +232,6 @@ h1 {
     color: #5e7185;
     line-height: 20px;
     margin: 8px 0 20px 24px;
-  } 
-} 
+  }
+}
 </style>  

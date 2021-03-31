@@ -118,7 +118,27 @@ const routes = [{
       path: '/coupon',
       name: 'Coupon',
       component: () => import( /* webpackChunkName: "about" */ '../views/marketing/coupon/coupon.vue'),
-    }, ]
+    }, {
+      path: '/editCoupon',
+      name: 'EditCoupon',
+      component: () => import( /* webpackChunkName: "about" */ '../views/marketing/coupon/editCoupon.vue'),
+    }, {
+      path: '/editCouponEvent',
+      name: 'EditCouponEvent',
+      component: () => import( /* webpackChunkName: "about" */ '../views/marketing/coupon/editCouponEvent.vue'),
+    },{
+      path: '/seckill',
+      name: 'Seckill',
+      component: () => import( /* webpackChunkName: "about" */ '../views/marketing/seckill/seckill.vue'),
+    }, {
+      path: '/editSeckill',
+      name: 'EditSeckill',
+      component: () => import( /* webpackChunkName: "about" */ '../views/marketing/seckill/editSeckill.vue'),
+    },{
+      path: '/editSeckillRules',
+      name: 'EditSeckillRules',
+      component: () => import( /* webpackChunkName: "about" */ '../views/marketing/seckill/editSeckillRules.vue'),
+    },    ]
   }, {
     path: 'appHome',
     name: '应用管理',
@@ -147,10 +167,6 @@ const routes = [{
         path: '/recommendOption',
         name: 'RecommendOption',
         component: () => import( /* webpackChunkName: "about" */ '../views/appHome/recommend/recommendOption.vue'),
-      }, {
-        path: '/facebookPixel',
-        name: 'FacebookPixel',
-        component: () => import( /* webpackChunkName: "about" */ '../views/appHome/facebookPixel.vue'),
       }, {
         path: '/combinationProduct',
         name: 'CombinationProduct',
@@ -288,6 +304,10 @@ const routes = [{
       name: 'PaymentType',
       component: () => import( /* webpackChunkName: "about" */ '../views/setting/paymentType/paymentType.vue'),
     }, {
+      path: '/pay',
+      name: 'Pay',
+      component: () => import( /* webpackChunkName: "about" */ '../views/setting/paymentType/pay.vue'),
+    }, {
       path: '/checkoutSetting',
       name: 'CheckoutSetting',
       component: () => import( /* webpackChunkName: "about" */ '../views/setting/checkoutSetting.vue'),
@@ -328,8 +348,8 @@ router.beforeEach((to, from, next) => {
   if (Object.is(to.name, 'Login')) {
     next();
     return
-  }
-  next();
+  } 
+  next(); 
   // 判断当前是否含有token
   // if (token) {
   //   localStorage.setItem('router-path', to.path)

@@ -46,7 +46,7 @@
               maxlength="8"
               size="medium"
               placeholder="请输入商品现价"
-              @blur="attr.price = $IsNaN(attr.price)"
+              @blur="attr.price = $toDecimal2(attr.price)"
             >
               <span slot="append">{{ currency.n }}</span>
             </el-input>
@@ -54,11 +54,12 @@
           <div class="item-margin" v-if="show">
             <span class="text-span">库存数量</span>
             <el-input
-              v-model.number="attr.stock"
+              v-model="attr.stock"
               type="number"
               size="medium"
               maxlength="8"
               placeholder="请输入商品库存"
+              @blur="attr.stock = $IsNaN(attr.stock)"
             ></el-input>
           </div>
           <div class="item-margin" v-if="show">
@@ -104,7 +105,7 @@
                 >（自动分类不可删除）</span
               >
             </span>
-            <el-select
+            <!-- <el-select
               class="box-item-entry"
               size="medium"
               v-model="tagIds"
@@ -117,7 +118,37 @@
                 :label="item.title"
                 :value="item.id"
               ></el-option>
-            </el-select>
+            </el-select> -->
+            <el-cascader
+              style="width: 100%"
+              v-model="tagIds"
+              :props="categoryOption"
+              :show-all-levels="false"
+              clearable
+            >
+            </el-cascader>
+          </div>
+          <div class="item-margin">
+            <span class="text-span">虚拟销量</span>
+            <el-input
+              class="box-item-entry"
+              v-model="detail.ficti"
+              maxlength="8"
+              size="medium"
+              @blur="detail.ficti = $IsNaN(detail.ficti)"
+            >
+            </el-input>
+          </div>
+          <div class="item-margin" v-show="!show">
+            <span class="text-span">虚拟收藏量</span>
+            <el-input
+              class="box-item-entry"
+              v-model="detail.virtualCollect"
+              maxlength="8"
+              size="medium"
+              @blur="detail.virtualCollect = $IsNaN(detail.virtualCollect)"
+            >
+            </el-input>
           </div>
         </div>
         <div class="product-right">
@@ -129,7 +160,7 @@
               maxlength="8"
               size="medium"
               placeholder="请输入商品原价"
-              @blur="attr.ot_price = $IsNaN(attr.ot_price)"
+              @blur="attr.ot_price = $toDecimal2(attr.ot_price)"
             >
               <span slot="append">{{ currency.n }}</span>
             </el-input>
@@ -140,7 +171,7 @@
               class="box-item-entry"
               v-model="attr.weight"
               maxlength="8"
-              @blur="attr.weight = $IsNaN(attr.weight)"
+              @blur="attr.weight = $toDecimal2(attr.weight)"
               size="medium"
               placeholder="请输入商品重量"
             >
@@ -174,6 +205,28 @@
             >
               {{ item }}
             </el-tag>
+          </div>
+          <div class="item-margin">
+            <span class="text-span">虚拟浏览量</span>
+            <el-input
+              class="box-item-entry"
+              v-model="detail.virtualBrowse"
+              maxlength="8"
+              size="medium"
+              @blur="detail.virtualBrowse = $IsNaN(detail.virtualBrowse)"
+            >
+            </el-input>
+          </div>
+          <div class="item-margin" v-if="show">
+            <span class="text-span">虚拟收藏量</span>
+            <el-input
+              class="box-item-entry"
+              v-model="detail.virtualCollect"
+              maxlength="8"
+              size="medium"
+              @blur="detail.virtualCollect = $IsNaN(detail.virtualCollect)"
+            >
+            </el-input>
           </div>
         </div>
       </div>
@@ -498,7 +551,10 @@
 import wangeditor from "@/components/wangeditor";
 import tableTem from "@/components/tableTem";
 import { add, edit, getInfo, isFormatAttr } from "@/api/yxStoreProduct";
-import { getCates } from "@/api/yxStoreCategory";
+import {
+  getNewCategoryList,
+  getNewCategoryListByPid,
+} from "@/api/yxStoreCategory";
 export default {
   components: {
     tableTem,
@@ -506,6 +562,33 @@ export default {
   },
   data() {
     return {
+      categoryOption: {
+        lazy: true,
+        lazyLoad(node, resolve) {
+          const { level } = node;
+          if (level == 0) {
+            let par = {
+              page: 0,
+              size: 99,
+              pid: 0,
+            };
+            getNewCategoryList(par).then((res) => {
+              if (res.data) {
+                resolve(res.data.yxStoreTagList);
+              }
+            });
+          } else {
+            getNewCategoryListByPid({ pid: node.data.id }).then((res) => {
+              if (res.data) {
+                resolve(res.data);
+              }
+            });
+          }
+        },
+        value: "id",
+        label: "title",
+        checkStrictly: true,
+      },
       url: localStorage.getItem("uploadUrl"),
       id: "",
       isFirst: true,
@@ -536,7 +619,7 @@ export default {
         },
       ],
       categoryValue: "", // 分类值
-      tagIds: "",
+      tagIds: [],
       categoryList: [], // 分类列表
       classIds: "", // 商品标签
       classList: [], // 商品标签列表
@@ -584,6 +667,10 @@ export default {
       optionIndex: 0, // 批量修改类型
       optionList: [
         {
+          label: "删除",
+          value: 1,
+        },
+        {
           label: "修改价格",
           value: 2,
         },
@@ -606,10 +693,6 @@ export default {
         {
           label: "修改商品SKU",
           value: 7,
-        },
-        {
-          label: "删除",
-          value: 1,
         },
       ],
       requestParams: {},
@@ -647,6 +730,9 @@ export default {
     this.token = localStorage.getItem("token");
   },
   methods: {
+    ChangeTag: function (e) {
+      console.log(e);
+    },
     // 获取信息
     GetInfo() {
       let that = this;
@@ -659,7 +745,6 @@ export default {
         if (that.id === 0) {
           this.temp_id = "";
         } else {
-          console.log(res.productInfo);
           that.detail = { ...res.productInfo };
           that.tagIds = res.tagList;
           if (res.productInfo.classIds) {
@@ -668,13 +753,17 @@ export default {
           that.attr = res.productInfo.attr;
           res.productInfo.attr.price == 0
             ? (that.attr.price = "")
-            : (that.attr.price = this.$IsNaN(res.productInfo.attr.price));
+            : (that.attr.price = this.$toDecimal2(res.productInfo.attr.price));
           res.productInfo.attr.weight == 0
             ? (that.attr.weight = "")
-            : (that.attr.weight = this.$IsNaN(res.productInfo.attr.weight));
+            : (that.attr.weight = this.$toDecimal2(
+                res.productInfo.attr.weight
+              ));
           res.productInfo.attr.ot_price == 0
             ? (that.attr.ot_price = "")
-            : (that.attr.ot_price = this.$IsNaN(res.productInfo.attr.ot_price));
+            : (that.attr.ot_price = this.$toDecimal2(
+                res.productInfo.attr.ot_price
+              ));
           res.productInfo.attr.stock === 0 ? (that.attr.stock = "") : "";
           that.detail.cate_id = Number(that.detail.cate_id);
           // 判断是否上架
@@ -697,13 +786,13 @@ export default {
           that.fileList = arr;
         }
       });
-      let params = {
-        page: 0,
-        size: 20,
-      };
-      getCates(params).then((res) => {
-        this.categoryList = res.content;
-      });
+      // let params = {
+      //   page: 0,
+      //   size: 20,
+      // };
+      // getCates(params).then((res) => {
+      //   this.categoryList = res.content;
+      // });
     },
     PictureCardPreview(file) {
       this.imageUrl = file.url;
@@ -714,14 +803,11 @@ export default {
       this.showUpload = fileList.length >= this.limit;
     },
     RemoveImg: function (e) {
-      console.log(e);
       this.fileList.map((v, i) => {
         if (v.uid == e.uid) {
-          console.log(i);
           this.fileList.splice(i, 1);
         }
       });
-      console.log(this.fileList);
       this.showUpload = false;
     },
     // 添加规格
@@ -757,7 +843,6 @@ export default {
     // 判断属性名称是否一样
     CheckAttrName: function (index) {
       let val = this.shopAttributeList[index].value;
-      console.log(val);
       for (var i in this.shopAttributeList) {
         if (this.shopAttributeList[i].value == val && index != i) {
           this.$message.warning("重复属性");
@@ -824,82 +909,102 @@ export default {
               array.push(i);
             }
           });
+          console.log(array);
           this.table = array;
         } else {
           let table = [...this.table];
-          r.value.map((v, i) => {
-            v.index = i;
-            if (v.is_show == 1) { 
-              table.map((item) => { 
+          r.value.map((v, i) => { 
+            if (v.is_show == 1) {
+              table.map((item) => {
                 if (v.hasOwnProperty("value2")) {
                   // 判断新表单是否有第三规格
                   if (v.hasOwnProperty("value3")) {
                     // 若原表单不含第三规格，则为新增
-                    if (!item.hasOwnProperty("value3")) { 
+                    if (!item.hasOwnProperty("value3")) {
                       if (item.value1 + item.value2 == v.value1 + v.value2) {
-                        delete item.skuCode;  
+                        delete item.skuCode;
+                        const detail = { ...v.detail };
                         v = {
                           ...v,
                           ...item,
+                          detail,
                         };
+                        v.index += r.value.length;
                       }
-                    } else { 
+                    } else {
                       // 若原表单含有第三规格，则为新增某一规格值
                       if (
-                        (item.value1 + item.value2 + item.value3) == 
-                        (v.value1 + v.value2 + v.value3)
-                      ) { 
+                        item.value1 + item.value2 + item.value3 ==
+                        v.value1 + v.value2 + v.value3
+                      ) {
                         delete item.skuCode;
+                        const detail = { ...v.detail };
                         v = {
                           ...v,
                           ...item,
+                          detail,
                         };
+                        v.index += r.value.length;
                       }
                     }
-                  } else if(item.hasOwnProperty('value2')){  
-                    if ((v.value1 + v.value2) === (item.value1 + item.value2)) { 
+                  } else if (item.hasOwnProperty("value2")) {
+                    if (v.value1 + v.value2 === item.value1 + item.value2) {
                       delete item.value3;
                       delete item.skuCode;
+                      const detail = { ...v.detail };
                       v = {
                         ...v,
                         ...item,
+                        detail,
                       };
+                      v.index += r.value.length;
                     }
-                  } else{
-                    if(item.value1 == v.value1){
-                      delete item.skuCode; 
+                  } else {
+                    if (item.value1 == v.value1) {
+                      delete item.skuCode;
+                      const detail = { ...v.detail };
                       v = {
                         ...v,
                         ...item,
+                        detail,
                       };
+                      v.index += r.value.length; 
                     }
-                  } 
-                } else{
-                  if(item.value1 == v.value1){
-                    delete item.skuCode; 
+                  }
+                } else {
+                  if (item.value1 == v.value1) {
+                    delete item.skuCode;
                     delete item.value2;
                     delete item.value3;
+                    const detail = { ...v.detail };
                     v = {
                       ...v,
                       ...item,
+                      detail,
                     };
+                    v.index += r.value.length;
                   }
                 }
               });
               array.push(v);
             }
-          }); 
+          });
+          array.map((item,index)=>{
+            item.index = index;
+          })
           this.table = array;
         }
       });
     },
     // 判断多规格数据是否需要转小数点
-    BlurSet: function (key, data) { 
+    BlurSet: function (key, data) {
       if (key == "skuCode") {
+        return false;
       } else if (key !== "stock") {
-        data[key] = data[key] ? this.$IsNaN(data[key].toString()) : "0.00";
+        data[key] = data[key] ? this.$toDecimal2(data[key].toString()) : "0.00";
       } else {
-        isNaN(Number(data[key]))?data[key]=0:''
+        console.log(data[key]);
+        data[key] = this.$IsNaN(data[key]);
       }
     },
     // 选择批量操作数据
@@ -910,7 +1015,6 @@ export default {
     BatchOperation: function (e) {
       let item = this.selectItem;
       let table = this.table;
-      console.log(e);
       this.optionIndex = e - 1;
       // 1 删除; 2 修改价格; 3 修改原价; 4 修改图片; 5 修改库存; 6 修改重量
       if (e == 1) {
@@ -967,7 +1071,7 @@ export default {
               item[e] =
                 e == "stock" || e == "skuCode"
                   ? that.batchValue
-                  : that.$IsNaN(that.batchValue);
+                  : that.$toDecimal2(that.batchValue);
             }
           });
         });
@@ -978,14 +1082,14 @@ export default {
     // 选择图片
     SelectPicture: function (index) {
       this.tableIndex = index;
-      if(this.fileList.length>0){
+      if (this.fileList.length > 0) {
         if (this.table[index].pic) {
-        this.showDelImage = true;
-      }
-      this.showDialog = true;
+          this.showDelImage = true;
+        }
+        this.showDialog = true;
       } else {
-        this.$message.warning('请先上传商品图片')
-      } 
+        this.$message.warning("请先上传商品图片");
+      }
     },
     // 提交图片
     SubImage: function () {
@@ -1042,16 +1146,14 @@ export default {
         that.$message.error("请输入商品名称");
         return false;
       }
-      // // 判断是否选择分类
-      // if (!this.tagIds || this.tagIds.length === 0) {
-      //   that.$message.error("请选择商品分类");
-      //   return false;
-      // }
+      // 判断是否选择分类
+      if (!this.tagIds || this.tagIds.length === 0) {
+        that.$message.error("请选择商品分类");
+        return false;
+      }
       // 判断是否有标签
-      console.log(this.classList);
       if (this.classList) {
         this.detail.classIds = this.classList.toString();
-        console.log(this.detail.classList);
       }
       // 判断是否输入商品详情
       if (!this.detail.description) {
@@ -1103,7 +1205,6 @@ export default {
           that.$message.error("请输入商品Sku");
           return false;
         } else {
-          console.log(this.detail.skuCode);
           this.attr.skuCode = this.detail.skuCode;
         }
         // 判断用户是否输入库存，默认为空
@@ -1169,7 +1270,8 @@ export default {
         this.detail.attr = this.attr;
       }
       this.detail.is_show = Number(this.isGrounding);
-
+      console.log(this.tagIds);
+      // return false;
       this.detail.tagIds = this.tagIds.toString();
 
       // 基础参数
@@ -1251,7 +1353,6 @@ export default {
         });
       }
     },
-    Error: function (text) {},
   },
 };
 </script>

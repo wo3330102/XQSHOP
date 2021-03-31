@@ -47,7 +47,7 @@
                   >（收取商品总价格的百分比）</span
                 >
               </span>
-              <span class="option">效果预览</span>
+              <span class="option" @click="preview = true">效果预览</span>
             </h3>
             <el-radio-group v-model="detail.rates">
               <el-radio :label="0">2%</el-radio>
@@ -68,13 +68,28 @@
             >
           </div>
         </el-col>
+        <el-col :span="8" style="padding-left: 10px; padding-right: 10px;">
+          <div class="box">
+            <p class="infoTip">信息提示</p>
+            <div class="infoContent">
+              <p>开启运费险后，顾客可以在结账页选择是否要购买运费险，这对我们提升客单价有一定帮助。</p>
+              <p>注意：无论顾客是否购买运费险，产生了包裹的丢失和损坏我们都要积极处理哦，否则会产生客诉。</p>
+            </div>
+          </div>
+        </el-col>
       </el-row>
       <div class="pageSaveBtn">
         <el-button type="primary" @click="Save">保存</el-button>
       </div>
     </div>
+    <el-dialog title="效果预览" :visible.sync="preview">
+      <div style="text-align: center; width: 100%; max-height: 620px;"> 
+        <el-image style="width: 300px; margin-bottom: 20px;" src="https://alligatoreel-fa.xshoppy.shop/static/img/applications/insurance/insurance-preview-unchecked.png" ></el-image>
+      </div> 
+    </el-dialog>
   </div>
 </template> 
+
 <script>
 import { get, add, edit } from "@/api/yxStorePlugRate";
 
@@ -87,6 +102,7 @@ export default {
         type: true,
         id: "",
       },
+      preview:false
     };
   }, 
   created() {
@@ -150,6 +166,16 @@ h1 {
   box-shadow: 0 1px 3px 0 rgba(35, 35, 112, 0.2),
     0 0 0 1px rgba(67, 67, 145, 0.05);
   overflow: hidden;
+  .infoTip{
+     color: #1a1d2c;
+    font-size: 14px;
+    padding-bottom: 14px;
+  } 
+  .infoContent {
+    line-height: 18px;
+    font-size: 12px;
+    color: #606266;
+}
   .title {
     color: #1a1d2c;
     font-size: 14px;

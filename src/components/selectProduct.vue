@@ -36,11 +36,14 @@
         clearable
         @change="
           () => {
+            requestParams.page = 0;
             table = [];
-            init();
           }
         "
-        @clear="requestParams.cateId = 0"
+        @clear="()=>{
+          requestParams.page = 0;
+          requestParams.cateId = ''
+        }"
       >
         <el-option
           v-for="item in shopCategoryList"
@@ -56,7 +59,7 @@
         placeholder="请输入内容"
         @change="Search"
       >
-        <el-button @click.prevent.stop="Search" slot="append">查询</el-button>
+        <el-button @click="Search" slot="append">查询</el-button>
       </el-input>
     </div>
     <el-table
@@ -64,8 +67,11 @@
       :data="table"
       style="width: 100%"
       empty-text
+      ref="multipleTable"
       v-el-table-infinite-scroll="load"
       @selection-change="SelectItem"
+      :infinite-scroll-delay="200"
+      :infinite-scroll-distance="100"
     >
       <el-table-column
         type="selection"
@@ -132,6 +138,11 @@ export default {
       type: Boolean,
       default: true,
     },
+    // 是否是新类型API
+    isNewApi: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -148,21 +159,24 @@ export default {
   },
   watch: {
     requestParams: {
-      handler: function (val) {
-        console.log(val); 
+      handler: function (val, old) { 
         this.init();
       },
-      deep: true, 
-      immediate:true,
+      deep: true,
+      immediate: true,
     },
     visible: function (val) {
       this.shopDialog = val;
+      this.selectItem = []; 
+      console.log("清空选框");
+      if (!val) {
+        this.$refs.multipleTable.clearSelection();
+      }
     },
     disableNum: function (val) {
       this.disableNumber = val;
     },
     selectItem: function (val) {
-      console.log(this.disableNumber);
       if (val.length >= this.disableNumber) {
         this.disable = false;
       } else {
@@ -172,56 +186,66 @@ export default {
   },
   created() {
     getCates(this.requestParams).then((res) => {
-      this.shopCategoryList = res.content; 
+      this.shopCategoryList = res.content;
     });
-    this.init();
   },
   methods: {
     handleClose() {
       this.$emit("update:visible", false);
     },
     init: function () {
-      let that = this; 
-      console.log(that.requestParams)
+      let that = this;
       request({
         url:
-          that.requestUrl + "?" + qs.stringify(that.requestParams, { indices: false }),
+          that.requestUrl +
+          "?" +
+          qs.stringify(that.requestParams, { indices: false }),
         method: "get",
       }).then((res) => {
-        if ((that.requestUrl = "api/yxComposeProduct/list/product")) {
-          if(res.data){
-            this.table = res.data;
-            this.tableTotal = res.data.length;
-          } else {
-            this.table = [];
-            this.tableTotal = 0;
+        if (this.table && this.table.length > 0) {
+          if (res.data) {
+            if (this.isNewApi) {
+              this.table = this.table.concat(res.data.content);
+            } else {
+              this.table = this.table.concat(res.data);
+            }
           }
         } else {
-          this.table = res.content;
-          this.tableTotal = res.totalElements;
-        }
+          if (res.data) {
+            if (this.isNewApi) {
+              this.table = res.data.content;
+              this.tableTotal = 0 || res.data.totalElements;
+            } else {
+              if (res.data) {
+                this.table = res.data;
+                this.tableTotal = 0 || res.data.length;
+              }
+            }
+          }
+        } 
       });
     },
     Search: function () {
-      this.table = []; 
-      this.requestParams.productName = this.shopContent; 
+      this.table = [];
+      this.requestParams.page = 0;
+      this.requestParams.storeName = this.shopContent;
     },
     SelectItem: function (e) {
       this.selectItem = e;
+      this.$store.commit("changeSelectItem", e);
     },
-    CheckSelectItem: function () { 
-      if(this.selectItem.length>1){
+    CheckSelectItem: function () {
+      if (this.selectItem.length > 0) {
         this.$emit("update:visible", false);
-        this.$emit("selectItem", this.selectItem);  
+        this.$emit("selectItem", [...this.selectItem]);
       } else {
-        this.$message.warning('请选择数据')
-      } 
+        this.$message.warning("请选择数据");
+      }
     },
     // 加载更多
     load: function () {
       if (this.needLoad) {
         this.requestParams.page += 1;
-        this.init();
       }
     },
     // 规定禁用功能
@@ -241,4 +265,4 @@ export default {
     },
   },
 };
-</script> 
+</script>

@@ -1,32 +1,27 @@
 <template>
-  <div class="page" >
-    <div class="box" :style="{'top':top+'px'}"> 
-      {{top}}
-      <div class="box-item">
-        <div class="box-item2"></div> 
-      </div>  
-    </div>
+  <div class="page" > 
+    <el-button @click="handClick">测试</el-button>
+    <iframe src="https://tap.xqkj.top/" width="100%" id='iframe' height="80%"></iframe>
   </div>
 </template> 
 
 <script>
 export default {
   data() {
-    return {
-      top: document.body.clientHeight,
+    return { 
     };
   },  
-  created(){
-    if(localStorage.getItem('time') === 0){
-      localStorage.setItem('time',1)
-      //执行方法
-      this.Fun();
+  created(){ 
+  },
+  methods:{ 
+    handClick:function(){ 
+      let dom = document.getElementById('iframe').contentWindow; 
+      // dom.test();
+      dom.postMessage('123123123123','https://tap.xqkj.top/');
     }
   },
-  methods:{
-    Fun(){
-      console.log(111)
-    }
+  mounted(){
+    console.log(123);
   }
 };
 </script>
@@ -34,8 +29,7 @@ export default {
 <style lang="scss" scoped>
 .page {
   width: 100%;
-  height: 100%;
-  background: red;
+  height: 100%; 
   position: relative;
   .box { 
     background: #fff;

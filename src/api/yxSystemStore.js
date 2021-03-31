@@ -69,5 +69,15 @@ export function changeTem(data){
   })
 }
 
+// 获取国家列表
+
+export function getContryList(params){
+  return request({
+    url: 'api/yxCountryData',
+    method: 'get',
+    params
+  })
+}
+
 export default { getL, add, edit, del, getShopId, getAll }
 // getShop,

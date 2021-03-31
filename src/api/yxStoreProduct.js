@@ -99,5 +99,12 @@ export function onsaleAll(data) {
   })
 }
 
+export function getProductOfCoupon(params){
+  return request({
+    url:'api/productList',
+    method:'get',
+    params
+  })
+}
 
 

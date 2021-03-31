@@ -1,251 +1,513 @@
 <template>
   <div class="container">
     <h1 class="title">
-      <span>秒杀</span> 
+      <span>秒杀</span>
+      <span style="font-size: 0">
+        <el-button type="primary" @click="showSelectProduct = true"
+          >添加秒杀</el-button
+        >
+      </span>
     </h1>
     <div class="content">
       <div class="tab">
-        <div
-          v-for="(item,index) in nav"
-          :key="item.id"
-          :class="acitve == index?'active':''"
-          @click="ChangeActive(index)"
-        >{{item.label}}</div>
-      </div>
-      <div class="conditions" v-if="false">
-        <!-- 分类 -->
-        <el-select
-          v-model="requestParams.isSubscribe"
-          clearable
-          placeholder="订阅状态"
-          @change="ChangeSelect"
-          style="margin-right: 10px;width:140px"
-        >
-          <el-option
-            v-for="item in subscribeTypeList"
+        <div>
+          <div
+            v-for="(item, index) in nav"
             :key="item.id"
-            :label="item.label"
-            :value="item.id"
-          ></el-option>
-        </el-select>
-        <!-- 时间选择 -->
-        <el-date-picker
-          v-model="date"
-          type="daterange"
-          range-separator="至"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          @change="ChangeSelect"
-          format="yyyy/MM/dd"
-          value-format="yyyy-MM-dd"
-          style="width:230px;margin-right: 10px;"
-          :picker-options="endOptions"
-        ></el-date-picker>
-        <!-- 标签 -->
-        <!-- <el-select
-          v-model="countryType"
-          clearable
-          placeholder="国家/地区"
-          @change="ChangeSelect"
-          style="margin-right: 10px;width:164px"
-        >
-          <el-option
-            v-for="item in countryTypeList"
-            :key="item.id"
-            :label="item.label"
-            :value="item.id"
-          ></el-option>
-        </el-select> -->
-        <div class="search-box">
-          <el-input v-model="searchVal" placeholder="请输入姓名、邮箱、手机">
-            <el-button slot="append" @click="Search">搜索</el-button>
-          </el-input>
-        </div>
-        <div style="line-height:36px; align-self: center; margin-left: 20px;">
-          <el-dropdown style="cursor:pointer" trigger="click">
-            <span class="el-dropdown-link">
-              更多筛选
-              <i class="el-icon-arrow-down el-icon--right"></i>
-            </span>
-            <el-dropdown-menu slot="dropdown">
-              <div class="filter-box">
-                <h4>筛选条件</h4>
-                <div class="item">
-                  <div class="inp-number">
-                    <span class="inp-number-prepend">最小金额</span>
-                    <el-input v-model="minMoney" placeholder></el-input>
-                  </div>
-                  <span style="margin: 0px 10px;">-</span>
-                  <div class="inp-number">
-                    <span class="inp-number-prepend">最大金额</span>
-                    <el-input v-model="maxMoney" placeholder></el-input>
-                  </div>
-                </div>
-                <div class="item">
-                  <div class="inp-number">
-                    <span class="inp-number-prepend">最小订单</span>
-                    <el-input v-model="minOrder" placeholder></el-input>
-                  </div>
-                  <span style="margin: 0px 10px;">-</span>
-                  <div class="inp-number">
-                    <span class="inp-number-prepend">最大订单</span>
-                    <el-input v-model="maxOrder" placeholder></el-input>
-                  </div>
-                </div>
-                <div class="option-btn">
-                  <el-button @click="Screen">筛选</el-button>
-                </div>
-              </div>
-            </el-dropdown-menu>
-          </el-dropdown>
+            class="nav-item"
+            :class="active == index ? 'active' : ''"
+            @click="ChangeActive(index)"
+          >
+            {{ item.label }}
+          </div>
         </div>
       </div>
-      <table-tem 
+      <!-- 筛选条件 -->
+      <!-- <div class="conditions" v-show="active == 0 || active == 2">
+        <el-input
+          v-show="active == 0 || active == 2"
+          v-model="searchVal"
+          size="small"
+          suffix-icon="el-icon-search"
+          placeholder="请输入优惠券名称或券号"
+          @change="Search(1)"
+        ></el-input>
+        <el-input
+          style="margin-left: 15px"
+          v-show="active == 2"
+          v-model="searchVal2"
+          size="small"
+          suffix-icon="el-icon-search"
+          placeholder="请输入优惠券名称或券号"
+          @change="Search(2)"
+        ></el-input>
+      </div> -->
+      <table-tem
         :requestUrl="nav[active].url"
-        :requestParams="requestParams"
-        :optionList="['删除']" 
+        :optionList="optionList"
+        :requestParams="tableParams"
         :tableHeader="tableHeader"
         :isRefresh="isRefresh"
+        :isNewApi="true"
+        :selection="isNeedSelection"
         @rowClick="toDetail"
-        @BatchOption="BatchOption" 
-        ></table-tem>
-    </div> 
+        @resultData="TableResult"
+        @BatchOption="BatchOption"
+      >
+        <!-- 外面给判断而不是在循环里面给判断的原因是为了解决el-table-column未重新生成导致页面不刷新的BUG -->
+        <template v-if="active !== 2">
+          <el-table-column
+            v-for="item in tableHeader"
+            :key="item.id"
+            :width="item.width ? item.width : ''"
+            :prop="item.prop ? item.prop : ''"
+            :label="item.label ? item.label : ''"
+            :align="item.align ? item.align : ''"
+            :sortable="item.sortable"
+          >
+            <template slot-scope="scope">
+              <template v-if="item.prop == 'image'">
+                <!-- <el-image :src="scope.row.image" class="small-img"></el-image> -->
+                <span class="small-img" :style="{'backgroundImage':'url('+scope.row.image+')'}"></span>
+              </template>
+              <template v-else-if="item.prop == 'info'">
+                <div style="text-align: left">
+                  <p
+                    style="
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
+                  >
+                    {{ scope.row.storeName }}
+                  </p>
+                  <p
+                    style="
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
+                  >
+                    {{ scope.row.skuCode }}
+                  </p>
+                  <p
+                    style="
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
+                  >
+                    {{ scope.row.storeName }}
+                  </p>
+                </div>
+              </template>
+              <template v-else-if="item.prop == 'status'">
+                <!-- {{scope.row.status == 1?'在线':'下线'}} -->
+                <el-switch
+                  v-model="scope.row.status"
+                  :active-value="1"
+                  :inactive-value="0"
+                  @change="ChangeStatus(scope.row)"
+                ></el-switch>
+              </template>
+              <template
+                v-else-if="item.prop == 'outPrice' || item.prop == 'price'"
+              >
+                {{ currency.s + $toDecimal2(scope.row[item.prop]) }}
+              </template>
+              <template v-else-if="item.prop == 'option'">
+                <el-dropdown
+                  type="primary"
+                  @command="
+                    (e) => {
+                      Options(e, scope.row);
+                    }
+                  "
+                  @click.native.stop=""
+                >
+                  <el-button size="small">
+                    操作<i class="el-icon-arrow-down el-icon--right"></i>
+                  </el-button>
+                  <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item command="edit">编辑规则</el-dropdown-item>
+                  </el-dropdown-menu>
+                </el-dropdown>
+              </template>
+              <template v-else>
+                <span>{{ scope.row[item.prop] }}</span>
+              </template>
+            </template>
+          </el-table-column>
+        </template>
+        <template v-else>
+          <el-table-column
+            v-for="item in tableHeader"
+            :key="item.id"
+            :width="item.width ? item.width : ''"
+            :prop="item.prop ? item.prop : ''"
+            :label="item.label ? item.label : ''"
+            :align="item.align ? item.align : ''"
+            :sortable="item.sortable"
+          >
+            <template slot-scope="scope">
+              <template v-if="item.prop == 'image'">
+                <!-- <el-image :src="scope.row.image" class="small-img"></el-image> -->
+                <span class="small-img" :style="{'backgroundImage':'url('+scope.row.image+')'}"></span>
+              </template>
+              <template v-else-if="item.prop == 'info'">
+                <div style="text-align: left">
+                  <p
+                    style="
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
+                  >
+                    {{ scope.row.storeName }}
+                  </p>
+                  <p
+                    style="
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
+                  >
+                    {{ scope.row.skuCode }}
+                  </p>
+                  <p
+                    style="
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                    "
+                  >
+                    {{ scope.row.storeName }}
+                  </p>
+                </div>
+              </template>
+              <template v-else-if="item.prop == 'status'">
+                {{
+                  scope.row.status == 0
+                    ? "未使用"
+                    : scope.row.status == 1
+                    ? "已使用"
+                    : "已过期"
+                }}
+              </template>
+              <template v-else>
+                {{ scope.row[item.prop] }}
+              </template>
+            </template>
+          </el-table-column>
+        </template>
+      </table-tem>
+    </div>
+    <select-product
+      :visible.sync="showSelectProduct" 
+      @Result="ToAdd"
+    >
+    </select-product>
   </div>
 </template>
-<script> 
+<script>
 import tableTem from "@/components/tableTem";
-import {del} from '@/api/yxUser'
+import selectProduct from "../components/selectProductInCoupon"; 
+import { editSeckillStatus,delSeckillSelect } from "@/api/seckill";
 export default {
-  components: { 
+  components: {
     tableTem,
-  }, 
+    selectProduct,
+  },
   data() {
     return {
-      requestParams:{
+      tableParams: {
         page: 0,
-        size: 30,  
-        beginTime:'',
-        endTime:'',
-        keyword:'',
-        minOrder:'',
-        maxOrder:'',
-        minMoney:'',
-        maxMoney:'',
-        notStoreId:true,
-      },
-      showExport: false,
+        size: 30,
+      }, 
+      isRefresh: 0,
       nav: [
         {
-          id: 1,
+          id: 0,
           label: "商品秒杀",
-          url:'',
+          url: "api/seckill/Seckill",
+        },
+        {
+          id: 1,
+          label: "过期商品秒杀",
+          url: "api/seckill/overdueList",
         },
         {
           id: 2,
-          label: "过期商品秒杀",
-        },
-        {
-          id: 3,
           label: "秒杀历史",
+          url: "api/seckill/historyList",
         },
       ],
-      acitve: 0, 
-      subscribeTypeList: [
-        {
-          id: 1,
-          label: "已订阅",
-        },
-        {
-          id: 0,
-          label: "未订阅",
-        },
-      ],
-      // countryType: "",
-      // countryTypeList: [
-      //   {
-      //     id: 1,
-      //     label: "中国",
-      //   },
-      // ],
-      date: "",
-      searchVal: "",
-      minMoney: "",
-      maxMoney: "",
-      minOrder: "",
-      maxOrder: "",
-      tableData: [],
-      isRefresh:0,
+      active: 0,
       tableHeader: [
         {
-          width: 263,
-          label: "姓名",
-          prop:'nickname',
+          prop: "image",
+          label: "图片",
+          width: "80",
+          align: "center",
         },
         {
-          width: 261,
-          label: "地区",
-          prop:'addres',
+          prop: "info",
+          label: "商品名称/编号/分类",
+          align: "center",
         },
         {
-          width: 261,
-          label: "已购订单",
-          sortable: true,
-          prop:'payCount',
+          prop: "sort",
+          label: "排序",
+          width: "60",
+          align: "center",
         },
         {
-          width: 261,
-          label: "总金额",
-          sortable: true,
-          prop:'sumMoney',
+          prop: "status",
+          label: "状态",
+          width: "70",
+          align: "center",
+        },
+        {
+          prop: "outPrice",
+          label: "价格",
+          width: "100",
+          align: "center",
+        },
+        {
+          prop: "price",
+          label: "秒杀价格",
+          width: "100",
+          align: "center",
+        },
+        {
+          prop: "num",
+          label: "限购数量",
+          width: "80",
+          align: "center",
+        },
+        {
+          prop: "startTime",
+          label: "开始时间",
+          align: "center",
+          width: "100",
+        },
+        {
+          prop: "stopTime",
+          label: "结束时间",
+          align: "center",
+          width: "100",
+        },
+        {
+          prop: "statusStr",
+          label: "活动状态",
+          width: "100",
+          align: "center",
+        },
+        {
+          prop: "option",
+          label: "操作",
+          width: "100",
+          align: "center",
         },
       ],
-      currentPage: 1, 
-      endOptions:{
-        disabledDate(time) {
-          return time.getTime() > new Date().getTime() ;
-        },
-      },
+      showSelectProduct: false,
+      isNeedSelection:true,
+      optionList:['取消秒杀']
     };
-  }, 
+  },
   methods: {
-    ChangeActive: function (index) {
-      this.acitve = index;
-    },
-    ChangeSelect: function (newVal) {
-      if(newVal){
-        this.requestParams.beginTime = newVal[0];
-        this.requestParams.endTime = newVal[1];
-      } else {
-        this.requestParams.beginTime = ''
-        this.requestParams.endTime = ''
+    // 表格数据
+    TableResult: function (e) {},
+    // 针对某个优惠券的操作
+    Options: function (type, e) {
+      console.log(type);
+      switch (type) {
+        case "edit":
+          localStorage.setItem("seckillProduct", JSON.stringify(e));
+          // 编辑优惠券
+          this.$router.push({
+            path: "/editSeckillRules",
+            query: {
+              id: e.id,
+            },
+          });
+          break;
+        case "status":
+          console.log("复制");
+          break;
+        case "del":
+          if (this.active == 0) {
+            delCoupon([e.id]).then((res) => {
+              this.$message.success("删除成功");
+              this.isRefresh += 1;
+            });
+          } else {
+            delCouponEvent([e.id]).then((res) => {
+              this.$message.success("删除成功");
+              this.isRefresh += 1;
+            });
+          }
+          break;
       }
-    }, 
-    toDetail:function(e){ 
-      localStorage.setItem('customerDetail',JSON.stringify(e))
-      this.$router.push('/customerDetail')
+    },
+    // 改变搜索条件
+    ChangeActive: function (index) {
+      this.active = index;
+      let par = {
+        page: 0,
+        size: 30,
+      };
+      if (this.active == 2) {
+        this.isNeedSelection = false;
+        this.optionList = []
+        this.tableHeader = [
+          {
+            prop: "image",
+            label: "图片",
+            width: "80",
+            align: "center",
+          },
+          {
+            prop: "info",
+            label: "商品名称/编号/分类",
+            width:'224',
+            align: "left",
+          },
+          {
+            prop: "orderId",
+            label: "订单号", 
+            align: "center",
+            width:'180'
+          },
+          {
+            prop: "truePrice",
+            label: "价格", 
+            align: "center",
+          },
+          {
+            prop: "realName",
+            label: "会员", 
+            align: "center",
+          },
+          {
+            prop: "cartNum",
+            label: "购买数量", 
+            align: "center",
+          }, 
+          {
+            prop: "payTime",
+            label: "时间", 
+            align: "center",
+          }, 
+        ]
+      } else {
+        this.isNeedSelection = true; 
+        this.optionList = ['取消秒杀']
+        this.tableHeader = [
+          {
+            prop: "image",
+            label: "图片",
+            width: "80",
+            align: "center",
+          },
+          {
+            prop: "info",
+            label: "商品名称/编号/分类",
+            align: "center",
+          },
+          {
+            prop: "sort",
+            label: "排序",
+            width: "60",
+            align: "center",
+          },
+          {
+            prop: "status",
+            label: "状态",
+            width: "70",
+            align: "center",
+          },
+          {
+            prop: "outPrice",
+            label: "价格",
+            width: "100",
+            align: "center",
+          },
+          {
+            prop: "price",
+            label: "秒杀价格",
+            width: "100",
+            align: "center",
+          },
+          {
+            prop: "num",
+            label: "限购数量",
+            width: "80",
+            align: "center",
+          },
+          {
+            prop: "startTime",
+            label: "开始时间",
+            align: "center",
+            width: "100",
+          },
+          {
+            prop: "stopTime",
+            label: "结束时间",
+            align: "center",
+            width: "100",
+          },
+          {
+            prop: "statusStr",
+            label: "活动状态",
+            width: "100",
+            align: "center",
+          },
+          {
+            prop: "option",
+            label: "操作",
+            width: "100",
+            align: "center",
+          },
+        ];
+      } 
+      this.tableParams = { ...par };
     },
     // 批量操作
-    BatchOption:function(e,selectItem){
+    BatchOption: function (e, selectItem) {
+      console.log(e);
       let that = this;
-      let par = [];
-      selectItem.map(i=>{
-        par.push(i.uid);
-      })
-      this.$DelTip(function(){
-        del(par).then(()=>{
-          that.isRefresh += 1;
-          that.$message.success('删除成功')
+      // 取消秒杀
+      // 0为下架  1为上架
+      let arr = [];
+      selectItem.map((i) => {
+        arr.push(i.id);
+      }); 
+      delSeckillSelect(arr).then(() => {
+        that.$message.success("删除成功");
+        that.isRefresh += 1;
+      });
+    },
+    ToAdd: function (e) {
+      localStorage.setItem("seckillProduct", JSON.stringify(e));
+      this.$router.push("/editSeckill");
+    },
+    ChangeStatus: function (e) {
+      let par = {
+        seckillId: e.id,
+        status: e.status,
+      };
+      editSeckillStatus(par)
+        .then((res) => {
+          this.$message.success("修改成功");
+          this.isRefresh += 1;
         })
-      })
+        .catch((res) => {
+          this.isRefresh += 1;
+        });
     },
-    Screen:function(){ 
-      this.requestParams.minOrder = this.minOrder
-      this.requestParams.maxOrder = this.maxOrder
-      this.requestParams.minMoney = this.minMoney
-      this.requestParams.maxMoney = this.maxMoney
-    },
-    Search:function(){
-      this.requestParams.keyword = this.searchVal
+    toDetail: function (e) {
+      console.log(e);
     },
   },
 };
@@ -261,15 +523,6 @@ export default {
   justify-items: center;
   justify-content: space-between;
   flex: 1;
-  /deep/.el-button,
-  .el-button--medium {
-    padding: 10px 20px;
-    font-size: 14px;
-    border-radius: 4px;
-  }
-  /deep/.el-button + .el-button {
-    margin-left: 20px !important;
-  }
 }
 .content {
   overflow: hidden;
@@ -279,19 +532,22 @@ export default {
   background-color: #fff;
   .tab {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: 0 10px;
+    height: 45px;
     border-bottom: 1px solid #dcdfe6;
     .active {
-      border-bottom: 4px solid #f49342;
+      border-bottom: 4px solid #f49342 !important;
       color: #1a1d2c;
     }
-    & > div {
+    .nav-item {
       display: inline-block;
       padding: 0 10px;
-      height: 36px;
+      height: 41px;
       background: #fcfdff;
       font-size: 14px;
-      line-height: 36px;
+      line-height: 41px;
       border-bottom: 4px solid #fcfdff;
       color: #5e7185;
       cursor: pointer;
@@ -300,107 +556,30 @@ export default {
   .conditions {
     padding: 9px 12px;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     border-bottom: 1px solid #f1f1f6;
-    flex-wrap: wrap; 
-    .search-box {
-      display: flex;
-      flex: 1;
-    }
-    /deep/.el-input-group__append {
-      background: #fff;
-      color: #000000;
-    }
-    /deep/ .el-button {
-      height: 36px;
-      padding: 0 15px;
-    }
-  }
-  .pagination {
-    padding: 14px 0;
-    text-align: center;
   }
 }
-.filter-box {
-  padding: 10px 20px;
-  .item {
-    margin-top: 20px;
-    .inp-number {
-      display: inline-table;
-      font-size: 13px;
-      line-height: normal;
-      width: 200px;
-      border-collapse: separate;
-      border-spacing: 0;
-      border-top-left-radius: 4px;
-      border-bottom-left-radius: 4px;
-      border-right: none;
-      .inp-number-prepend,
-      .inp-number-append {
-        border-top-left-radius: 4px;
-        border-bottom-left-radius: 4px;
-        border-right: none;
-        border: 1px solid #dcdfe6;
-        padding: 0 15px;
-        color: #1a1d2c;
-        display: table-cell;
-        -webkit-box-sizing: border-box;
-        box-sizing: border-box;
-        width: 1px;
-        white-space: nowrap;
-        background: #fff;
-      }
-      /deep/ .el-input > input,
-      .el-input__inner > input {
-        border-top-left-radius: 0 !important;
-        border-bottom-left-radius: 0 !important;
-        border-left: 0;
-      }
-    }
-    & > span {
-      margin: 0px 10px;
-    }
-  }
-  .option-btn {
-    margin: 30px 0 10px;
-    text-align: center;
-  }
+// .small-img {
+//   width: 80px;
+//   height: 80px;
+// }
+.download-tpl-link-new {
+  color: #242b4a;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+  float: right;
 }
-.table {
-  position: relative;
-  .checkOption {
-    overflow: hidden;
-    width: 82px;
-    height: 36px;
-    line-height: 36px;
-    background: #fff;
-    padding: 0 12px;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
-    z-index: 1;
-    position: absolute;
-    left: 0;
-    top: 8px;
-    .checkContent {
-      width: 100%;
-      height: 100%;
-      padding: 0 10px;
-      box-sizing: border-box;
-      border-radius: 4px;
-      border: 1px solid #dcdfe6;
-      color: #273a8a;
-      i {
-        float: right;
-        line-height: 36px;
-        margin-right: 4px;
-        cursor: pointer;
-        color: #c0c4cc;
-      }
-    }
-  }
-}  
-/deep/ .el-table--enable-row-transition .el-table__body td{
-  height: 70px;
+.textBtn {
+  // padding: 10px 0;
+  color: #273a8a;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-block;
+  font-weight: 400;
+  // margin-left: 10px;
+  // text-decoration: underline;
 }
 </style>
 

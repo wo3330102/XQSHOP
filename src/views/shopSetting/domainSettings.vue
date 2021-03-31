@@ -39,7 +39,7 @@
           <el-table :data="domainForm">
             <el-table-column prop="url" label="域名">
               <template slot-scope="scope"> 
-                <a :href="'https://' +scope.row.domain">{{ scope.row.domain }}</a> 
+                <a :href="'https://' +scope.row.url" target="_blank">{{ scope.row.url }}</a> 
               </template>
             </el-table-column>
             <el-table-column label="状态">
@@ -134,13 +134,14 @@ export default {
         return false;
       }
       if(!this.detail.linkUrl){
-        this.detail.linkUrl = this.domain
+        this.detail.linkUrl = this.domain 
       }
-      if (this.detail.linkUrlList) {
-        this.detail.linkUrlList.push({ url: this.domain });
+      if (this.detail.linkUrlList) { 
+        this.detail.linkUrlList.push({ url: this.domain }); 
       } else {
         this.detail.linkUrlList = [{ url: this.domain }];
-      }
+      } 
+      this.detail.linkUrls = JSON.stringify(this.detail.linkUrlList);
       edit(this.detail).then((res) => {
         this.$message.success("新增成功");
         this.showExport = false;

@@ -29,11 +29,11 @@
                   >（开启后会在商品图上显示优惠提示）</span
                 >
               </span>
-              <span class="option">效果预览</span>
+              <span class="option" @click="preview = true">效果预览</span>
             </h3>
-            <el-radio-group v-model="detail.rates">
-              <el-radio :label="0">开启</el-radio>
-              <el-radio :label="1">关闭</el-radio>
+            <el-radio-group v-model="detail.isOpen">
+              <el-radio :label="1">开启</el-radio>
+              <el-radio :label="0">关闭</el-radio>
             </el-radio-group>
           </div> 
         </el-col> 
@@ -52,18 +52,27 @@
         <el-button type="primary" @click="Save">保存</el-button>
       </div>
     </div>
+    <el-dialog title="效果预览" :visible.sync="preview">
+      <div style="text-align: center; width: 100%; max-height: 620px;"> 
+        <el-image style="width: 300px;" src="https://alligatoreel-fa.xshoppy.shop/static/img/applications/limit-quantity-discount/limit-quantity-yes.png" ></el-image>
+        <p class="discount_tips-text">
+            限量优惠开启效果展示
+        </p>
+      </div> 
+    </el-dialog>
   </div>
 </template> 
 <script>
-import { get, add, edit } from "@/api/yxStorePlugRate"; 
+import { getOptionSetting,changeOptionSetting } from "@/api/productLimit"; 
 export default {
   data() {
     return { 
       detail: {
-        rates: 0,
-        type: true,
-        id: "",
+        isOpen: 0,  
+        notStoreId:true
       },
+      preview:false,
+        
     };
   }, 
   created() {
@@ -71,33 +80,20 @@ export default {
   },
   methods: {
     Init: function () {
-      get().then((res) => {
-        if (res.content.length > 0) {
-          this.detail = res.content[0];
-          this.detail.type = Boolean(res.content[0].type);
-          this.status = res.content[0].status;
-        }
+      getOptionSetting().then((res) => {
+        console.log(res);
+        this.detail = res.data;
+        this.detail.notStoreId = true;
       });
     },
     Save: function () {
-      let that = this;
-      this.detail.status = this.status;
-      this.detail.type = Number(this.detail.type);
-      if (this.detail.id) {
-        edit(this.detail).then(() => {
-          Tip();
-        });
-      } else {
-        delete this.detail.id;
-        add(this.detail).then(() => {
-          Tip();
-        });
-      }
-      function Tip() {
+      let that = this; 
+      const storeId = Number(localStorage.getItem('storeId'));
+      changeOptionSetting({isRemind:this.detail.isOpen,storeId,notStoreId:true}).then(res=>{ 
         that.$message.success("修改成功");
-        that.Init();
-      }
-      // this.$router.push('/appHome')
+        that.$router.push('/limitedProduct')
+      }) 
+      
     },
   },
 };
@@ -138,6 +134,13 @@ h1 {
     }
   }
 }  
+.discount_tips-text{
+  width: 100%;
+    text-align: center;
+    font-size: 14px;
+    color: #3d5265;
+    margin-bottom: 20px;
+}
 .infoContent {
   line-height: 18px;
   font-size: 12px;

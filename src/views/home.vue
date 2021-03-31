@@ -50,10 +50,10 @@
             <i class="el-icon-s-custom"></i>
             <span slot="title">顾客</span>
           </el-menu-item>
-          <el-menu-item index="/dataCenter">
+          <!-- <el-menu-item index="/dataCenter">
             <i class="el-icon-s-data"></i>
             <span slot="title">数据中心</span>
-          </el-menu-item>
+          </el-menu-item> -->
           <el-submenu index="4">
             <template slot="title">
               <i class="el-icon-s-marketing"></i>
@@ -140,7 +140,7 @@
         <div class="router-view">
           <transition name="fade" mode="out-in">
             <router-view
-              style="padding-bottom: 50px"
+              style="padding-bottom: 10px"
               v-if="isRouterAlive"
             ></router-view>
           </transition>
@@ -155,8 +155,7 @@ import { getShop, getShopId } from "@/api/yxSystemStore";
 let loadin;
 export default {
   name: "home",
-  data() {
-    
+  data() { 
     return {
       userName: "admin",
       transitionName: "fade",
@@ -186,7 +185,7 @@ export default {
       lock: true,
       text: "Loading",
       spinner: "el-icon-loading",
-      background: "rgba(0, 0, 0, 0.7)",
+      background: "rgba(255, 255, 255, 0.7)",
     });
   },
   created() {
